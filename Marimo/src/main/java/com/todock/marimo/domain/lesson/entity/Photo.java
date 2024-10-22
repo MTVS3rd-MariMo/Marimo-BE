@@ -1,4 +1,4 @@
-package com.todock.marimo.domain.photo.entity;
+package com.todock.marimo.domain.lesson.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
