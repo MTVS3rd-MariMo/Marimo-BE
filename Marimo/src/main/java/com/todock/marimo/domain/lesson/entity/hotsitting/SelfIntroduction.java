@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lesson.entity.hotsitting;
 
+import com.todock.marimo.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,6 +21,12 @@ public class SelfIntroduction {
     @ManyToOne
     @JoinColumn(name = "hot_sitting_id")
     private HotSitting hotSitting;
+
+    // 역할 필드
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(name = "contents")
     private String contents;

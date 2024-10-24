@@ -23,8 +23,12 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long class_room_id;
 
+    @OneToOne
+    private LessonResult lessenResult;
+
     // 유저는 여러개의 수업을 가진다.
     @ManyToOne
+    @JoinColumn(name="user_id")
     private User user;
 
     // 수업은 여러개의 아바타를 가진다.
