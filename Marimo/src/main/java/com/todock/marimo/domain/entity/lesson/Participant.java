@@ -23,9 +23,9 @@ public class Participant {
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
-    @ManyToOne
-    @JoinColumn(name = "lesson_result_id")
-    private LessonResult lessonResult;
+//    @ManyToOne
+//    @JoinColumn(name = "lesson_result_id")
+//    private LessonResult lessonResult;
 
 
 }

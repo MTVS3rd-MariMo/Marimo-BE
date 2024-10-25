@@ -23,8 +23,8 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long class_room_id;
 
-    @OneToOne
-    private LessonResult lessonResult;
+//    @OneToOne
+//    private LessonResult lessonResult;
 
     // 수업은 여러개의 참가자를 가진다.
     @OneToMany(mappedBy = "lesson")
