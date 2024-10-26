@@ -1,0 +1,33 @@
+<included>
+    <!-- 콘솔 로그 설정 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 로그 파일이 저장될 경로를 지정 -->
+        <file>./log/info/info-${BY_DATE}.log</file>
+        <!-- 로그 메시지를 필터링하는 조건을 정의한다. -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level> <!-- 필터가 수집할 로그의 레벨 설정 -->
+            <onMatch>ACCEPT</onMatch> <!-- 필터가 일치할 경우 이 메시지를 수락하라는 의미 -->
+            <onMismatch>DENY</onMismatch> <!-- 필터가 일치할 경우 이 메시지를 거부하라는 의미 -->
+        </filter>
+
+        <!-- 로그 메시지의 형식을 설정한다. -->
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+
+        <!-- 롤링 정책 설정 : 로그 파일 관리에 사용되는 기술 -->
+        <!-- SizeAndTimeBasedRollingPolicy: 크기와 시간을 기반으로 로그 파일을 롤링하는 정책을 사용한다.-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>./backup/info/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern> <!-- 로그파일의 이름 형식 정의 -->
+            <maxFileSize>100MB</maxFileSize> <!-- 파일의 최대 크기를 설정, 크기를 초과하면 새 파일로 롤링된다.-->
+            <maxHistory>30</maxHistory> <!-- 최대 보관 일수를 설정, 오래된 로그부터 삭제한다. -->
+            <totalSizeCap>3GB</totalSizeCap> <!-- 모든 로그 파일의 총 크기를 설정. 한도에 도달하면 오래된 파일부터 삭제한다.-->
+        </rollingPolicy>
+    </appender>
+</included>
