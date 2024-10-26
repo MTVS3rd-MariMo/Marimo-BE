@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Getter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_user")
@@ -38,4 +40,14 @@ public class User {
     @Column(name = "password") // 비밀번호
     private String password;
 
+    public User(Role role, String school, Integer grade, Integer classRoom,
+                Integer studentNumber, String name, String password) {
+        this.role = role;
+        this.school = school;
+        this.grade = grade;
+        this.classRoom = classRoom;
+        this.studentNumber = studentNumber;
+        this.name = name;
+        this.password = password;
+    }
 }
