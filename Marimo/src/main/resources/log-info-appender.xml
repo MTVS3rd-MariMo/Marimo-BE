@@ -8,7 +8,7 @@
 
     <appender name="FILE-INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- 로그 파일이 저장될 경로를 지정 -->
-        <file>./marimo/log/info/info-${BY_DATE}.log</file>
+        <file>./log/info/info-${BY_DATE}.log</file>
         <!-- 로그 메시지를 필터링하는 조건을 정의한다. -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level> <!-- 필터가 수집할 로그의 레벨 설정 -->

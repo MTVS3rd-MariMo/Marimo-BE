@@ -28,7 +28,9 @@ public class OpenQuestion {
     @Column(name = "open_question_title", nullable = false) // 열린 질문(내용)
     private String questionTitle;
 
-    @OneToMany(mappedBy = "openQuestion") // 열린 질문 답변
+    @OneToMany(mappedBy = "openQuestion", // 열린 질문 답변 
+            cascade = CascadeType.ALL, // 질문 삭제시 답변도 삭제
+            orphanRemoval = true) // 고아 객체 자동으로 삭제
     private List<OpenQuestionAnswer> openQuestionAnswerList;
 
     // 생성자
@@ -77,7 +79,8 @@ public class OpenQuestion {
     }
 
     // LessonMaterial 설정 메서드
-    void setLessonMaterial(LessonMaterial lessonMaterial) {
+    public void setLessonMaterial(LessonMaterial lessonMaterial) {
         this.lessonMaterial = lessonMaterial;
     }
+
 }
