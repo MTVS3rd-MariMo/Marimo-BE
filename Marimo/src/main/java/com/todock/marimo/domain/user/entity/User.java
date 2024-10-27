@@ -40,6 +40,7 @@ public class User {
     @Column(name = "password") // 비밀번호
     private String password;
 
+    // 생성자
     public User(Role role, String school, Integer grade, Integer classRoom,
                 Integer studentNumber, String name, String password) {
         this.role = role;

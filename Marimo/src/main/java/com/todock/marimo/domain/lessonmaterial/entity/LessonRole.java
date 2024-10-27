@@ -1,7 +1,6 @@
 package com.todock.marimo.domain.lessonmaterial.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -15,7 +14,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @Table(name = "tbl_role")
-public class Role {
+public class LessonRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +30,7 @@ public class Role {
     @Column(name = "lesson_role_name", nullable = false) // 역할 이름
     private String roleName;
 
-    public Role(Long userId, String roleName) {
+    public LessonRole(Long userId, String roleName) {
 
         validateRoleName(roleName);
 
