@@ -29,34 +29,30 @@ import java.util.List;
 @Service
 public class LessonMaterialService {
 
-    // RestTemplate은 Spring에서 외부 서버와 HTTP 요청을 수행하는 데 사용됩니다. 이를 빈으로 등록해 재사용할 수 있게 설정합니다.
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
-    @Autowired
-    private RestTemplate restTemplate;
-
+    private final RestTemplate restTemplate;
     private final UserRepository userRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
 
 
     @Autowired
-    public LessonMaterialService(UserRepository userRepository, LessonMaterialRepository lessonMaterialRepository) {
+    public LessonMaterialService(
+            UserRepository userRepository,
+            LessonMaterialRepository lessonMaterialRepository,
+            RestTemplate restTemplate) {
 
         this.userRepository = userRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
+        this.restTemplate = restTemplate;
     }
 
     /**
      * pdf 업로드
      */
 
-    public String sendPdfToAiServer(MultipartFile pdfFile) {
+    public String sendPdfToAiServer(MultipartFile pdf) {
         try {
             // 1. AI 서버 URI 설정
-            String AIServerUrI = "URI";
+            String AIServerUrI = "http://metaai2.iptime.org:64987/pdfupload";
 
             // 2. HttpHeaders 설정(멀티파트 형식 지정)
             HttpHeaders headers = new HttpHeaders();
@@ -64,10 +60,10 @@ public class LessonMaterialService {
 
             // 3. PDF 파일을 멀티파트 형식을 Wrapping
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", new ByteArrayResource(pdfFile.getBytes()) {
+            body.add("pdf", new ByteArrayResource(pdf.getBytes()) {
                 @Override
                 public String getFilename() {
-                    return pdfFile.getOriginalFilename(); // 파일 이름 설정
+                    return pdf.getOriginalFilename(); // 파일 이름 설정
                 }
             });
 
@@ -80,8 +76,6 @@ public class LessonMaterialService {
             // 6. AI 서버에서 받은 JSON 반환
             return response.getBody();
         } catch (Exception e) { // 예외 처리 로직 추가
-
-            e.printStackTrace(); // 콘솔에 스택 트레이스 출력
             throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
         }
     }
@@ -144,7 +138,13 @@ public class LessonMaterialService {
     /**
      * 유저 id로 수업 자료 전체 조회 (버튼에 보여줄 API)
      */
+    public List<LessonMaterial> getLessonMaterials(Long userId) {
 
+        validateUserRole(userId);
+        List<LessonMaterial> lessonMaterialList = lessonMaterialRepository.findByUserId(userId);
+
+        return lessonMaterialList;
+    }
 
     /**
      * lessonMaterialId로 수업 자료 조회 (수정 페이지 들어가서 보여줄 API)
@@ -158,6 +158,7 @@ public class LessonMaterialService {
     @Transactional
     public void modifyLessonMaterial(Long lessonMaterialId) {
 
+        // 1. 수업 자료 부터 조회
         LessonMaterial foundLessonMaterial = lessonMaterialRepository
                 .findById(lessonMaterialId)
                 .orElseThrow(IllegalAccessError::new);
@@ -201,4 +202,5 @@ public class LessonMaterialService {
             throw new IllegalArgumentException("역할은 4개여야 합니다.");
         }
     }
+
 }

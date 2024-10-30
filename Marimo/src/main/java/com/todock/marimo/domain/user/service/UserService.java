@@ -18,7 +18,7 @@ public class UserService {
      */
 
     @Transactional
-    public void registUser(RegistUserRequestDto userInfo) {
+    public void signUp(RegistUserRequestDto userInfo) {
         
         // User Entity 객체 생성
         User newUser = new User(

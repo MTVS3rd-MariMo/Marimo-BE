@@ -25,8 +25,8 @@ public class LessonMaterial {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long lessonMaterialId; // 수업 자료 id
 
-    @Column(name = "teacher_id", nullable = false) // 만든 선생님 id
-    private Long teacherId;
+    @Column(name = "user_id", nullable = false) // 만든 선생님 id
+    private Long userId;
 
     @Column(name = "book_title") // 책 제목
     private String bookTitle;
@@ -50,11 +50,11 @@ public class LessonMaterial {
     private List<LessonRole> lessonRoleList = new ArrayList<>();
 
     // 생성자
-    public LessonMaterial(Long teacherId, String bookTitle, String bookContents) {
-        validateTeacherId(teacherId);
+    public LessonMaterial(Long userId, String bookTitle, String bookContents) {
+        validateTeacherId(userId);
         validateBookInfo(bookTitle, bookContents);
 
-        this.teacherId = teacherId;
+        this.userId = userId;
         this.bookTitle = bookTitle;
         this.bookContents = bookContents;
     }
@@ -63,7 +63,7 @@ public class LessonMaterial {
                           List<OpenQuestion> openQuestionList,
                           List<SelectedQuiz> selectedQuizList,
                           List<LessonRole> lessonRoleList) {
-        this.teacherId = teacherId;
+        this.userId = teacherId;
         this.bookTitle = bookTitle;
         this.bookContents = bookContents;
         this.openQuestionList = openQuestionList;

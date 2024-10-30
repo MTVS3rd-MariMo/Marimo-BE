@@ -17,3 +17,4 @@ spring:
     multipart:
       max-file-size: 10MB # 파일 업로드 제한 용량
       max-request-size: 10MB # 파일 응답 제한 용량
+      enabled: true

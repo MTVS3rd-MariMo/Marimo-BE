@@ -43,20 +43,8 @@ dependencies {
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
-    compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    // Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // mybatis
     testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    testImplementation 'com.h2database:h2'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // Spring Boot AOP 의존성
     implementation 'org.springframework.boot:spring-boot-starter-aop'
