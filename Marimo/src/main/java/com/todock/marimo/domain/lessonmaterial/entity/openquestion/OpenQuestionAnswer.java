@@ -1,9 +1,7 @@
 package com.todock.marimo.domain.lessonmaterial.entity.openquestion;
 
 
-import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -19,7 +17,7 @@ public class OpenQuestionAnswer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long openQuestionAnswerId; // 열린 질문 대답 id
 
-    @ManyToOne // 열린 질문
+    @ManyToOne(fetch = FetchType.LAZY) // 열린 질문
     @JoinColumn(name = "open_question_id", nullable = false)
     private OpenQuestion openQuestion;
 

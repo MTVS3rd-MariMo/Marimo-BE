@@ -11,7 +11,7 @@ import lombok.ToString;
 
 @Entity
 @Getter
-@ToString
+@ToString(exclude = "lessonMaterial")
 @NoArgsConstructor
 @Table(name = "tbl_role")
 public class LessonRole {
@@ -20,7 +20,7 @@ public class LessonRole {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long RoleId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_material_id")
     private LessonMaterial lessonMaterial;
 

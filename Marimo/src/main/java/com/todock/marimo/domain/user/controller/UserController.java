@@ -2,7 +2,6 @@ package com.todock.marimo.domain.user.controller;
 
 import com.todock.marimo.domain.user.dto.LoginUserRequestDto;
 import com.todock.marimo.domain.user.dto.RegistUserRequestDto;
-import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

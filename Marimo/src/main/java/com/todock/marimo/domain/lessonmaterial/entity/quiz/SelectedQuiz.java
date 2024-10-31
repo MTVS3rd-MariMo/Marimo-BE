@@ -1,11 +1,10 @@
 package com.todock.marimo.domain.lessonmaterial.entity.quiz;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.expression.spel.ast.QualifiedIdentifier;
 
 import java.util.ArrayList;
@@ -13,7 +12,8 @@ import java.util.List;
 
 @Entity
 @Getter
-@ToString
+@Setter
+@ToString(exclude = {"lessonMaterial", "quizList"})
 @NoArgsConstructor
 @Table(name = "tbl_selected_quiz")
 public class SelectedQuiz {
@@ -22,7 +22,7 @@ public class SelectedQuiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 퀴즈 id
     private Long selectedQuizId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_material_id", nullable = false) // 연결된 수업 재료 id
     private LessonMaterial lessonMaterial;
 
@@ -37,9 +37,12 @@ public class SelectedQuiz {
         this.quizList = new ArrayList<>();
     }
 
+    public void setQuizList(List<Quiz> quizList) {
+        this.quizList = quizList;
+        quizList.forEach(quiz -> quiz.setSelectedQuiz(this));
+    }
 
 
-    // 불필요한 주석 제거 및 메서드 정리
     public void addQuiz(Quiz quiz1, Quiz quiz2) {
         quiz1.setSelectedQuiz(this);
         quiz2.setSelectedQuiz(this);
@@ -55,11 +58,5 @@ public class SelectedQuiz {
         if (quizList.size() > 2) {
             throw new IllegalArgumentException("퀴즈는 최대 2개까지 등록 가능합니다.");
         }
-    }
-
-    // setter
-    // 퀴즈 두개 선택 저장 메서드
-    public void setLessonMaterial(LessonMaterial lessonMaterial) {  // setSelectedQuizId에서 변경
-        this.lessonMaterial = lessonMaterial;
     }
 }

@@ -1,5 +1,7 @@
 package com.todock.marimo.domain.lessonmaterial.controller;
 
+import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameDto;
+import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRegistRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
@@ -8,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-@RequestMapping("api/lesson-material")
+@Slf4j
 @RestController
+@RequestMapping("api/lesson-material")
 public class LessonMaterialController {
 
     private final LessonMaterialService lessonMaterialService;
@@ -40,8 +44,6 @@ public class LessonMaterialController {
     /**
      * pdf 업로드
      */
-
-    // swagger
     @Operation(
             summary = "PDF 파일 업로드",
             description = "PDF 파일을 업로드하면 AI 서버로 전송하여 분석 결과를 JSON 형태로 받습니다."
@@ -95,85 +97,115 @@ public class LessonMaterialController {
     /**
      * 수업자료 저장
      */
-
+    @Operation(summary = "수업 자료 생성", description = "새로운 수업 자료를 생성합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "수업 자료 생성 성공",
+                    content = @Content(schema = @Schema(implementation = LessonMaterialRegistRequestDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = String.class))
+            )
+    })
     @PostMapping
     public ResponseEntity<LessonMaterialRegistRequestDto> createLessonMaterial(
             @RequestBody LessonMaterialRegistRequestDto lessonMaterialRegistRequestDto) {
 
         // 1. 서비스에 복합 DTO 전달하여 저장 로직 처리
         LessonMaterial savedLessonMaterial = lessonMaterialService.save(lessonMaterialRegistRequestDto);
-
+        log.info("저장 완료");
         return ResponseEntity.status(HttpStatus.CREATED).body(lessonMaterialRegistRequestDto);
     }
+
 
     /**
      * 유저 id로 유저의 수업 자료 전체 조회 (pdf 이름만 보여줌)
      */
-
+    @Operation(summary = "유저의 수업 자료 조회", description = "유저 ID로 해당 유저의 모든 수업 자료를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = LessonMaterialNameDto.class))
+            )
+    })
     @GetMapping("/{userId}")
-    public ResponseEntity<List<LessonMaterial>> getLessonMaterialByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<LessonMaterialNameResponseDto>> getLessonMaterialByUserId(@PathVariable Long userId) {
 
-        List<LessonMaterial> lessonMaterialList = lessonMaterialService.getLessonMaterialByUserId(userId);
+        List<LessonMaterialNameResponseDto> LessonMaterialNameList = lessonMaterialService.getLessonMaterialByUserId(userId);
 
-        return ResponseEntity.ok(lessonMaterialList);
+        return ResponseEntity.ok(LessonMaterialNameList);
     }
 
 
+    /**
+     * lessonMaterialId로 수업 자료 내용 상세 조회
+     */
+    @Operation(summary = "수업 자료 상세 조회", description = "수업 자료 ID로 상세 내용을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = LessonMaterial.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "수업 자료를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = String.class))
+            )
+    })
+    @GetMapping("/detail/{lessonMaterialId}")
+    public ResponseEntity<LessonMaterial> getLessonMaterialByLessonMaterialId(
+            @PathVariable Long lessonMaterialId) {
 
-/**
- * lessonMaterialId로 수업 자료 내용 조회 (작성한 내용 조회)
- */
+        LessonMaterial lessonMaterial = lessonMaterialService.getLessonMaterialByLessonMaterialId(lessonMaterialId);
 
-@GetMapping("/detail/{lessonMaterialId}")
-public ResponseEntity<LessonMaterial> getLessonMaterialByLessonMaterialId(@PathVariable("lessonMaterialId") Long lessonMaterialId) {
+        return ResponseEntity.ok(lessonMaterial);
+    }
 
-    LessonMaterial lessonMaterial = lessonMaterialService.getLessonMaterialByLessonMaterialId(lessonMaterialId);
+    /**
+     * 수업자료 id로 수업자료 수정
+     */
+    @Operation(summary = "수업 자료 수정", description = "수업 자료를 수정합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "수정 성공",
+                    content = @Content(schema = @Schema(implementation = String.class))
+            )
+    })
+    @PutMapping("/{lessonMaterial}")
+    public ResponseEntity<String> updateLessonMaterial(
+            @PathVariable("lessonMaterial") Long lessonMaterial,
+            @RequestBody LessonMaterialRegistRequestDto updateLessonMaterialInfo) {
 
-    return ResponseEntity.ok(lessonMaterial);
-}
+        lessonMaterialService.updateLessonMaterial(lessonMaterial, updateLessonMaterialInfo);
 
-
-/**
- * 수업자료 id로 수업자료 수정
- */
-
-@PutMapping
-public ResponseEntity<String> updateLessonMaterial(
-        @PathVariable("lessonMaterial") Long lessonMaterial,
-        @RequestBody LessonMaterialRegistRequestDto updateLessonMaterialInfo) {
-
-    lessonMaterialService.updateLessonMaterial(lessonMaterial, updateLessonMaterialInfo);
-
-    return ResponseEntity.ok("수정 완료");
-}
-
-
-/**
- * 수업자료 id로 수업자료 삭제
- */
-@DeleteMapping
-public ResponseEntity<String> deleteLessonMaterial(Long lessonMaterialId) {
-
-
-}
-
-
-/**
- * userId로 수업자료 전체 불러오기
- */
-@GetMapping
-public List<LessonMaterial> getAll() {
-
-}
-
-
-/**
- * 수정할 수업자료를 material Id로 조회
- */
-@GetMapping
-public ResponseEntity<Long> getByLessonMaterialId(Long lessonMaterialId) {
+        return ResponseEntity.ok("수정 완료");
+    }
 
 
-}
+    /**
+     * 수업자료 id로 수업자료 삭제
+     */
+    @Operation(summary = "수업 자료 삭제", description = "수업 자료를 삭제합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "삭제 성공",
+                    content = @Content(schema = @Schema(implementation = String.class))
+            )
+    })
+    @DeleteMapping("/{lessonMaterialId}")
+    public ResponseEntity<String> deleteLessonMaterial(@PathVariable("lessonMaterialId") Long lessonMaterialId) {
+
+        lessonMaterialService.deleteById(lessonMaterialId);
+
+        return ResponseEntity.ok("수업자료를 삭제했습니다.");
+
+    }
 
 }

@@ -1,21 +1,21 @@
 package com.todock.marimo.domain.lessonmaterial.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.entity.quiz.SelectedQuiz;
 import com.todock.marimo.domain.user.entity.Role;
 import com.todock.marimo.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Setter
 @Getter
 @Entity
-@ToString
+@ToString(exclude = {"openQuestionList", "selectedQuizList", "lessonRoleList"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_lesson_material")
@@ -34,6 +34,7 @@ public class LessonMaterial {
     @Column(name = "book_contents") // 책 내용
     private String bookContents;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "lessonMaterial", // 열린 질문
             cascade = CascadeType.ALL,
             orphanRemoval = true)

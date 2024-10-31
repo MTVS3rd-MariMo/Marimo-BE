@@ -12,7 +12,7 @@ import lombok.ToString;
 
 @Entity
 @Getter
-@ToString
+@ToString(exclude = "selectedQuiz")
 @NoArgsConstructor
 @Table(name = "tbl_quiz")
 public class Quiz {
@@ -22,7 +22,7 @@ public class Quiz {
     private Long quizId;
 
     // 선택된 퀴즈는 여러개의 퀴즈를 가진다.
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "selected_quiz_id", nullable = false)
     private SelectedQuiz selectedQuiz;
 
@@ -52,7 +52,7 @@ public class Quiz {
         // 검증
         validateQuizQuestion(question);
         validateQuizAnswer(answer);
-        validateChoices(firstChoice, secondChoice, thirdChoice, fourthChoice);
+        validateChoices(answer, firstChoice, secondChoice, thirdChoice, fourthChoice);  // answer를 첫 번째 인자로 전달
 
         this.question = question;
         this.answer = answer;
@@ -80,20 +80,17 @@ public class Quiz {
     }
 
     private void validateChoices(String answer, String... choices) {
-
-        boolean validateIsAnswer = false; // 보기 중에 정답이 없는 상태
+        boolean validateIsAnswer = false;
 
         for (String choice : choices) {
-
-            if (choice == null || choice.trim().isEmpty()) { // null 체크와 trim()을 통한 공백 제거 후 빈 문자열 체크
+            if (choice == null || choice.trim().isEmpty()) {
                 throw new IllegalArgumentException("보기를 작성해야 합니다.");
             }
-            if (answer.equals(choice)) { // 정답이 있는지 검증
-                validateIsAnswer = true; // 보기 == 정답일 때, true
+            if (choice.equals(answer)) {  // 정확한 비교를 위해 equals 사용
+                validateIsAnswer = true;
             }
         }
 
-        // 보기 중에 정답이 없으면 예외
         if (!validateIsAnswer) {
             throw new IllegalArgumentException("정답이 보기에 없습니다.");
         }

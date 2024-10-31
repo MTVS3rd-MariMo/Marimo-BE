@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lessonmaterial.repository;
 
+import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameResponseDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,8 +15,10 @@ public interface LessonMaterialRepository extends JpaRepository<LessonMaterial, 
     // 유저 id로 수업 자료 전체 조회
     List<LessonMaterial> findByUserId(Long userId);
 
-    // 수업 자료 id로 수업 자료 수정
-    
-    // 수업 자료 id로 수업 자료 삭제
 
+    // 수업자료 id로 상세 조회
+    LessonMaterial findLessonMaterialByLessonMaterialId(Long lessonMaterialId);
+
+    // userId로 전체 조회
+    //List<LessonMaterialNameResponseDto> findLessonMaterialNameByLessonMaterialId(Long userId);
 }

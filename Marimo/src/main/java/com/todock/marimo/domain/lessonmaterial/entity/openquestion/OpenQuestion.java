@@ -1,5 +1,7 @@
 package com.todock.marimo.domain.lessonmaterial.entity.openquestion;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,16 +14,17 @@ import java.util.List;
 
 @Entity
 @Getter
-@ToString
+@ToString(exclude = {"lessonMaterial", "openQuestionAnswerList"})
 @NoArgsConstructor
 @Table(name = "tbl_open_question")
 public class OpenQuestion {
 
-    @Id()
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long openQuestionId; // 열린 질문 id
 
-    @ManyToOne
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_material_id", nullable = false) // 수업 자료
     private LessonMaterial lessonMaterial;
 

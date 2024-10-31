@@ -1,13 +1,11 @@
 package com.todock.marimo.domain.user.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @Getter
+@Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,7 +16,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId; // 유저 id
 
+
     @Column(name = "role") // STUDENT, TEACHER
+    @Enumerated(value = EnumType.STRING)
     private Role role;
     
     @Column(name = "school") // 학교

@@ -19,7 +19,7 @@ public class LessonMaterialRegistRequestDto {
 
     private String bookContents; // 책 내용
 
-    private List<OpenQuestionRequest> openQuestionList;  // 열린 질문 // 2개
+    private List<OpenQuestionRequestDto> openQuestionList;  // 열린 질문 // 2개
 
     private List<QuizRequestDto> quizzeList;               // 퀴즈 // 3개
 
