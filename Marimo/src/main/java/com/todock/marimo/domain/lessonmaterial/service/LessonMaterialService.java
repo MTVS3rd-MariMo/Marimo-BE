@@ -12,7 +12,6 @@ import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,7 +32,6 @@ public class LessonMaterialService {
     private final UserRepository userRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
 
-
     @Autowired
     public LessonMaterialService(
             UserRepository userRepository,
@@ -44,6 +42,7 @@ public class LessonMaterialService {
         this.lessonMaterialRepository = lessonMaterialRepository;
         this.restTemplate = restTemplate;
     }
+
 
     /**
      * pdf 업로드
@@ -75,6 +74,7 @@ public class LessonMaterialService {
 
             // 6. AI 서버에서 받은 JSON 반환
             return response.getBody();
+
         } catch (Exception e) { // 예외 처리 로직 추가
             throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
         }
@@ -86,14 +86,14 @@ public class LessonMaterialService {
      */
 
     @Transactional
-    public LessonMaterial save(Long userId, LessonMaterialRegistRequestDto lessonMaterialInfo) {
+    public LessonMaterial save(LessonMaterialRegistRequestDto lessonMaterialInfo) {
 
-        validateUserRole(userId); // 1. 선생님인지 검증
+        validateUserRole(lessonMaterialInfo.getUserId()); // 1. 선생님인지 검증
         validateRequestCounts(lessonMaterialInfo); // 2. 요청받은 수업자료 검증
 
         // 3. LessonMaterial 생성
         LessonMaterial lessonMaterial = new LessonMaterial(
-                userId,
+                lessonMaterialInfo.getUserId(),
                 lessonMaterialInfo.getBookTitle(),
                 lessonMaterialInfo.getBookContents()
         );
@@ -135,10 +135,12 @@ public class LessonMaterialService {
         return lessonMaterialRepository.save(lessonMaterial);
     }
 
+
     /**
-     * 유저 id로 수업 자료 전체 조회 (버튼에 보여줄 API)
+     * 유저 id로 유저의 수업 자료 전체 조회 (pdf 이름만 보여줌)
      */
-    public List<LessonMaterial> getLessonMaterials(Long userId) {
+
+    public List<LessonMaterial> getLessonMaterialByUserId(Long userId) {
 
         validateUserRole(userId);
         List<LessonMaterial> lessonMaterialList = lessonMaterialRepository.findByUserId(userId);
@@ -146,17 +148,30 @@ public class LessonMaterialService {
         return lessonMaterialList;
     }
 
+
     /**
-     * lessonMaterialId로 수업 자료 조회 (수정 페이지 들어가서 보여줄 API)
+     * lessonMaterialId로 수업 자료 내용 조회 (작성한 내용 조회)
      */
 
+    public LessonMaterial getLessonMaterialByLessonMaterialId(Long userId) {
+
+        validateUserRole(userId);
+
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(userId).orElse(null);
+
+        return lessonMaterial;
+
+
+    }
 
     /**
-     * 수업 자료 id로 수정 (수정 페이지에서 수정하고 요청)
+     * 수업 자료를 수업자료 id로 수정 (수정 페이지에서 수정하고 요청)
      */
 
     @Transactional
-    public void modifyLessonMaterial(Long lessonMaterialId) {
+    public void updateLessonMaterial(
+            Long lessonMaterialId,
+            LessonMaterialRegistRequestDto lessonMaterialRegistRequestDto) {
 
         // 1. 수업 자료 부터 조회
         LessonMaterial foundLessonMaterial = lessonMaterialRepository
@@ -164,6 +179,7 @@ public class LessonMaterialService {
                 .orElseThrow(IllegalAccessError::new);
 
         // 전체 수정 코드
+
 
     }
 
@@ -202,5 +218,6 @@ public class LessonMaterialService {
             throw new IllegalArgumentException("역할은 4개여야 합니다.");
         }
     }
+
 
 }

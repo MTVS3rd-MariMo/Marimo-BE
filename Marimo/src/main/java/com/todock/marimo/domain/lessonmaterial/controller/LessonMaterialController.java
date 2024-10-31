@@ -1,8 +1,8 @@
 package com.todock.marimo.domain.lessonmaterial.controller;
 
-    import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRegistRequestDto;
-    import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
-    import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
+import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRegistRequestDto;
+import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
+import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,9 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-    import java.util.List;
+import java.util.List;
 
-@RequestMapping("api/v1/lesson-material")
+@RequestMapping("api/lesson-material")
 @RestController
 public class LessonMaterialController {
 
@@ -32,10 +32,14 @@ public class LessonMaterialController {
      * 1. yml 파일 설정
      * 2. POST 엔드포인트 생성 - 파일 업로드 메서드 작성 - pdf 파일 수신 확인
      * 2-2. HttpStatus: HTTP 상태 코드 (200 OK, 404 Not Found 등)
-     *      HttpHeaders: 응답 헤더 정보
-     *      HttpBody: 실제 응답 데이터
+     * HttpHeaders: 응답 헤더 정보
+     * HttpBody: 실제 응답 데이터
      */
 
+
+    /**
+     * pdf 업로드
+     */
 
     // swagger
     @Operation(
@@ -80,7 +84,7 @@ public class LessonMaterialController {
         if (pdfFile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일이 없습니다.");
         }
-        
+
         String fileName = pdfFile.getOriginalFilename(); // 파일 이름
         lessonMaterialService.sendPdfToAiServer(pdfFile);
 
@@ -91,42 +95,85 @@ public class LessonMaterialController {
     /**
      * 수업자료 저장
      */
+
     @PostMapping
     public ResponseEntity<LessonMaterialRegistRequestDto> createLessonMaterial(
             @RequestBody LessonMaterialRegistRequestDto lessonMaterialRegistRequestDto) {
-        
+
         // 1. 서비스에 복합 DTO 전달하여 저장 로직 처리
-        LessonMaterial savedLessonMaterial = lessonMaterialService.save(userId, lessonMaterialRegistRequestDto);
+        LessonMaterial savedLessonMaterial = lessonMaterialService.save(lessonMaterialRegistRequestDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(lessonMaterialRegistRequestDto);
     }
 
     /**
-     * 수업자료 id로 수업자료 수정
+     * 유저 id로 유저의 수업 자료 전체 조회 (pdf 이름만 보여줌)
      */
 
-    @PutMapping
-    public LessonMaterial update(LessonMaterial lessonMaterial) {
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<LessonMaterial>> getLessonMaterialByUserId(@PathVariable Long userId) {
 
+        List<LessonMaterial> lessonMaterialList = lessonMaterialService.getLessonMaterialByUserId(userId);
+
+        return ResponseEntity.ok(lessonMaterialList);
     }
 
-    /**
-     * 수업자료 id로 수업자료 삭제
-     */
 
 
-    /**
-     * userId로 수업자료 전체 불러오기
-     */
-    @GetMapping
-    public List<LessonMaterial> getAll() {
+/**
+ * lessonMaterialId로 수업 자료 내용 조회 (작성한 내용 조회)
+ */
 
-    }
+@GetMapping("/detail/{lessonMaterialId}")
+public ResponseEntity<LessonMaterial> getLessonMaterialByLessonMaterialId(@PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
-    /**
-     * 수업자료 id로 불러오기
-     */
-    @GetMapping
-    public List<LessonMaterial> getByLessonMaterialId(Long id) {
+    LessonMaterial lessonMaterial = lessonMaterialService.getLessonMaterialByLessonMaterialId(lessonMaterialId);
 
-    }
+    return ResponseEntity.ok(lessonMaterial);
+}
+
+
+/**
+ * 수업자료 id로 수업자료 수정
+ */
+
+@PutMapping
+public ResponseEntity<String> updateLessonMaterial(
+        @PathVariable("lessonMaterial") Long lessonMaterial,
+        @RequestBody LessonMaterialRegistRequestDto updateLessonMaterialInfo) {
+
+    lessonMaterialService.updateLessonMaterial(lessonMaterial, updateLessonMaterialInfo);
+
+    return ResponseEntity.ok("수정 완료");
+}
+
+
+/**
+ * 수업자료 id로 수업자료 삭제
+ */
+@DeleteMapping
+public ResponseEntity<String> deleteLessonMaterial(Long lessonMaterialId) {
+
+
+}
+
+
+/**
+ * userId로 수업자료 전체 불러오기
+ */
+@GetMapping
+public List<LessonMaterial> getAll() {
+
+}
+
+
+/**
+ * 수정할 수업자료를 material Id로 조회
+ */
+@GetMapping
+public ResponseEntity<Long> getByLessonMaterialId(Long lessonMaterialId) {
+
+
+}
 
 }

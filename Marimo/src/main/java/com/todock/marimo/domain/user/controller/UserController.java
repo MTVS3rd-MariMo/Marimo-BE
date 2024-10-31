@@ -41,5 +41,11 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(LoginUserRequestDto loginUserRequestDto) {
 
+
+        return ResponseEntity.ok().build();
     }
+
+    /**
+     * 로그아웃
+     */
 }
