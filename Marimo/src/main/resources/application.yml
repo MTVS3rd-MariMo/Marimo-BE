@@ -15,6 +15,6 @@ spring:
         format_sql: true # SQL 쿼리 로깅 시 출력되는 SQL을 읽기 쉽게 포맷팅함.
   servlet:
     multipart:
+      enabled: true
       max-file-size: 10MB # 파일 업로드 제한 용량
       max-request-size: 10MB # 파일 응답 제한 용량
-      enabled: true

@@ -39,8 +39,6 @@ import java.util.zip.ZipInputStream;
 @Service
 public class AvatarService {
 
-    private final LessonRepository lessonRepository;
-    private final AnimationRepository animationRepository;
     private final AvatarRepository avatarRepository;
     private final RestTemplate restTemplate;
 
@@ -50,13 +48,9 @@ public class AvatarService {
 
 
     @Autowired
-    public AvatarService(LessonRepository lessonRepository,
-                         AvatarRepository avatarRepository,
-                         AnimationRepository animationRepository,
+    public AvatarService(AvatarRepository avatarRepository,
                          RestTemplate restTemplate) {
-        this.lessonRepository = lessonRepository;
         this.avatarRepository = avatarRepository;
-        this.animationRepository = animationRepository;
         this.restTemplate = restTemplate;
         initDirectories();
     }
@@ -77,7 +71,7 @@ public class AvatarService {
      * img를 AI서버로 전송
      */
     @Transactional
-    public void sendImgToAiServer(MultipartFile img, Long userId, Long lessonId) {
+    public void sendImgToAiServer(MultipartFile img) {
 
         try {
             // 1. AI 서버 URI 설정
@@ -125,26 +119,6 @@ public class AvatarService {
 
             unzipFile(zipPath.toString(), unzipDirPath);
 
-            // 4. 수업 정보 조회
-            Lesson lesson = lessonRepository.findById(lessonId)
-                    .orElseThrow(() -> new RuntimeException("Lesson not found"));
-
-            // Avatar 엔티티 생성 및 저장
-            Avatar avatar = new Avatar();
-            avatar.setLesson(lesson);
-            avatar.setUserId(userId);
-            avatar.setAvatarImg(saveImageFile(img)); // 이미지 파일 저장 경로
-            Avatar savedAvatar = avatarRepository.save(avatar);
-
-            // Animation 엔티티들 생성 및 저장
-            for (String animationPath : animationPaths) {
-                Animation animation = new Animation();
-                animation.setAvatar(savedAvatar);
-                animation.setAnimation1(animationPath);
-                animation.setAnimation2(animationPath);
-                animationRepository.save(animation);
-            }
-
         } catch (Exception e) {
             log.error("파일 처리 중 오류 발생", e);
             throw new RuntimeException("파일 처리 실패", e);
@@ -155,15 +129,12 @@ public class AvatarService {
      * 수업 id로 모든 아바타와 애니메이션 조회
      */
     public List<AvatarResponseDto> findByLessonId(Long lessonId) {
-
-        List<Avatar> avatars = avatarRepository.findAvatarByLessonId(lessonId);
-
-        return avatars
+        return avatarRepository.findByLesson_LessonId(lessonId)
                 .stream()
                 .map(avatar -> new AvatarResponseDto(
-                        avatar.getUserId()
-                        , avatar.getAvatarImg()
-                        , avatar.getAnimationList()
+                        avatar.getUserId(),
+                        avatar.getAvatarImg(),
+                        avatar.getAnimationList()
                 ))
                 .collect(Collectors.toList());
     }

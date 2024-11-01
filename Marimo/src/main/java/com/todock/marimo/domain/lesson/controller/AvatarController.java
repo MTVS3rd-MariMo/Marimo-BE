@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,9 +41,9 @@ public class AvatarController {
      */
     @GetMapping
     public ResponseEntity<List<AvatarResponseDto>> getAvatar(Long lessonId) {
-        
+
         List<AvatarResponseDto> avatarList = avatarService.findByLessonId(lessonId);
-        
+
         return ResponseEntity.ok(avatarList);
     }
 
@@ -86,8 +87,8 @@ public class AvatarController {
                     )
             )
     })
-    @PostMapping("/upload-img")
-    public ResponseEntity<String> sendImgToAiServer(@RequestParam("img") MultipartFile img, Long userId, Long lessonId) {
+    @PostMapping(value = "/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> sendImgToAiServer(@RequestParam("img") MultipartFile img) {
         try {
             // 1. 파일 존재 여부 검증
             if (img == null || img.isEmpty()) {
@@ -124,7 +125,7 @@ public class AvatarController {
             }
 
             // 5. 서비스 호출
-            avatarService.sendImgToAiServer(img, userId, lessonId);
+            avatarService.sendImgToAiServer(img);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body("Img 파일 " + originalFilename + "이 성공적으로 업로드되었습니다.");

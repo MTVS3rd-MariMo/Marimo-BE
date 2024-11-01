@@ -21,7 +21,7 @@ public class Participant {
     @Column(name = "participant_name") // 참가자 이름
     private String participantName;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 

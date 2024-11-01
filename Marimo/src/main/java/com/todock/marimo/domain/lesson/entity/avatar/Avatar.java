@@ -21,7 +21,7 @@ public class Avatar {
     private Long avatarId;
 
     @ManyToOne
-    @JoinColumn(name="lesson_id") // 수업 id
+    @JoinColumn(name="lessonId") // 수업 id
     private Lesson lesson;
 
     @Column(name = "user_id") // 유저 id
@@ -33,4 +33,10 @@ public class Avatar {
     // 한 아바타에 애니메이션 두개
     @OneToMany(mappedBy ="avatar")
     private List<Animation> animationList = new ArrayList<>();
+
+    public Avatar(Long userId, String avatarImg, List<Animation> animationList) {
+        this.userId = userId;
+        this.avatarImg = avatarImg;
+        this.animationList = animationList;
+    }
 }

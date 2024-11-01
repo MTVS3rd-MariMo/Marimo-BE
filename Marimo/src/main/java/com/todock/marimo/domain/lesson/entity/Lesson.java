@@ -22,6 +22,7 @@ public class Lesson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "lesson_id")
     private Long lessonId; // 수업 id
 
     // 수업은 여러개의 참가자를 가진다.

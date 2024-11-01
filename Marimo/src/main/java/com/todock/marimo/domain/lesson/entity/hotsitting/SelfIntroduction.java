@@ -19,7 +19,7 @@ public class SelfIntroduction {
     private Long selfIntroduceId; // 자기소개 id
 
     // 핫시팅은 여러개의 자기소개를 가진다.
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hot_sitting_id") // 핫시팅 id
     private HotSitting hotSitting;
 

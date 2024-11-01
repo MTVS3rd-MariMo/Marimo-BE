@@ -9,7 +9,6 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class AvatarResponseDto {
 
     private Long userId;
@@ -17,4 +16,10 @@ public class AvatarResponseDto {
     private String avatarImg;
 
     private List<Animation> animationList = new ArrayList<>();
+
+    public AvatarResponseDto(Long userId, String avatarImg, List<Animation> animationList) {
+        this.userId = userId;
+        this.avatarImg = avatarImg;
+        this.animationList = animationList;
+    }
 }

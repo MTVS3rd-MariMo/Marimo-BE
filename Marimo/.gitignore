@@ -38,3 +38,6 @@ out/
 
 ### logging ###
 /log/
+
+### data ###
+/data/

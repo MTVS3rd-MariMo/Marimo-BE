@@ -17,7 +17,7 @@ public class Animation {
     private Long animationId; // 애니메이션 id
 
     // 수업은 여러개의 아바타를 가진다.
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "avatar_id")
     private Avatar avatar;
 
