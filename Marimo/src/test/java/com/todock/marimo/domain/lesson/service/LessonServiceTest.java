@@ -43,7 +43,7 @@ class LessonServiceTest {
     private RestTemplate restTemplate;
 
     @InjectMocks
-    private LessonService lessonService;
+    private AvatarService avatarService;
 
     private MockMultipartFile mockImage;
     private byte[] mockZipData;
@@ -78,7 +78,7 @@ class LessonServiceTest {
                 .thenReturn(ResponseEntity.ok(mockZipData));
 
         // When
-        assertDoesNotThrow(() -> lessonService.sendImgToAiServer(mockImage, userId, lessonId));
+        assertDoesNotThrow(() -> avatarService.sendImgToAiServer(mockImage, userId, lessonId));
 
         // Then
         verify(lessonRepository).findById(lessonId);
@@ -99,7 +99,7 @@ class LessonServiceTest {
 
         // When & Then
         assertThrows(RuntimeException.class,
-                () -> lessonService.sendImgToAiServer(mockImage, userId, lessonId));
+                () -> avatarService.sendImgToAiServer(mockImage, userId, lessonId));
     }
 
     private byte[] createMockZipFile() throws IOException {
@@ -130,7 +130,7 @@ class LessonServiceTest {
     @DisplayName("디렉토리 생성 테스트")
     void testDirectoryInitialization() {
         // Given & When
-        lessonService.initDirectories();
+        avatarService.initDirectories();
 
         // Then
         assertTrue(Files.exists(Paths.get("data")));
@@ -151,6 +151,6 @@ class LessonServiceTest {
 
         // When & Then
         assertThrows(RuntimeException.class,
-                () -> lessonService.sendImgToAiServer(mockImage, userId, lessonId));
+                () -> avatarService.sendImgToAiServer(mockImage, userId, lessonId));
     }
 }
