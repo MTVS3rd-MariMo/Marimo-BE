@@ -6,6 +6,7 @@ import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRegistRequestDt
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -133,7 +134,9 @@ public class LessonMaterialController {
             )
     })
     @GetMapping("/{userId}")
-    public ResponseEntity<List<LessonMaterialNameResponseDto>> getLessonMaterialByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<LessonMaterialNameResponseDto>> getLessonMaterialByUserId(
+            @Parameter(description = "수업 자료 id", required = true, example = "1")
+            @PathVariable("userId") Long userId) {
 
         List<LessonMaterialNameResponseDto> LessonMaterialNameList = lessonMaterialService.getLessonMaterialByUserId(userId);
 
@@ -157,9 +160,9 @@ public class LessonMaterialController {
                     content = @Content(schema = @Schema(implementation = String.class))
             )
     })
-    @GetMapping("/detail/{lessonMaterialId}")
+    @GetMapping("/{lessonMaterialId}/detail")
     public ResponseEntity<LessonMaterial> getLessonMaterialByLessonMaterialId(
-            @PathVariable Long lessonMaterialId) {
+            @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
         LessonMaterial lessonMaterial = lessonMaterialService.getLessonMaterialByLessonMaterialId(lessonMaterialId);
 
@@ -177,9 +180,9 @@ public class LessonMaterialController {
                     content = @Content(schema = @Schema(implementation = String.class))
             )
     })
-    @PutMapping("/{lessonMaterial}")
+    @PutMapping("/{lessonMaterialId}")
     public ResponseEntity<String> updateLessonMaterial(
-            @PathVariable("lessonMaterial") Long lessonMaterial,
+            @PathVariable("lessonMaterialId") Long lessonMaterial,
             @RequestBody LessonMaterialRegistRequestDto updateLessonMaterialInfo) {
 
         lessonMaterialService.updateLessonMaterial(lessonMaterial, updateLessonMaterialInfo);

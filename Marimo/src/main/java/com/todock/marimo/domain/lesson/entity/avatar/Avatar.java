@@ -2,16 +2,14 @@ package com.todock.marimo.domain.lesson.entity.avatar;
 
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +21,7 @@ public class Avatar {
     private Long avatarId;
 
     @ManyToOne
-    @JoinColumn(name="lesson_id") // 아바타 id
+    @JoinColumn(name="lesson_id") // 수업 id
     private Lesson lesson;
 
     @Column(name = "user_id") // 유저 id

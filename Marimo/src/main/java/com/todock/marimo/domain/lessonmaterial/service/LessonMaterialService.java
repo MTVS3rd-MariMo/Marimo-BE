@@ -58,7 +58,7 @@ public class LessonMaterialService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            // 3. PDF 파일을 멀티파트 형식을 Wrapping
+            // 3. PDF 파일을 멀티파트 형식으로 Wrapping
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("pdf", new ByteArrayResource(pdf.getBytes()) {
                 @Override
@@ -130,7 +130,6 @@ public class LessonMaterialService {
 
     /**
      * 유저 id로 유저의 수업 자료 전체 조회
-     *
      */
     public List<LessonMaterialNameResponseDto> getLessonMaterialByUserId(Long userId) {
         validateUserRole(userId);
