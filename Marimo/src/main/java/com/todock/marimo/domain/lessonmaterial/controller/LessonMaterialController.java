@@ -89,6 +89,7 @@ public class LessonMaterialController {
         }
 
         String fileName = pdfFile.getOriginalFilename(); // 파일 이름
+
         lessonMaterialService.sendPdfToAiServer(pdfFile);
 
         return ResponseEntity.status(HttpStatus.OK).body("PDF 파일" + fileName + "이 성공적으로 업로드되었습니다.");
