@@ -22,7 +22,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("api/lesson-material")
+@RequestMapping("/api/lesson-material")
 public class LessonMaterialController {
 
     private final LessonMaterialService lessonMaterialService;
