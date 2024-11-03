@@ -20,6 +20,7 @@ public class Photo {
 
     // 수업은 하나의 단체사진을 가진다.
     @OneToOne
+    @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
     @Column(name = "photo_url")

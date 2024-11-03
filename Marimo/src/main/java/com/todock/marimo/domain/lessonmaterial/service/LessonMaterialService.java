@@ -1,7 +1,10 @@
 package com.todock.marimo.domain.lessonmaterial.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialDto;
 import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameResponseDto;
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRegistRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialResponseDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonRole;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
@@ -24,6 +27,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +37,7 @@ public class LessonMaterialService {
     private final RestTemplate restTemplate;
     private final UserRepository userRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 파싱용 ObjectMapper 추가
 
     @Autowired
     public LessonMaterialService(
@@ -49,7 +54,7 @@ public class LessonMaterialService {
     /**
      * pdf 업로드
      */
-    public String sendPdfToAiServer(MultipartFile pdf) {
+    public LessonMaterialResponseDto sendPdfToAiServer(MultipartFile pdf, String pdfName) {
         try {
 
             // 1. AI 서버 URI 설정
@@ -75,7 +80,8 @@ public class LessonMaterialService {
             ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, request, String.class);
 
             // 6. AI 서버에서 받은 JSON 반환
-            return response.getBody();
+            return parseLessonMaterialJson(response.getBody(), pdfName);
+
 
         } catch (Exception e) { // 예외 처리 로직 추가
             throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
@@ -87,7 +93,7 @@ public class LessonMaterialService {
      * 수업 자료 저장
      */
     @Transactional
-    public LessonMaterial save(LessonMaterialRegistRequestDto lessonMaterialInfo) {
+    public LessonMaterial save(LessonMaterialDto lessonMaterialInfo) {
         validateUserRole(lessonMaterialInfo.getUserId());
         validateRequestCounts(lessonMaterialInfo); // 여기서 한번에 검증
 
@@ -155,7 +161,8 @@ public class LessonMaterialService {
      * 수업 자료를 수업자료 id로 수정 (수정 페이지에서 수정하고 요청)
      */
     @Transactional
-    public void updateLessonMaterial(Long lessonMaterialId, LessonMaterialRegistRequestDto updateDto) {
+    public void updateLessonMaterial(Long lessonMaterialId, LessonMaterialDto updateDto) {
+
         // 1. 기존 수업 자료 조회
         LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수업 자료입니다."));
@@ -176,6 +183,8 @@ public class LessonMaterialService {
         });
 
         // 5. 퀴즈 업데이트
+        lessonMaterial.getSelectedQuizList().clear(); // 기존에 있던 선택된 퀴즈 삭제
+
         SelectedQuiz selectedQuiz = new SelectedQuiz(lessonMaterial);
         List<Quiz> quizList = updateDto.getQuizzeList().stream()
                 .map(quizRequest -> new Quiz(
@@ -201,6 +210,55 @@ public class LessonMaterialService {
 
         // 8. 저장
         lessonMaterialRepository.save(lessonMaterial);
+    }
+
+    // AI 반환 Json 파싱 메서드
+    private LessonMaterialResponseDto parseLessonMaterialJson(String jsonResponse, String pdfName) throws Exception {
+        JsonNode root = objectMapper.readTree(jsonResponse);
+
+        // LessonMaterial 객체 생성
+        LessonMaterial lessonMaterial = new LessonMaterial();
+        lessonMaterial.setBookTitle(pdfName);
+        lessonMaterial.setBookContents(root.get("pdftext").asText());
+
+        // 열린 질문 생성 및 추가
+        List<OpenQuestion> openQuestions = new ArrayList<>();
+        root.get("open_questions").forEach(questionNode -> {
+            OpenQuestion question = new OpenQuestion(lessonMaterial, questionNode.get("question").asText());
+            openQuestions.add(question);
+        });
+        lessonMaterial.setOpenQuestionList(openQuestions);
+
+        // 퀴즈 생성 및 추가
+        List<Quiz> quizList = new ArrayList<>();
+        root.get("quiz").forEach(quizNode -> {
+            Quiz quiz = new Quiz(
+                    quizNode.get("question").asText(),
+                    quizNode.get("answer").asText(),
+                    quizNode.get("firstChoice").asText(),
+                    quizNode.get("secondChoice").asText(),
+                    quizNode.get("thirdChoice").asText(),
+                    quizNode.get("fourthChoice").asText()
+            );
+            quizList.add(quiz);
+        });
+        SelectedQuiz selectedQuiz = new SelectedQuiz(lessonMaterial);
+        selectedQuiz.setQuizList(quizList);
+        lessonMaterial.getSelectedQuizList().add(selectedQuiz);
+
+        // 역할 생성 및 추가
+        List<LessonRole> roles = new ArrayList<>();
+        root.get("characters").forEach(characterNode -> {
+            LessonRole role = new LessonRole(null, characterNode.asText());
+            roles.add(role);
+        });
+        lessonMaterial.setLessonRoleList(roles);
+
+        // LessonMaterial 저장
+        lessonMaterialRepository.save(lessonMaterial);
+
+        // 클라이언트에 반환할 LessonMaterialResponseDto 생성
+        return new LessonMaterialResponseDto(quizList, openQuestions);
     }
 
 
@@ -230,7 +288,7 @@ public class LessonMaterialService {
     /**
      * 컨텐츠 개수 검증
      */
-    private void validateRequestCounts(LessonMaterialRegistRequestDto requestDto) {
+    private void validateRequestCounts(LessonMaterialDto requestDto) {
         if (requestDto.getOpenQuestionList().size() != 2) {
             throw new IllegalArgumentException("열린 질문은 3개여야 합니다.");
         }

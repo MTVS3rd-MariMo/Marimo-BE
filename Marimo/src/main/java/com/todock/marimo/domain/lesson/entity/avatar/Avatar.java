@@ -21,7 +21,7 @@ public class Avatar {
     private Long avatarId;
 
     @ManyToOne
-    @JoinColumn(name = "lessonId") // 수업 id
+    @JoinColumn(name = "lesson_id") // 수업 id
     private Lesson lesson;
 
     @Column(name = "user_id") // 유저 id

@@ -1,6 +1,7 @@
 package com.todock.marimo.domain.lessonmaterial.controller;
 
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRegistRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialDto;
+import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialResponseDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,17 +79,18 @@ public class LessonMaterialController {
             )
     })
     @PostMapping("/upload-pdf")
-    public ResponseEntity<String> sendPdfToAiServer(@RequestParam("pdf") MultipartFile pdfFile) {
+    public ResponseEntity<LessonMaterialResponseDto> sendPdfToAiServer(@RequestParam("pdf") MultipartFile pdfFile) {
 
         if (pdfFile.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일이 없습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
         String fileName = pdfFile.getOriginalFilename(); // 파일 이름
 
-        String aiResponseJson = lessonMaterialService.sendPdfToAiServer(pdfFile);
+        LessonMaterialResponseDto lessonMaterialResponseDto
+                = lessonMaterialService.sendPdfToAiServer(pdfFile, fileName);
 
-        return ResponseEntity.status(HttpStatus.OK).body(aiResponseJson);
+        return ResponseEntity.status(HttpStatus.OK).body(lessonMaterialResponseDto);
     }
 
 
@@ -101,7 +103,7 @@ public class LessonMaterialController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = LessonMaterialRegistRequestDto.class),
+                            schema = @Schema(implementation = LessonMaterialDto.class),
                             examples = @ExampleObject(
                                     value = "{\n" +
                                             "  \"userId\": 1,\n" +
@@ -143,7 +145,7 @@ public class LessonMaterialController {
             @ApiResponse(
                     responseCode = "201",
                     description = "수업 자료 생성 성공",
-                    content = @Content(schema = @Schema(implementation = LessonMaterialRegistRequestDto.class))
+                    content = @Content(schema = @Schema(implementation = LessonMaterialDto.class))
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -152,13 +154,13 @@ public class LessonMaterialController {
             )
     })
     @PostMapping
-    public ResponseEntity<LessonMaterialRegistRequestDto> createLessonMaterial(
-            @RequestBody LessonMaterialRegistRequestDto lessonMaterialRegistRequestDto) {
+    public ResponseEntity<String> createLessonMaterial(
+            @RequestBody LessonMaterialDto lessonMaterialDto) {
 
         // 1. 서비스에 복합 DTO 전달하여 저장 로직 처리
-        LessonMaterial savedLessonMaterial = lessonMaterialService.save(lessonMaterialRegistRequestDto);
+        lessonMaterialService.save(lessonMaterialDto);
         log.info("저장 완료");
-        return ResponseEntity.status(HttpStatus.CREATED).body(lessonMaterialRegistRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("수업 자료를 생성했습니다.");
     }
 
 
@@ -201,7 +203,7 @@ public class LessonMaterialController {
     @PutMapping("/{lessonMaterialId}")
     public ResponseEntity<String> updateLessonMaterial(
             @PathVariable("lessonMaterialId") Long lessonMaterial,
-            @RequestBody LessonMaterialRegistRequestDto updateLessonMaterialInfo) {
+            @RequestBody LessonMaterialDto updateLessonMaterialInfo) {
 
         lessonMaterialService.updateLessonMaterial(lessonMaterial, updateLessonMaterialInfo);
 

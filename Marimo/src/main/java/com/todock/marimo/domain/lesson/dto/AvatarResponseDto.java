@@ -17,9 +17,9 @@ public class AvatarResponseDto {
 
     private List<Animation> animations = new ArrayList<>();
 
-    public AvatarResponseDto(Long userId, String avatarImg, List<Animation> animationList) {
+    public AvatarResponseDto(Long userId, String avatarImg, List<Animation> animations) {
         this.userId = userId;
         this.avatarImg = avatarImg;
-        this.animations = animationList;
+        this.animations = animations;
     }
 }

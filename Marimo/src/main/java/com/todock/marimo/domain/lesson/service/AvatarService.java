@@ -126,7 +126,7 @@ public class AvatarService {
                 } else if (filePath.endsWith(".mp4")) {
                     Animation animation = new Animation();
                     animation.setAvatar(avatar);
-                    animation.setAnimationIdle(filePath); // MP4 파일을 애니메이션으로 저장
+                    animation.setAnimation(filePath); // MP4 파일을 애니메이션으로 저장
                     animations.add(animation);
                 }
             }

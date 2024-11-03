@@ -35,10 +35,12 @@ public class Lesson {
 
     // 수업은 하나의 핫시팅을 가진다.
     @OneToOne(mappedBy = "lesson")
+    @JoinColumn(name = "hot_sitting_id")
     private HotSitting hotSitting;
 
     // 수업은 하나의 단체사진을 가진다.
     @OneToOne(mappedBy = "lesson")
+    @JoinColumn(name = "photo_id")
     private Photo photo;
 
 }
