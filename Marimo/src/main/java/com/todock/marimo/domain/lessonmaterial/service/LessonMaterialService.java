@@ -211,7 +211,6 @@ public class LessonMaterialService {
         lessonMaterialRepository.deleteById(lessonMaterialId);
     }
 
-
     /**
      * 선생님인지 검증
      */

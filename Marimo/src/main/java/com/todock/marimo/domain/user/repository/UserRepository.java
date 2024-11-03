@@ -9,6 +9,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+    
+    // 이름과 비밀번호로 유저 찾기
+    User findByNameAndPassword(String name, String password);
 
     // 유저 만들기
     
