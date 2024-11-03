@@ -211,6 +211,7 @@ public class LessonMaterialService {
         lessonMaterialRepository.deleteById(lessonMaterialId);
     }
 
+
     /**
      * 선생님인지 검증
      */
@@ -223,6 +224,7 @@ public class LessonMaterialService {
             throw new IllegalArgumentException("선생님만 수업 자료를 만들 수 있습니다.");
         }
     }
+
 
     /**
      * 컨텐츠 개수 검증
