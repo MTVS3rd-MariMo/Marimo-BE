@@ -51,8 +51,9 @@ public class LessonMaterialService {
      */
     public String sendPdfToAiServer(MultipartFile pdf) {
         try {
+
             // 1. AI 서버 URI 설정
-            String AIServerUrI = "http://metaai2.iptime.org:64987/pdfupload";
+            String AIServerUrI = "http://192.168.123.108:8000/pdfupload";
 
             // 2. HttpHeaders 설정(멀티파트 형식 지정)
             HttpHeaders headers = new HttpHeaders();
@@ -230,7 +231,7 @@ public class LessonMaterialService {
      * 컨텐츠 개수 검증
      */
     private void validateRequestCounts(LessonMaterialRegistRequestDto requestDto) {
-        if (requestDto.getOpenQuestionList().size() != 3) {
+        if (requestDto.getOpenQuestionList().size() != 2) {
             throw new IllegalArgumentException("열린 질문은 3개여야 합니다.");
         }
         if (requestDto.getQuizzeList().size() != 2) {

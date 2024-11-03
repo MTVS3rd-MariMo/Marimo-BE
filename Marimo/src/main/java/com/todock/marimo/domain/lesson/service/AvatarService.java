@@ -134,7 +134,7 @@ public class AvatarService {
                 .map(avatar -> new AvatarResponseDto(
                         avatar.getUserId(),
                         avatar.getAvatarImg(),
-                        avatar.getAnimationList()
+                        avatar.getAnimations()
                 ))
                 .collect(Collectors.toList());
     }
