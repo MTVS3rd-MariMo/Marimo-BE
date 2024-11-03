@@ -1,12 +1,9 @@
 package com.todock.marimo.domain.lesson.service;
 
 import com.todock.marimo.domain.lesson.dto.AvatarResponseDto;
-import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.avatar.Animation;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
-import com.todock.marimo.domain.lesson.repository.AnimationRepository;
 import com.todock.marimo.domain.lesson.repository.AvatarRepository;
-import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +41,7 @@ public class AvatarService {
 
     private static final String DATA_DIR = "data"; // 파일 저장 경로
     private static final String ZIP_DIR = "data/zip"; // zip 파일 저장 경로
-    private static final String UNZIP_DIR = "data/animation"; // 압축 해제된 파일 저장 경로
-
+    private static final String AVATAR_DIR = "data/avatar"; // avatar 파일 저장 경로
 
     @Autowired
     public AvatarService(AvatarRepository avatarRepository,
@@ -57,10 +53,11 @@ public class AvatarService {
 
     // 필요한 디렉토리를 초기화 하는 메서드
     public void initDirectories() {
-        try {
-            Files.createDirectories(Paths.get(DATA_DIR));
-            Files.createDirectories(Paths.get(ZIP_DIR));
-            Files.createDirectories(Paths.get(UNZIP_DIR));
+        try { // 디렉토리 생성
+            Files.createDirectories(Paths.get(DATA_DIR)); // 파일 저장 경로
+            Files.createDirectories(Paths.get(ZIP_DIR)); // zip 파일 저장 경로
+            Files.createDirectories(Paths.get(AVATAR_DIR)); // avatar 파일 저장 경로
+
         } catch (IOException e) {
             throw new RuntimeException("디렉토리 생성 실패", e);
         }
@@ -71,7 +68,7 @@ public class AvatarService {
      * img를 AI서버로 전송
      */
     @Transactional
-    public void sendImgToAiServer(MultipartFile img) {
+    public AvatarResponseDto sendImgToAiServer(MultipartFile img) {
 
         try {
             // 1. AI 서버 URI 설정
@@ -113,11 +110,33 @@ public class AvatarService {
             Files.write(zipPath, response.getBody());
 
             // zip 파일 압축 해제 경로 설정 및 압축 해제 수행
-            String unzipDirPath = Paths.get(UNZIP_DIR, zipFileName.replace(".zip", "")).toString();
+            String unzipDirPath = Paths.get(AVATAR_DIR, zipFileName.replace(".zip", "")).toString();
+            List<String> filePaths = unzipFile(zipPath.toString(), unzipDirPath);
 
-            List<String> animationPaths = unzipFile(zipPath.toString(), unzipDirPath);
+            // 아바타 엔티티 생성 및 파일 저장
+            Long userId = 1L; // 임시 userId 나중에 헤더에서 받은걸로 변경
+            Avatar avatar = new Avatar();
+            avatar.setUserId(userId);
 
-            unzipFile(zipPath.toString(), unzipDirPath);
+            // 애니메이션 엔티티 연결
+            List<Animation> animations = new ArrayList<>();
+            for (String filePath : filePaths) {
+                if (filePath.endsWith(".png")) {
+                    avatar.setAvatarImg(filePath); // PNG 파일을 avatarImg에 저장
+                } else if (filePath.endsWith(".mp4")) {
+                    Animation animation = new Animation();
+                    animation.setAvatar(avatar);
+                    animation.setAnimationIdle(filePath); // MP4 파일을 애니메이션으로 저장
+                    animations.add(animation);
+                }
+            }
+
+             avatar.setAnimations(animations);
+
+            // 8. 저장된 아바타와 애니메이션 정보로 AvatarResponseDto 생성
+            avatar = avatarRepository.save(avatar);
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+
 
         } catch (Exception e) {
             log.error("파일 처리 중 오류 발생", e);
@@ -144,22 +163,22 @@ public class AvatarService {
      * zip 파일을 압축 해제하고 압축 해제된 파일들의 경로 목록을 반환
      */
     private List<String> unzipFile(String zipFilePath, String destDirectory) throws IOException {
-        List<String> animationPaths = new ArrayList<>();
+        List<String> filePaths = new ArrayList<>();
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFilePath))) {
             ZipEntry zipEntry;
             while ((zipEntry = zis.getNextEntry()) != null) {
-                Path destPath = Paths.get(destDirectory, zipEntry.getName());
+                Path destPath = Paths.get(destDirectory, zipEntry.getName()); // avatar 폴더에 압축 해제
                 if (!destPath.normalize().startsWith(Paths.get(destDirectory))) {
-                    throw new SecurityException("Invalid zip entry path");
+                    throw new SecurityException("잘못된 zip 파일 경로입니다.");
                 }
                 if (!zipEntry.isDirectory()) {
                     Files.createDirectories(destPath.getParent());
                     Files.copy(zis, destPath, StandardCopyOption.REPLACE_EXISTING);
-                    animationPaths.add(destPath.toString());
+                    filePaths.add(destPath.toString());
                 }
             }
         }
-        return animationPaths;
+        return filePaths;
     }
 
     // MultipartFile을 로컬 파일 시스템에 저장하고 저장된 경로를 반환
@@ -171,10 +190,38 @@ public class AvatarService {
     }
 
     // 파일명에서 확장자를 추출
+
     private String getFileExtension(String filename) {
         return Optional.ofNullable(filename)
                 .filter(f -> f.contains("."))
                 .map(f -> "." + f.substring(filename.lastIndexOf(".") + 1))
                 .orElse("");
+    }
+
+    // 파일 확장자에 따라 다른 폴더에 저장
+    private String saveFileByType(MultipartFile file) throws IOException {
+        String fileExtension = getFileExtension(file.getOriginalFilename()).toLowerCase();
+        String targetDir;
+
+        // 파일 확장자에 따라 폴더를 구분
+        if (fileExtension.equals(".png")) {
+            targetDir = AVATAR_DIR;
+        } else if (fileExtension.equals(".mp4")) {
+            targetDir = "data/animation";
+        } else {
+            throw new IllegalArgumentException("지원되지 않는 파일 형식입니다. PNG 또는 MP4 파일만 업로드 가능합니다.");
+        }
+
+        // 폴더가 없으면 생성
+        Files.createDirectories(Paths.get(targetDir));
+
+        // 파일을 저장할 경로를 설정
+        String fileName = UUID.randomUUID().toString() + fileExtension;
+        Path destinationPath = Paths.get(targetDir, fileName);
+
+        // 파일 저장
+        Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+
+        return destinationPath.toString();
     }
 }

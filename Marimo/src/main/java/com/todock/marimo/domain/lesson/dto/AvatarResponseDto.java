@@ -15,11 +15,11 @@ public class AvatarResponseDto {
 
     private String avatarImg;
 
-    private List<Animation> animationList = new ArrayList<>();
+    private List<Animation> animations = new ArrayList<>();
 
     public AvatarResponseDto(Long userId, String avatarImg, List<Animation> animationList) {
         this.userId = userId;
         this.avatarImg = avatarImg;
-        this.animationList = animationList;
+        this.animations = animationList;
     }
 }
