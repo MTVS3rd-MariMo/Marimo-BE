@@ -1,13 +1,11 @@
 package com.todock.marimo.domain.lessonmaterial.controller;
 
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameDto;
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRegistRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -90,16 +86,59 @@ public class LessonMaterialController {
 
         String fileName = pdfFile.getOriginalFilename(); // 파일 이름
 
-        lessonMaterialService.sendPdfToAiServer(pdfFile);
+        String aiResponseJson = lessonMaterialService.sendPdfToAiServer(pdfFile);
 
-        return ResponseEntity.status(HttpStatus.OK).body("PDF 파일" + fileName + "이 성공적으로 업로드되었습니다.");
+        return ResponseEntity.status(HttpStatus.OK).body(aiResponseJson);
     }
 
 
     /**
      * 수업자료 저장
      */
-    @Operation(summary = "수업 자료 생성", description = "새로운 수업 자료를 생성합니다.")
+    @Operation(
+            summary = "수업 자료 생성",
+            description = "새로운 수업 자료를 생성합니다.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LessonMaterialRegistRequestDto.class),
+                            examples = @ExampleObject(
+                                    value = "{\n" +
+                                            "  \"userId\": 1,\n" +
+                                            "  \"bookTitle\": \"동화 이야기\",\n" +
+                                            "  \"bookContents\": \"옛날 옛적에...\",\n" +
+                                            "  \"openQuestionList\": [\n" +
+                                            "    {\"questionTitle\": \"주인공은 어떤 성격을 가지고 있나요?\"},\n" +
+                                            "    {\"questionTitle\": \"이야기에서 가장 흥미로운 장면은 무엇인가요?\"},\n" +
+                                            "    {\"questionTitle\": \"이야기 속에서 배우는 교훈은 무엇인가요?\"}\n" +
+                                            "  ],\n" +
+                                            "  \"quizzeList\": [\n" +
+                                            "    {\"question\": \"주인공이 만난 첫 번째 인물은 누구인가요?\",\n" +
+                                            "     \"answer\": \"어머니\",\n" +
+                                            "     \"firstChoice\": \"아버지\",\n" +
+                                            "     \"secondChoice\": \"어머니\",\n" +
+                                            "     \"thirdChoice\": \"친구\",\n" +
+                                            "     \"fourthChoice\": \"스승\"\n" +
+                                            "    },\n" +
+                                            "    {\"question\": \"주인공이 선택한 길은 무엇인가요?\",\n" +
+                                            "     \"answer\": \"오솔길\",\n" +
+                                            "     \"firstChoice\": \"산길\",\n" +
+                                            "     \"secondChoice\": \"오솔길\",\n" +
+                                            "     \"thirdChoice\": \"해변길\",\n" +
+                                            "     \"fourthChoice\": \"강가길\"\n" +
+                                            "    }\n" +
+                                            "  ],\n" +
+                                            "  \"roleList\": [\n" +
+                                            "    {\"roleName\": \"주인공\"},\n" +
+                                            "    {\"roleName\": \"도우미\"},\n" +
+                                            "    {\"roleName\": \"악당\"},\n" +
+                                            "    {\"roleName\": \"현자\"}\n" +
+                                            "  ]\n" +
+                                            "}"
+                            )
+                    )
+            )
+    )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "201",
@@ -120,28 +159,6 @@ public class LessonMaterialController {
         LessonMaterial savedLessonMaterial = lessonMaterialService.save(lessonMaterialRegistRequestDto);
         log.info("저장 완료");
         return ResponseEntity.status(HttpStatus.CREATED).body(lessonMaterialRegistRequestDto);
-    }
-
-
-    /**
-     * 유저 id로 유저의 수업 자료 전체 조회 (pdf 이름만 보여줌)
-     */
-    @Operation(summary = "유저의 수업 자료 조회", description = "유저 ID로 해당 유저의 모든 수업 자료를 조회합니다.")
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공",
-                    content = @Content(schema = @Schema(implementation = LessonMaterialNameDto.class))
-            )
-    })
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<LessonMaterialNameResponseDto>> getLessonMaterialByUserId(
-            @Parameter(description = "수업 자료 id", required = true, example = "1")
-            @PathVariable("userId") Long userId) {
-
-        List<LessonMaterialNameResponseDto> LessonMaterialNameList = lessonMaterialService.getLessonMaterialByUserId(userId);
-
-        return ResponseEntity.ok(LessonMaterialNameList);
     }
 
 

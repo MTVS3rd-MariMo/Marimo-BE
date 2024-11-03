@@ -21,9 +21,9 @@ public class Animation {
     @JoinColumn(name = "avatar_id")
     private Avatar avatar;
 
-    @Column(name = "animation1")
-    private String animation1;
+    @Column(name = "animation_idle")
+    private String animationIdle;
 
-    @Column(name = "animation2")
-    private String animation2;
+    @Column(name = "animation_walk")
+    private String animationWalk;
 }

@@ -4,16 +4,14 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @ToString(exclude = {"lessonMaterial", "openQuestionAnswerList"})
 @NoArgsConstructor
 @Table(name = "tbl_open_question")
@@ -79,11 +77,6 @@ public class OpenQuestion {
         if (openQuestionAnswer == null) {
             throw new IllegalArgumentException("답변은 null일 수 없습니다.");
         }
-    }
-
-    // LessonMaterial 설정 메서드
-    public void setLessonMaterial(LessonMaterial lessonMaterial) {
-        this.lessonMaterial = lessonMaterial;
     }
 
 }
