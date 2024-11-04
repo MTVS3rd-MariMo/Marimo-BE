@@ -9,12 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuizResponseDto {
-
-    private String question;
-    private int answer;
-    private String choice1;
-    private String choice2;
-    private String choice3;
-    private String choice4;
+public class LessonRoleDto {
+    
+    private String roleName; // 역할
 }

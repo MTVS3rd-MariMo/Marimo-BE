@@ -2,9 +2,7 @@ package com.todock.marimo.domain.lessonmaterial.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialDto;
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameResponseDto;
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.*;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonRole;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
@@ -81,11 +79,11 @@ public class LessonMaterialService {
             // 5. AI 서버로 요청 전송
             ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, request, String.class);
 
+            // 확인용 응답 로그
             log.info("AI 서버 응답: {}", response.getBody());
 
             // 6. AI 서버에서 받은 JSON 반환
             return parseLessonMaterialJson(response.getBody(), pdfName);
-
 
         } catch (Exception e) { // 예외 처리 로직 추가
             throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
@@ -108,31 +106,14 @@ public class LessonMaterialService {
         );
 
         // 모든 질문을 한번에 추가
-        List<OpenQuestion> questions = lessonMaterialInfo.getOpenQuestionList().stream()
-                .map(q -> new OpenQuestion(lessonMaterial, q.getQuestionTitle()))
-                .collect(Collectors.toList());
-        lessonMaterial.setOpenQuestionList(questions);
-
+        lessonMaterial.setOpenQuestionList(createOpenQuestionList
+                (lessonMaterial, lessonMaterialInfo.getOpenQuestionList()));
         // 퀴즈 한번에 추가
-        SelectedQuiz selectedQuiz = new SelectedQuiz(lessonMaterial);
-        List<Quiz> quizList = lessonMaterialInfo.getQuizzeList().stream()
-                .map(quizRequest -> new Quiz(
-                        quizRequest.getQuestion(),
-                        quizRequest.getAnswer(),
-                        quizRequest.getChoices1(),
-                        quizRequest.getChoices2(),
-                        quizRequest.getChoices3(),
-                        quizRequest.getChoices4()
-                ))
-                .collect(Collectors.toList());
-        selectedQuiz.setQuizList(quizList);  // 퀴즈 리스트 한번에 설정
-        lessonMaterial.getSelectedQuizList().add(selectedQuiz);
-
+        lessonMaterial.getSelectedQuizList()
+                .add(createQuizList(lessonMaterial, lessonMaterialInfo.getQuizzeList()));
         // 역할 4개 한번에 추가
-        List<LessonRole> roles = lessonMaterialInfo.getRoleList().stream()
-                .map(roleRequest -> new LessonRole(null, roleRequest.getRoleName()))
-                .collect(Collectors.toList());
-        lessonMaterial.setLessonRoleList(roles);
+        lessonMaterial.setLessonRoleList(
+                createLessonRoleList(lessonMaterialInfo.getRoleList()));
 
         // DB에 저장
         return lessonMaterialRepository.save(lessonMaterial);
@@ -180,34 +161,12 @@ public class LessonMaterialService {
         lessonMaterial.getSelectedQuizList().clear();
         lessonMaterial.getLessonRoleList().clear();
 
-        // 4. 열린 질문 업데이트
-        updateDto.getOpenQuestionList().forEach(questionRequest -> {
-            OpenQuestion openQuestion = new OpenQuestion(lessonMaterial, questionRequest.getQuestionTitle());
-            lessonMaterial.addOpenQuestion(openQuestion);
-        });
-
-        // 5. 퀴즈 업데이트
-        lessonMaterial.getSelectedQuizList().clear(); // 기존에 있던 선택된 퀴즈 삭제
-
-        SelectedQuiz selectedQuiz = new SelectedQuiz(lessonMaterial);
-        List<Quiz> quizList = updateDto.getQuizzeList().stream()
-                .map(quizRequest -> new Quiz(
-                        quizRequest.getQuestion(),
-                        quizRequest.getAnswer(),
-                        quizRequest.getChoices1(),
-                        quizRequest.getChoices2(),
-                        quizRequest.getChoices3(),
-                        quizRequest.getChoices4()
-                ))
-                .toList();
-        selectedQuiz.addQuiz(quizList.get(0), quizList.get(1));
-        lessonMaterial.addSelectedQuiz(selectedQuiz);
-
-        // 6. 역할 업데이트
-        updateDto.getRoleList().forEach(roleRequest -> {
-            LessonRole lessonRole = new LessonRole(null, roleRequest.getRoleName());
-            lessonMaterial.addRole(lessonRole);
-        });
+        lessonMaterial.setOpenQuestionList(// 4. 열린 질문 업데이트
+                createOpenQuestionList(lessonMaterial, updateDto.getOpenQuestionList()));
+        lessonMaterial.getSelectedQuizList()// 5. 선택된 퀴즈 추가
+                .add(createQuizList(lessonMaterial, updateDto.getQuizzeList()));
+        lessonMaterial.setLessonRoleList( // 6. 역할 리스트 추가
+                createLessonRoleList(updateDto.getRoleList()));
 
         // 7. 요청 데이터 검증
         validateRequestCounts(updateDto);
@@ -216,8 +175,12 @@ public class LessonMaterialService {
         lessonMaterialRepository.save(lessonMaterial);
     }
 
-    // AI 반환 Json 파싱 메서드
+
+    /**
+     * AI 반환 Json 파싱 메서드
+     */
     private LessonMaterialResponseDto parseLessonMaterialJson(String jsonResponse, String pdfName) throws Exception {
+
         JsonNode root = objectMapper.readTree(jsonResponse);
 
         // LessonMaterial 객체 생성
@@ -281,6 +244,42 @@ public class LessonMaterialService {
     @Transactional
     public void deleteById(Long lessonMaterialId) {
         lessonMaterialRepository.deleteById(lessonMaterialId);
+    }
+
+
+
+
+
+
+    // OpenQuestion 리스트 생성 헬퍼 메서드
+    private List<OpenQuestion> createOpenQuestionList(LessonMaterial lessonMaterial, List<OpenQuestionDto> openQuestionDtos) {
+        return openQuestionDtos.stream()
+                .map(q -> new OpenQuestion(lessonMaterial, q.getQuestionTitle()))
+                .collect(Collectors.toList());
+    }
+
+    // SelectedQuiz 리스트 생성 헬퍼 메서드
+    private SelectedQuiz createQuizList(LessonMaterial lessonMaterial, List<QuizDto> quizDto) {
+        SelectedQuiz selectedQuiz = new SelectedQuiz(lessonMaterial);
+        List<Quiz> quizList = quizDto.stream()
+                .map(quizRequest -> new Quiz(
+                        quizRequest.getQuestion(),
+                        quizRequest.getAnswer(),
+                        quizRequest.getChoices1(),
+                        quizRequest.getChoices2(),
+                        quizRequest.getChoices3(),
+                        quizRequest.getChoices4()
+                ))
+                .collect(Collectors.toList());
+        selectedQuiz.setQuizList(quizList);
+        return selectedQuiz;
+    }
+
+    // LessonRoleDto 리스트 생성 헬퍼 메서드
+    private List<LessonRole> createLessonRoleList(List<LessonRoleDto> roleDto) {
+        return roleDto.stream()
+                .map(roleRequest -> new LessonRole(null, roleRequest.getRoleName()))
+                .collect(Collectors.toList());
     }
 
 

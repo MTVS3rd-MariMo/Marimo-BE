@@ -29,18 +29,9 @@ public class LessonMaterialController {
         this.lessonMaterialService = lessonMaterialService;
     }
 
-    /**
-     * pdf 전달
-     * 1. yml 파일 설정
-     * 2. POST 엔드포인트 생성 - 파일 업로드 메서드 작성 - pdf 파일 수신 확인
-     * 2-2. HttpStatus: HTTP 상태 코드 (200 OK, 404 Not Found 등)
-     * HttpHeaders: 응답 헤더 정보
-     * HttpBody: 실제 응답 데이터
-     */
-
 
     /**
-     * pdf 업로드
+     * pdf 업로드 하고 퀴즈 8개, 열린 질문 2개 반환
      */
     @Operation(
             summary = "PDF 파일 업로드",
@@ -95,7 +86,7 @@ public class LessonMaterialController {
 
 
     /**
-     * 수업자료 저장
+     * 수업자료 저장 - 책 제목(pdf), 책 내용, 선택된 퀴즈 2개, 열린 질문 2개, 역할 4개, 배경 1개(이미지)
      */
     @Operation(
             summary = "수업 자료 생성",
@@ -188,6 +179,7 @@ public class LessonMaterialController {
 
         return ResponseEntity.ok(lessonMaterial);
     }
+
 
     /**
      * 수업자료 id로 수업자료 수정

@@ -13,8 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 public class LessonMaterialResponseDto {
 
+    // 퀴즈 리스트
     private List<Quiz> quizList;
+
+    // 열린 질문 리스트
     private List<OpenQuestion> openQuestionList;
 
-    // 필요한 필드만 포함하도록 구성
 }

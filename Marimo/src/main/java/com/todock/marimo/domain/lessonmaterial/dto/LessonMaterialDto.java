@@ -19,10 +19,10 @@ public class LessonMaterialDto {
 
     private String bookContents; // 책 내용
 
-    private List<OpenQuestionRequestDto> openQuestionList;  // 열린 질문 // 2개
+    private List<OpenQuestionDto> openQuestionList;  // 열린 질문 // 2개
 
-    private List<QuizRequestDto> quizzeList;               // 퀴즈 // 3개
+    private List<QuizDto> quizzeList;               // 퀴즈 // 2개
 
-    private List<LessonRoleRequestDto> roleList;                 // 역할 // 4개
+    private List<LessonRoleDto> roleList;                 // 역할 // 4개
 
 }
