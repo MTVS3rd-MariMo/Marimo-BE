@@ -126,6 +126,7 @@ public class AvatarService {
             Avatar avatar = new Avatar();
             avatar.setUserId(userId);
 
+
             // 애니메이션 엔티티 연결
             List<Animation> animations = new ArrayList<>();
             for (String filePath : filePaths) {
@@ -151,6 +152,32 @@ public class AvatarService {
             throw new RuntimeException("파일 처리 실패", e);
         }
     }
+
+    /**
+     * 유저 Id로 아바타 조회(이미지, 애니메이션)
+     */
+    public AvatarResponseDto findByUserId(Long lessonId, Long userId) {
+
+        // 유저 ID로 아바타 조회
+        Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저와 수업이 공통으로 있는 아바타를 찾을 수 없습니다: " + userId));
+
+        // 애니메이션 목록 생성
+        List<Animation> animations = avatar.getAnimations().stream()
+                .map(animation -> {
+                    // 각 애니메이션 경로를 URL로 변환
+                    String animationUrl = createFileUrl(animation.getAnimation());
+                    animation.setAnimation(animationUrl);
+                    return animation;
+                }).collect(Collectors.toList());
+
+        // 아바타 이미지 URL로 변환
+        String avatarImgUrl = createFileUrl(avatar.getAvatarImg());
+
+        // AvatarResponseDto 생성 및 반환
+        return new AvatarResponseDto(avatar.getUserId(), avatarImgUrl, animations);
+    }
+
 
     /**
      * 수업 id로 모든 아바타와 애니메이션 조회
@@ -245,4 +272,6 @@ public class AvatarService {
         relativePath = relativePath.replaceFirst("^data/avatar/", ""); // "data/avatar/" 제거
         return "http://" + serverHost + ":" + serverPort + "/data/avatar/" + relativePath;
     }
+
+
 }

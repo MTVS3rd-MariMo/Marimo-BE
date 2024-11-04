@@ -36,7 +36,7 @@ public class AvatarController {
     }
 
     /**
-     * 모든 유저의 아바타와 이미지를 한번에 List<dto>로 전달
+     * 모든 유저의 아바타와 이미지를 한번에 List<dto>로 전달 - 선생님용?
      * 수업 id로 아바타를 전부 저장
      */
     @GetMapping
@@ -118,7 +118,7 @@ public class AvatarController {
                 if (bufferedImage == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             //.body("유효하지 않은 이미지 파일입니다.");
-                     .body(null);
+                            .body(null);
                 }
             } catch (IOException e) {
                 log.error("이미지 파일 검증 중 오류 발생", e);
@@ -142,6 +142,18 @@ public class AvatarController {
         }
     }
 
+
+    /**
+     * 다른 유저의 아바타 이미지, 애니메이션 받기
+     */
+    @GetMapping("/participant")
+    public ResponseEntity<AvatarResponseDto> getAvatarForParticipant(@RequestParam("lessonId") Long lessonId, @RequestParam("userId") Long userId) {
+
+        AvatarResponseDto avatarResponseDto = avatarService.findByUserId(lessonId, userId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(avatarResponseDto);
+    }
 
     /**
      * 파일 확장자 추출
