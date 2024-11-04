@@ -7,6 +7,7 @@ import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -35,6 +36,13 @@ import java.util.zip.ZipInputStream;
 @Slf4j
 @Service
 public class AvatarService {
+
+    // 클래스 내부에서 주입된 값을 사용하기 위해 추가
+    @Value("${server.host}")
+    private String serverHost;
+
+    @Value("${server.port}")
+    private String serverPort;
 
     private final AvatarRepository avatarRepository;
     private final RestTemplate restTemplate;
@@ -72,7 +80,7 @@ public class AvatarService {
 
         try {
             // 1. AI 서버 URI 설정
-            String AIServerUrI = "http://metaai2.iptime.org:62987/animation/";
+            String AIServerUrI = "http://metaai2.iptime.org:64987/animation/";
 
             // 2. HttpHeaders 설정
             HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
@@ -122,16 +130,16 @@ public class AvatarService {
             List<Animation> animations = new ArrayList<>();
             for (String filePath : filePaths) {
                 if (filePath.endsWith(".png")) {
-                    avatar.setAvatarImg(filePath); // PNG 파일을 avatarImg에 저장
+                    avatar.setAvatarImg(createFileUrl(filePath)); // URL로 변환하여 avatarImg에 저장
                 } else if (filePath.endsWith(".mp4")) {
                     Animation animation = new Animation();
                     animation.setAvatar(avatar);
-                    animation.setAnimation(filePath); // MP4 파일을 애니메이션으로 저장
+                    animation.setAnimation(createFileUrl(filePath)); // URL로 변환하여 애니메이션에 저장
                     animations.add(animation);
                 }
             }
 
-             avatar.setAnimations(animations);
+            avatar.setAnimations(animations);
 
             // 8. 저장된 아바타와 애니메이션 정보로 AvatarResponseDto 생성
             avatar = avatarRepository.save(avatar);
@@ -189,8 +197,9 @@ public class AvatarService {
         return destinationPath.toString();
     }
 
-    // 파일명에서 확장자를 추출
-
+    /**
+     * 파일명에서 확장자를 추출
+     */
     private String getFileExtension(String filename) {
         return Optional.ofNullable(filename)
                 .filter(f -> f.contains("."))
@@ -198,7 +207,9 @@ public class AvatarService {
                 .orElse("");
     }
 
-    // 파일 확장자에 따라 다른 폴더에 저장
+    /**
+     * 파일 확장자에 따라 다른 폴더에 저장
+     */
     private String saveFileByType(MultipartFile file) throws IOException {
         String fileExtension = getFileExtension(file.getOriginalFilename()).toLowerCase();
         String targetDir;
@@ -223,5 +234,15 @@ public class AvatarService {
         Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
 
         return destinationPath.toString();
+    }
+
+    /**
+     * 파일 경로를 URL 형식으로 변환
+     */
+    private String createFileUrl(String filePath) {
+        // 파일 경로에서 중복된 루트 디렉토리를 제거
+        String relativePath = filePath.replace("\\", "/");
+        relativePath = relativePath.replaceFirst("^data/avatar/", ""); // "data/avatar/" 제거
+        return "http://" + serverHost + ":" + serverPort + "/data/avatar/" + relativePath;
     }
 }

@@ -23,7 +23,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("api/avatar")
+@RequestMapping("/api/avatar")
 public class AvatarController {
 
     private final AvatarService avatarService;
@@ -46,6 +46,7 @@ public class AvatarController {
 
         return ResponseEntity.ok(avatarList);
     }
+
 
     /**
      * img를 AI서버로 전송
@@ -140,6 +141,7 @@ public class AvatarController {
                     .body(null);
         }
     }
+
 
     /**
      * 파일 확장자 추출
