@@ -92,18 +92,15 @@ public class LessonMaterialService {
 
 
     /**
-     * 수업 자료 저장
+     * pdf에서 바로 받은 후 수정하고 저장 (열린 질문 수정,
      */
     @Transactional
-    public LessonMaterial save(LessonMaterialDto lessonMaterialInfo) {
-        validateUserRole(lessonMaterialInfo.getUserId());
-        validateRequestCounts(lessonMaterialInfo); // 여기서 한번에 검증
+    public LessonMaterial updateLessonMaterial(LessonMaterialRequestDto lessonMaterialInfo) {
 
-        LessonMaterial lessonMaterial = new LessonMaterial(
-                lessonMaterialInfo.getUserId(),
-                lessonMaterialInfo.getBookTitle(),
-                lessonMaterialInfo.getBookContents()
-        );
+        // validateUserRole(lessonMaterialInfo.getUserId());
+        // validateRequestCounts(lessonMaterialInfo); // 여기서 한번에 검증
+
+        LessonMaterial lessonMaterial = new LessonMaterial();
 
         // 모든 질문을 한번에 추가
         lessonMaterial.setOpenQuestionList(createOpenQuestionList
@@ -112,8 +109,8 @@ public class LessonMaterialService {
         lessonMaterial.getSelectedQuizList()
                 .add(createQuizList(lessonMaterial, lessonMaterialInfo.getQuizzeList()));
         // 역할 4개 한번에 추가
-        lessonMaterial.setLessonRoleList(
-                createLessonRoleList(lessonMaterialInfo.getRoleList()));
+//        lessonMaterial.setLessonRoleList(
+//                createLessonRoleList(lessonMaterialInfo.getRoleList()));
 
         // DB에 저장
         return lessonMaterialRepository.save(lessonMaterial);
@@ -146,15 +143,11 @@ public class LessonMaterialService {
      * 수업 자료를 수업자료 id로 수정 (수정 페이지에서 수정하고 요청)
      */
     @Transactional
-    public void updateLessonMaterial(Long lessonMaterialId, LessonMaterialDto updateDto) {
+    public void updateLessonMaterial(Long lessonMaterialId, LessonMaterialRequestDto updateDto) {
 
         // 1. 기존 수업 자료 조회
         LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수업 자료입니다."));
-
-        // 2. 기본 정보 업데이트
-        lessonMaterial.setBookTitle(updateDto.getBookTitle());
-        lessonMaterial.setBookContents(updateDto.getBookContents());
 
         // 3. 기존 데이터 초기화
         lessonMaterial.getOpenQuestionList().clear();
@@ -165,11 +158,11 @@ public class LessonMaterialService {
                 createOpenQuestionList(lessonMaterial, updateDto.getOpenQuestionList()));
         lessonMaterial.getSelectedQuizList()// 5. 선택된 퀴즈 추가
                 .add(createQuizList(lessonMaterial, updateDto.getQuizzeList()));
-        lessonMaterial.setLessonRoleList( // 6. 역할 리스트 추가
-                createLessonRoleList(updateDto.getRoleList()));
+//        lessonMaterial.setLessonRoleList( // 6. 역할 리스트 추가
+//                createLessonRoleList(updateDto.getRoleList()));
 
         // 7. 요청 데이터 검증
-        validateRequestCounts(updateDto);
+        // validateRequestCounts(updateDto);
 
         // 8. 저장
         lessonMaterialRepository.save(lessonMaterial);
@@ -185,9 +178,10 @@ public class LessonMaterialService {
 
         // LessonMaterial 객체 생성
         LessonMaterial lessonMaterial = new LessonMaterial();
+        // lessonMaterial.setUserId(userId);
         lessonMaterial.setUserId(1L); // 임시 userId 생성
-        lessonMaterial.setBookTitle(pdfName);
-        lessonMaterial.setBookContents(root.path("pdftext").asText("")); // 기본값을 빈 문자열로 설정
+        lessonMaterial.setBookTitle(pdfName); // 책 제목
+        lessonMaterial.setBookContents(root.path("pdftext").asText("")); // 기본값을 빈 문자열로 설정 // 책 내용
 
         // 열린 질문 생성 및 추가
         List<OpenQuestion> openQuestions = new ArrayList<>();
@@ -198,7 +192,7 @@ public class LessonMaterialService {
                 openQuestions.add(question);
             });
         }
-        lessonMaterial.setOpenQuestionList(openQuestions);
+        lessonMaterial.setOpenQuestionList(openQuestions); // 열린 질문 저장
 
         // 퀴즈 생성 및 추가
         List<Quiz> quizList = new ArrayList<>();
@@ -234,7 +228,7 @@ public class LessonMaterialService {
         lessonMaterialRepository.save(lessonMaterial);
 
         // 클라이언트에 반환할 LessonMaterialResponseDto 생성
-        return new LessonMaterialResponseDto(quizList, openQuestions);
+        return new LessonMaterialResponseDto(lessonMaterial.getLessonMaterialId(), quizList, openQuestions);
     }
 
 
@@ -245,10 +239,6 @@ public class LessonMaterialService {
     public void deleteById(Long lessonMaterialId) {
         lessonMaterialRepository.deleteById(lessonMaterialId);
     }
-
-
-
-
 
 
     // OpenQuestion 리스트 생성 헬퍼 메서드
@@ -300,7 +290,7 @@ public class LessonMaterialService {
     /**
      * 컨텐츠 개수 검증
      */
-    private void validateRequestCounts(LessonMaterialDto requestDto) {
+    /*private void validateRequestCounts(LessonMaterialDto requestDto) {
         if (requestDto.getOpenQuestionList().size() != 2) {
             throw new IllegalArgumentException("열린 질문은 2개여야 합니다.");
         }
@@ -310,6 +300,6 @@ public class LessonMaterialService {
         if (requestDto.getRoleList().size() != 4) {
             throw new IllegalArgumentException("역할은 4개여야 합니다.");
         }
-    }
+    }*/
 
 }

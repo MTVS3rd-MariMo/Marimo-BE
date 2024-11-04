@@ -11,18 +11,11 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LessonMaterialDto {
+public class LessonMaterialRequestDto {
 
     private Long userId; // 만든 유저의 id
-
-    private String bookTitle; // 책 제목
-
-    private String bookContents; // 책 내용
 
     private List<OpenQuestionDto> openQuestionList;  // 열린 질문 // 2개
 
     private List<QuizDto> quizzeList;               // 퀴즈 // 2개
-
-    private List<LessonRoleDto> roleList;                 // 역할 // 4개
-
 }

@@ -39,7 +39,7 @@ public class AvatarService {
 
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
-    private String serverHost = "125.132.216.190";
+    private String serverHost = "125.132.216.28";
     // 125.132.216.190:8202
     //@Value("${server.port}")
     private String serverPort = "8202";

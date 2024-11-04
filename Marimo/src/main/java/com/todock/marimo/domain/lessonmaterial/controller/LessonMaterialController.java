@@ -1,6 +1,6 @@
 package com.todock.marimo.domain.lessonmaterial.controller;
 
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialDto;
+import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialResponseDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
@@ -31,7 +31,7 @@ public class LessonMaterialController {
 
 
     /**
-     * pdf 업로드 하고 퀴즈 8개, 열린 질문 2개 반환
+     * pdf 업로드 하고 수업자료 Id, 퀴즈 8개, 열린 질문 2개 반환
      */
     @Operation(
             summary = "PDF 파일 업로드",
@@ -86,7 +86,7 @@ public class LessonMaterialController {
 
 
     /**
-     * 수업자료 저장 - 책 제목(pdf), 책 내용, 선택된 퀴즈 2개, 열린 질문 2개, 역할 4개, 배경 1개(이미지)
+     * 수업자료 저장 - 수업 자료 id, 선택한 퀴즈 2개, 열린 질문 2개
      */
     @Operation(
             summary = "수업 자료 생성",
@@ -94,7 +94,7 @@ public class LessonMaterialController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = LessonMaterialDto.class),
+                            schema = @Schema(implementation = LessonMaterialRequestDto.class),
                             examples = @ExampleObject(
                                     value = "{\n" +
                                             "  \"userId\": 1,\n" +
@@ -121,12 +121,6 @@ public class LessonMaterialController {
                                             "     \"fourthChoice\": \"강가길\"\n" +
                                             "    }\n" +
                                             "  ],\n" +
-                                            "  \"roleList\": [\n" +
-                                            "    {\"roleName\": \"주인공\"},\n" +
-                                            "    {\"roleName\": \"도우미\"},\n" +
-                                            "    {\"roleName\": \"악당\"},\n" +
-                                            "    {\"roleName\": \"현자\"}\n" +
-                                            "  ]\n" +
                                             "}"
                             )
                     )
@@ -136,7 +130,7 @@ public class LessonMaterialController {
             @ApiResponse(
                     responseCode = "201",
                     description = "수업 자료 생성 성공",
-                    content = @Content(schema = @Schema(implementation = LessonMaterialDto.class))
+                    content = @Content(schema = @Schema(implementation = LessonMaterialRequestDto.class))
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -146,11 +140,15 @@ public class LessonMaterialController {
     })
     @PostMapping
     public ResponseEntity<String> createLessonMaterial(
-            @RequestBody LessonMaterialDto lessonMaterialDto) {
+            @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto,
+            @RequestBody Long lessonMaterialId
+    ) {
 
         // 1. 서비스에 복합 DTO 전달하여 저장 로직 처리
-        lessonMaterialService.save(lessonMaterialDto);
+        lessonMaterialService.updateLessonMaterial(lessonMaterialId, lessonMaterialRequestDto);
+
         log.info("저장 완료");
+
         return ResponseEntity.status(HttpStatus.CREATED).body("수업 자료를 생성했습니다.");
     }
 
@@ -195,7 +193,7 @@ public class LessonMaterialController {
     @PutMapping("/{lessonMaterialId}")
     public ResponseEntity<String> updateLessonMaterial(
             @PathVariable("lessonMaterialId") Long lessonMaterial,
-            @RequestBody LessonMaterialDto updateLessonMaterialInfo) {
+            @RequestBody LessonMaterialRequestDto updateLessonMaterialInfo) {
 
         lessonMaterialService.updateLessonMaterial(lessonMaterial, updateLessonMaterialInfo);
 
