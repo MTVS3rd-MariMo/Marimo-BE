@@ -78,7 +78,8 @@ class LessonServiceTest {
                 .thenReturn(ResponseEntity.ok(mockZipData));
 
         // When
-        assertDoesNotThrow(() -> avatarService.sendImgToAiServer(mockImage, userId, lessonId));
+        assertDoesNotThrow(() -> avatarService.sendImgToAiServer(mockImage));
+        // assertDoesNotThrow(() -> avatarService.sendImgToAiServer(mockImage, userId, lessonId));
 
         // Then
         verify(lessonRepository).findById(lessonId);
@@ -99,7 +100,8 @@ class LessonServiceTest {
 
         // When & Then
         assertThrows(RuntimeException.class,
-                () -> avatarService.sendImgToAiServer(mockImage, userId, lessonId));
+//                () -> avatarService.sendImgToAiServer(mockImage, userId, lessonId));
+                () -> avatarService.sendImgToAiServer(mockImage));
     }
 
     private byte[] createMockZipFile() throws IOException {
@@ -151,6 +153,7 @@ class LessonServiceTest {
 
         // When & Then
         assertThrows(RuntimeException.class,
-                () -> avatarService.sendImgToAiServer(mockImage, userId, lessonId));
+//                () -> avatarService.sendImgToAiServer(mockImage, userId, lessonId));
+                () -> avatarService.sendImgToAiServer(mockImage));
     }
 }

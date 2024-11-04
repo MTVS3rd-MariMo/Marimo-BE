@@ -47,7 +47,6 @@ public class AvatarController {
         return ResponseEntity.ok(avatarList);
     }
 
-
     /**
      * img를 AI서버로 전송
      */
@@ -88,18 +87,18 @@ public class AvatarController {
             )
     })
     @PostMapping(value = "/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> sendImgToAiServer(@RequestParam("img") MultipartFile img) {
+    public ResponseEntity<AvatarResponseDto> sendImgToAiServer(@RequestParam("img") MultipartFile img) {
         try {
             // 1. 파일 존재 여부 검증
             if (img == null || img.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("파일이 없습니다.");
+                        .body(null);
             }
 
             // 2. 파일 크기 검증
             if (img.getSize() > MAX_FILE_SIZE) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("파일 크기는 10MB를 초과할 수 없습니다.");
+                        .body(null);
             }
 
             // 3. 파일 확장자 검증
@@ -108,7 +107,8 @@ public class AvatarController {
 
             if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("허용되지 않는 파일 형식입니다. jpg, jpeg, png 파일만 업로드 가능합니다.");
+//                        .body("허용되지 않는 파일 형식입니다. jpg, jpeg, png 파일만 업로드 가능합니다.");
+                        .body(null);
             }
 
             // 4. 파일 내용 검증
@@ -116,24 +116,28 @@ public class AvatarController {
                 BufferedImage bufferedImage = ImageIO.read(img.getInputStream());
                 if (bufferedImage == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("유효하지 않은 이미지 파일입니다.");
+                            //.body("유효하지 않은 이미지 파일입니다.");
+                     .body(null);
                 }
             } catch (IOException e) {
                 log.error("이미지 파일 검증 중 오류 발생", e);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("이미지 파일 검증 중 오류가 발생했습니다.");
+//                        .body("이미지 파일 검증 중 오류가 발생했습니다.");
+                        .body(null);
             }
 
             // 5. 서비스 호출
-            avatarService.sendImgToAiServer(img);
+            AvatarResponseDto avatarResponseDto = avatarService.sendImgToAiServer(img);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body("Img 파일 " + originalFilename + "이 성공적으로 업로드되었습니다.");
+                    //.body("Img 파일 " + originalFilename + "이 성공적으로 업로드되었습니다.");
+                    .body(avatarResponseDto);
 
         } catch (Exception e) {
             log.error("파일 업로드 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("파일 처리 중 오류가 발생했습니다.");
+                    //.body("파일 처리 중 오류가 발생했습니다.");
+                    .body(null);
         }
     }
 

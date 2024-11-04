@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LessonMaterialRegistRequestDto {
+public class LessonMaterialDto {
 
     private Long userId; // 만든 유저의 id
 
