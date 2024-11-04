@@ -13,14 +13,14 @@ public class QuizRequestDto {
 
     private String question; // 문제
 
-    private String answer; // 정답
+    private int answer; // 정답
 
-    private String firstChoice; // 첫번째 보기
+    private String choices1; // 첫번째 보기
     
-    private String secondChoice; // 두번째 보기
+    private String choices2; // 두번째 보기
     
-    private String thirdChoice; // 세번째 보기
+    private String choices3; // 세번째 보기
 
-    private String fourthChoice; // 네번째 보기
+    private String choices4; // 네번째 보기
 
 }

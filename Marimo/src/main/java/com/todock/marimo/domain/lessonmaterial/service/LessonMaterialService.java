@@ -15,6 +15,7 @@ import com.todock.marimo.domain.user.entity.Role;
 import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class LessonMaterialService {
 
@@ -58,7 +60,7 @@ public class LessonMaterialService {
         try {
 
             // 1. AI 서버 URI 설정
-            String AIServerUrI = "http://192.168.123.108:8000/pdfupload";
+            String AIServerUrI = "http://221.163.19.142:7993/pdfupload";
 
             // 2. HttpHeaders 설정(멀티파트 형식 지정)
             HttpHeaders headers = new HttpHeaders();
@@ -78,6 +80,8 @@ public class LessonMaterialService {
 
             // 5. AI 서버로 요청 전송
             ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, request, String.class);
+
+            log.info("AI 서버 응답: {}", response.getBody());
 
             // 6. AI 서버에서 받은 JSON 반환
             return parseLessonMaterialJson(response.getBody(), pdfName);
@@ -115,10 +119,10 @@ public class LessonMaterialService {
                 .map(quizRequest -> new Quiz(
                         quizRequest.getQuestion(),
                         quizRequest.getAnswer(),
-                        quizRequest.getFirstChoice(),
-                        quizRequest.getSecondChoice(),
-                        quizRequest.getThirdChoice(),
-                        quizRequest.getFourthChoice()
+                        quizRequest.getChoices1(),
+                        quizRequest.getChoices2(),
+                        quizRequest.getChoices3(),
+                        quizRequest.getChoices4()
                 ))
                 .collect(Collectors.toList());
         selectedQuiz.setQuizList(quizList);  // 퀴즈 리스트 한번에 설정
@@ -190,10 +194,10 @@ public class LessonMaterialService {
                 .map(quizRequest -> new Quiz(
                         quizRequest.getQuestion(),
                         quizRequest.getAnswer(),
-                        quizRequest.getFirstChoice(),
-                        quizRequest.getSecondChoice(),
-                        quizRequest.getThirdChoice(),
-                        quizRequest.getFourthChoice()
+                        quizRequest.getChoices1(),
+                        quizRequest.getChoices2(),
+                        quizRequest.getChoices3(),
+                        quizRequest.getChoices4()
                 ))
                 .toList();
         selectedQuiz.addQuiz(quizList.get(0), quizList.get(1));
@@ -218,40 +222,49 @@ public class LessonMaterialService {
 
         // LessonMaterial 객체 생성
         LessonMaterial lessonMaterial = new LessonMaterial();
+        lessonMaterial.setUserId(1L); // 임시 userId 생성
         lessonMaterial.setBookTitle(pdfName);
-        lessonMaterial.setBookContents(root.get("pdftext").asText());
+        lessonMaterial.setBookContents(root.path("pdftext").asText("")); // 기본값을 빈 문자열로 설정
 
         // 열린 질문 생성 및 추가
         List<OpenQuestion> openQuestions = new ArrayList<>();
-        root.get("open_questions").forEach(questionNode -> {
-            OpenQuestion question = new OpenQuestion(lessonMaterial, questionNode.get("question").asText());
-            openQuestions.add(question);
-        });
+        JsonNode openQuestionsNode = root.path("open_questions");
+        if (!openQuestionsNode.isMissingNode()) { // 노드가 존재할 때만 진행
+            openQuestionsNode.forEach(questionNode -> {
+                OpenQuestion question = new OpenQuestion(lessonMaterial, questionNode.path("question").asText(""));
+                openQuestions.add(question);
+            });
+        }
         lessonMaterial.setOpenQuestionList(openQuestions);
 
         // 퀴즈 생성 및 추가
         List<Quiz> quizList = new ArrayList<>();
-        root.get("quiz").forEach(quizNode -> {
-            Quiz quiz = new Quiz(
-                    quizNode.get("question").asText(),
-                    quizNode.get("answer").asText(),
-                    quizNode.get("firstChoice").asText(),
-                    quizNode.get("secondChoice").asText(),
-                    quizNode.get("thirdChoice").asText(),
-                    quizNode.get("fourthChoice").asText()
-            );
-            quizList.add(quiz);
-        });
+        JsonNode quizNode = root.path("quiz");
+        if (!quizNode.isMissingNode()) { // 노드가 존재할 때만 진행
+            quizNode.forEach(qNode -> {
+                Quiz quiz = new Quiz(
+                        qNode.path("question").asText(""),
+                        qNode.path("answer").asInt(),
+                        qNode.path("choices1").asText(""),
+                        qNode.path("choices2").asText(""),
+                        qNode.path("choices3").asText(""),
+                        qNode.path("choices4").asText("")
+                );
+                quizList.add(quiz);
+            });
+        }
         SelectedQuiz selectedQuiz = new SelectedQuiz(lessonMaterial);
         selectedQuiz.setQuizList(quizList);
         lessonMaterial.getSelectedQuizList().add(selectedQuiz);
 
         // 역할 생성 및 추가
         List<LessonRole> roles = new ArrayList<>();
-        root.get("characters").forEach(characterNode -> {
-            LessonRole role = new LessonRole(null, characterNode.asText());
-            roles.add(role);
-        });
+        JsonNode charactersNode = root.path("characters");
+        if (!charactersNode.isMissingNode()) { // 노드가 존재할 때만 진행
+            charactersNode.forEach(characterNode -> {
+                roles.add(new LessonRole(null, characterNode.asText("")));
+            });
+        }
         lessonMaterial.setLessonRoleList(roles);
 
         // LessonMaterial 저장
@@ -290,7 +303,7 @@ public class LessonMaterialService {
      */
     private void validateRequestCounts(LessonMaterialDto requestDto) {
         if (requestDto.getOpenQuestionList().size() != 2) {
-            throw new IllegalArgumentException("열린 질문은 3개여야 합니다.");
+            throw new IllegalArgumentException("열린 질문은 2개여야 합니다.");
         }
         if (requestDto.getQuizzeList().size() != 2) {
             throw new IllegalArgumentException("퀴즈는 2개여야 합니다.");

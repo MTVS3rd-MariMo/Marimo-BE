@@ -8,7 +8,6 @@ import lombok.ToString;
 
 @Entity
 @Getter
-@ToString
 @NoArgsConstructor
 @Table(name = "tbl_open_question_answer")
 public class OpenQuestionAnswer {
@@ -54,5 +53,12 @@ public class OpenQuestionAnswer {
     // OpenQuestion와 관계 생성
     void setOpenQuestion(OpenQuestion openQuestion) {
         this.openQuestion = openQuestion;
+    }
+
+    @Override
+    public String toString() {
+        return "OpenQuestionAnswer{" +
+                "answer='" + answer + '\'' +
+                '}';
     }
 }

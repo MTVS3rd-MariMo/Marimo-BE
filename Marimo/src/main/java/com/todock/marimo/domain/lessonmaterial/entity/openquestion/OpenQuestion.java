@@ -12,7 +12,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@ToString(exclude = {"lessonMaterial", "openQuestionAnswerList"})
 @NoArgsConstructor
 @Table(name = "tbl_open_question")
 public class OpenQuestion {
@@ -79,4 +78,11 @@ public class OpenQuestion {
         }
     }
 
+    @Override
+    public String toString() {
+        return "OpenQuestion{" +
+                "questionTitle='" + questionTitle + '\'' +
+                ", openQuestionAnswerList=" + openQuestionAnswerList +
+                '}';
+    }
 }

@@ -15,7 +15,6 @@ import java.util.List;
 @Setter
 @Getter
 @Entity
-@ToString(exclude = {"openQuestionList", "selectedQuizList", "lessonRoleList"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_lesson_material")
@@ -31,7 +30,8 @@ public class LessonMaterial {
     @Column(name = "book_title") // 책 제목
     private String bookTitle;
 
-    @Column(name = "book_contents") // 책 내용
+    @Lob
+    @Column(name = "book_contents", columnDefinition = "LONGTEXT")
     private String bookContents;
 
     @JsonManagedReference
@@ -43,6 +43,7 @@ public class LessonMaterial {
     @OneToMany(mappedBy = "lessonMaterial", // 선택한 퀴즈
             cascade = CascadeType.ALL,
             orphanRemoval = true)
+    @JsonManagedReference
     private List<SelectedQuiz> selectedQuizList = new ArrayList<>();
 
     @OneToMany(mappedBy = "lessonMaterial", // 역할
@@ -138,5 +139,18 @@ public class LessonMaterial {
         if (user.getRole() != Role.TEACHER) {
             throw new IllegalArgumentException("선생님만 수업 자료를 생성할 수 있습니다.");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "LessonMaterial{" +
+                "userId=" + userId +
+                ", bookTitle='" + bookTitle + '\'' +
+                ", bookContents='" + bookContents + '\'' +
+                ", lessonMaterialId=" + lessonMaterialId +
+                ", openQuestionList=" + openQuestionList +
+                ", selectedQuizList=" + selectedQuizList +
+                ", lessonRoleList=" + lessonRoleList +
+                '}';
     }
 }

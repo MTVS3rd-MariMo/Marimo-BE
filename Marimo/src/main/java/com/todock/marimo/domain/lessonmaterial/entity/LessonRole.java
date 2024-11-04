@@ -11,7 +11,6 @@ import lombok.ToString;
 
 @Entity
 @Getter
-@ToString(exclude = "lessonMaterial")
 @NoArgsConstructor
 @Table(name = "tbl_role")
 public class LessonRole {

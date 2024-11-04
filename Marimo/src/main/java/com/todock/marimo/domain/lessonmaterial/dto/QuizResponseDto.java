@@ -5,14 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PdfToLessonMaterialResponseDto {
+public class QuizResponseDto {
 
-    private List<QuizResponseDto> quizzes;
-    private List<OpenQuestionResponseDto> openQuestions;
+    private String question;
+    private int answer;
+    private String choice1;
+    private String choice2;
+    private String choice3;
+    private String choice4;
 }
