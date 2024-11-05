@@ -66,7 +66,6 @@ class LessonServiceTest {
     @DisplayName("이미지 업로드 및 ZIP 파일 처리 테스트")
     void testSendImgToAiServer() throws IOException {
         // Given
-        Long userId = 1L;
         Long lessonId = 1L;
         Lesson mockLesson = new Lesson();
         Avatar mockAvatar = new Avatar();
@@ -144,7 +143,6 @@ class LessonServiceTest {
     @DisplayName("Lesson not found 예외 테스트")
     void testLessonNotFound() {
         // Given
-        Long userId = 1L;
         Long lessonId = 999L;
 
         when(lessonRepository.findById(lessonId)).thenReturn(Optional.empty());

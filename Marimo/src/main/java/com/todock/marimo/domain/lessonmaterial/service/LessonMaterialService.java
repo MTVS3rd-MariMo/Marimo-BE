@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -102,7 +103,10 @@ public class LessonMaterialService {
         // validateRequestCounts(lessonMaterialInfo); // 여기서 한번에 검증
 
         LessonMaterial lessonMaterial = lessonMaterialRepository
-                .findLessonMaterialByLessonMaterialId(lessonMaterialInfo.getLessonMaterialId());
+                .findById(lessonMaterialInfo.getLessonMaterialId()).orElse(null);
+        if (lessonMaterial == null) {  // lessonMaterial이 null인지 확인
+            throw new IllegalArgumentException("존재하지 않는 수업 자료입니다: " + lessonMaterialInfo.getLessonMaterialId());
+        }
 
         // 모든 질문을 한번에 추가
         lessonMaterial.setOpenQuestionList(createOpenQuestionList
@@ -110,9 +114,6 @@ public class LessonMaterialService {
         // 퀴즈 한번에 추가
         lessonMaterial.getSelectedQuizList()
                 .add(createQuizList(lessonMaterial, lessonMaterialInfo.getQuizzes()));
-        // 역할 4개 한번에 추가
-//        lessonMaterial.setLessonRoleList(
-//                createLessonRoleList(lessonMaterialInfo.getRoleList()));
 
         // DB에 저장
         lessonMaterialRepository.save(lessonMaterial);
@@ -134,9 +135,9 @@ public class LessonMaterialService {
     /**
      * lessonMaterialId로 수업 자료 내용 상세 조회
      */
-    public LessonMaterial getLessonMaterialByLessonMaterialId(Long lessonMaterialId) {
+    public Optional<LessonMaterial> findById(Long lessonMaterialId) {
 
-        return lessonMaterialRepository.findLessonMaterialByLessonMaterialId(lessonMaterialId);
+        return lessonMaterialRepository.findById(lessonMaterialId);
 
     }
 
@@ -255,6 +256,9 @@ public class LessonMaterialService {
 
     // OpenQuestion 리스트 생성 헬퍼 메서드
     private List<OpenQuestion> createOpenQuestionList(LessonMaterial lessonMaterial, List<OpenQuestionDto> openQuestionDtos) {
+        if (openQuestionDtos == null) {  // null 체크 추가
+            return new ArrayList<>();
+        }
         return openQuestionDtos.stream()
                 .map(q -> new OpenQuestion(lessonMaterial, q.getQuestion()))
                 .collect(Collectors.toList());
@@ -262,7 +266,14 @@ public class LessonMaterialService {
 
     // SelectedQuiz 리스트 생성 헬퍼 메서드
     private SelectedQuiz createQuizList(LessonMaterial lessonMaterial, List<QuizDto> quizDto) {
+
+        if (quizDto == null) {
+            quizDto = new ArrayList<>();
+        }
+
         SelectedQuiz selectedQuiz = new SelectedQuiz(lessonMaterial);
+
+
         List<Quiz> quizList = quizDto.stream()
                 .map(quizRequest -> new Quiz(
                         quizRequest.getQuestion(),

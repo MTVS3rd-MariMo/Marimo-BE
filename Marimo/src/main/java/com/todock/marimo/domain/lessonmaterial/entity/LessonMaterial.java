@@ -36,19 +36,16 @@ public class LessonMaterial {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "lessonMaterial", // 열린 질문
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            cascade = CascadeType.ALL)
     private List<OpenQuestion> openQuestionList = new ArrayList<>();
 
     @OneToMany(mappedBy = "lessonMaterial", // 선택한 퀴즈
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<SelectedQuiz> selectedQuizList = new ArrayList<>();
 
     @OneToMany(mappedBy = "lessonMaterial", // 역할
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            cascade = CascadeType.ALL)
     private List<LessonRole> lessonRoleList = new ArrayList<>();
 
     // 생성자
@@ -82,14 +79,14 @@ public class LessonMaterial {
 
     // 퀴즈 추가
     public void addSelectedQuiz(SelectedQuiz selectedQuiz) {
-        validateSelectedQuizCount();
+        //validateSelectedQuizCount();
         this.selectedQuizList.add(selectedQuiz);
         selectedQuiz.setLessonMaterial(this);
     }
 
     // 역할 추가
     public void addRole(LessonRole lessonRole) {
-        validateRoleCount();
+        //validateRoleCount();
         this.lessonRoleList.add(lessonRole);
     }
 
@@ -116,20 +113,20 @@ public class LessonMaterial {
             throw new IllegalArgumentException("열린 질문은 무조건 3개를 등록해야 합니다.");
         }
     }
-
-    // 퀴즈 수 검증
-    private void validateSelectedQuizCount() {
-        if (selectedQuizList.size() != 2) {
-            throw new IllegalArgumentException("퀴즈는 무조건 2개를 등록해야 합니다.");
-        }
-    }
-
-    // 역할 수 검증
-    private void validateRoleCount() {
-        if (lessonRoleList.size() != 4) {
-            throw new IllegalArgumentException("역할은 무조건 4개를 등록해야 합니다.");
-        }
-    }
+//
+//    // 퀴즈 수 검증
+//    private void validateSelectedQuizCount() {
+//        if (selectedQuizList.size() != 2) {
+//            throw new IllegalArgumentException("퀴즈는 무조건 2개를 등록해야 합니다.");
+//        }
+//    }
+//
+//    // 역할 수 검증
+//    private void validateRoleCount() {
+//        if (lessonRoleList.size() != 4) {
+//            throw new IllegalArgumentException("역할은 무조건 4개를 등록해야 합니다.");
+//        }
+//    }
 
     // 선생님 권한 검증
     private void validateTeacherRole(User user) {

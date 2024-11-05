@@ -88,7 +88,10 @@ public class AvatarController {
             )
     })
     @PostMapping(value = "/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AvatarResponseDto> sendImgToAiServer(@RequestParam("img") MultipartFile img) {
+    public ResponseEntity<AvatarResponseDto> sendImgToAiServer(
+            @RequestHeader("userId") Long userId
+            , @RequestParam("lessonId") Long lessonId
+            , @RequestParam("img") MultipartFile img) {
         try {
             // 1. 파일 존재 여부 검증
             if (img == null || img.isEmpty()) {
@@ -128,7 +131,7 @@ public class AvatarController {
             }
 
             // 5. 서비스 호출
-            AvatarResponseDto avatarResponseDto = avatarService.sendImgToAiServer(img);
+            AvatarResponseDto avatarResponseDto = avatarService.sendImgToAiServer(userId, lessonId,img);
 
             return ResponseEntity.status(HttpStatus.OK)
                     //.body("Img 파일 " + originalFilename + "이 성공적으로 업로드되었습니다.");

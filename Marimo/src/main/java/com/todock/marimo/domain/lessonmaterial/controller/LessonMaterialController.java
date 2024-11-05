@@ -6,7 +6,6 @@ import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -113,8 +114,7 @@ public class LessonMaterialController {
     })
     @PutMapping
     public ResponseEntity<String> updateLessonMaterial(
-            @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto
-    ) {
+            @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto) {
         log.info("수정한 값: {}", lessonMaterialRequestDto);
 
         // 1. 서비스에 복합 DTO 전달하여 저장 로직 처리
@@ -143,12 +143,11 @@ public class LessonMaterialController {
             )
     })
     @GetMapping("/{lessonMaterialId}/detail")
-    public ResponseEntity<LessonMaterial> getLessonMaterialByLessonMaterialId(
+    public ResponseEntity<Optional<LessonMaterial>> getLessonMaterialByLessonMaterialId(
             @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
-        LessonMaterial lessonMaterial = lessonMaterialService.getLessonMaterialByLessonMaterialId(lessonMaterialId);
 
-        return ResponseEntity.ok(lessonMaterial);
+        return ResponseEntity.ok(lessonMaterialService.findById(lessonMaterialId));
     }
 
     /**

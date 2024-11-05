@@ -17,7 +17,7 @@ public interface LessonMaterialRepository extends JpaRepository<LessonMaterial, 
 
 
     // 수업자료 id로 수업 Id 조회
-    LessonMaterial findLessonMaterialByLessonMaterialId(Long lessonMaterialId);
+    // LessonMaterial findLessonMaterialByLessonMaterialId(Long lessonMaterialId);
 
     // userId로 전체 조회
     //List<LessonMaterialNameResponseDto> findLessonMaterialNameByLessonMaterialId(Long userId);

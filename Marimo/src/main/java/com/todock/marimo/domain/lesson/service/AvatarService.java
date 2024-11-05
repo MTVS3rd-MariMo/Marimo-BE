@@ -1,9 +1,12 @@
 package com.todock.marimo.domain.lesson.service;
 
 import com.todock.marimo.domain.lesson.dto.AvatarResponseDto;
+import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.avatar.Animation;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.repository.AvatarRepository;
+import com.todock.marimo.domain.lesson.repository.LessonRepository;
+import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,7 @@ import java.util.zip.ZipInputStream;
 @Service
 public class AvatarService {
 
+    private final LessonMaterialRepository lessonMaterialRepository;
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
     private String serverHost = "125.132.216.28";
@@ -44,6 +48,7 @@ public class AvatarService {
     //@Value("${server.port}")
     private String serverPort = "8202";
 
+    private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
     private final RestTemplate restTemplate;
 
@@ -52,8 +57,12 @@ public class AvatarService {
     private static final String AVATAR_DIR = "data/avatar"; // avatar 파일 저장 경로
 
     @Autowired
-    public AvatarService(AvatarRepository avatarRepository,
-                         RestTemplate restTemplate) {
+    public AvatarService(LessonMaterialRepository lessonMaterialRepository
+            , LessonRepository lessonRepository
+            , AvatarRepository avatarRepository
+            , RestTemplate restTemplate) {
+        this.lessonMaterialRepository = lessonMaterialRepository;
+        this.lessonRepository = lessonRepository;
         this.avatarRepository = avatarRepository;
         this.restTemplate = restTemplate;
         initDirectories();
@@ -76,7 +85,7 @@ public class AvatarService {
      * img를 AI서버로 전송
      */
     @Transactional
-    public AvatarResponseDto sendImgToAiServer(MultipartFile img) {
+    public AvatarResponseDto sendImgToAiServer(Long userId, Long lessonId, MultipartFile img) {
 
         try {
             // 1. AI 서버 URI 설정
@@ -122,9 +131,13 @@ public class AvatarService {
             List<String> filePaths = unzipFile(zipPath.toString(), unzipDirPath);
 
             // 아바타 엔티티 생성 및 파일 저장
-            Long userId = 1L; // 임시 userId 나중에 헤더에서 받은걸로 변경
             Avatar avatar = new Avatar();
             avatar.setUserId(userId);
+            Optional<Lesson> lessonOptional = lessonRepository.findById(lessonId);
+            if (!lessonOptional.isPresent()) {
+                throw new IllegalArgumentException("해당 lessonId를 가진 수업을 찾을 수 없습니다: " + lessonId);
+            }
+            Lesson lesson = lessonOptional.get();
 
 
             // 애니메이션 엔티티 연결
