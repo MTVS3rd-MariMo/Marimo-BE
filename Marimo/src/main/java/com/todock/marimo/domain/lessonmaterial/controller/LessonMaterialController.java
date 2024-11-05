@@ -31,7 +31,7 @@ public class LessonMaterialController {
 
 
     /**
-     * pdf 업로드 하고 수업자료 Id, 퀴즈 8개, 열린 질문 2개 반환
+     * pdf 업로드 하고 수업자료 Id, 퀴즈 8개, 열린 질문 2개를 클라이언트로 반환
      */
     @Operation(
             summary = "PDF 파일 업로드",
@@ -70,17 +70,18 @@ public class LessonMaterialController {
             )
     })
     @PostMapping("/upload-pdf")
-    public ResponseEntity<LessonMaterialResponseDto> sendPdfToAiServer(@RequestParam("pdf") MultipartFile pdfFile) {
+    public ResponseEntity<LessonMaterialResponseDto> sendPdfToAiServer(
+            @RequestParam("pdf") MultipartFile pdfFile) {
 
         if (pdfFile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+        } // 파일 용량 null 확인
 
-        String fileName = pdfFile.getOriginalFilename(); // 파일 이름
+        String pdfName = pdfFile.getOriginalFilename(); // 파일 이름
 
         LessonMaterialResponseDto lessonMaterialResponseDto
-                = lessonMaterialService.sendPdfToAiServer(pdfFile, fileName);
-
+                = lessonMaterialService.sendPdfToAiServer(pdfFile, pdfName);
+        log.info("수정한 값: {}", lessonMaterialResponseDto);
         return ResponseEntity.status(HttpStatus.OK).body(lessonMaterialResponseDto);
     }
 
@@ -89,40 +90,12 @@ public class LessonMaterialController {
      * 수업자료 저장 - 수업 자료 id, 선택한 퀴즈 2개, 열린 질문 2개
      */
     @Operation(
-            summary = "수업 자료 생성",
-            description = "새로운 수업 자료를 생성합니다.",
+            summary = "수업 자료 수정 후 생성",
+            description = "수업 자료 수정 후 생성합니다.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = LessonMaterialRequestDto.class),
-                            examples = @ExampleObject(
-                                    value = "{\n" +
-                                            "  \"userId\": 1,\n" +
-                                            "  \"bookTitle\": \"동화 이야기\",\n" +
-                                            "  \"bookContents\": \"옛날 옛적에...\",\n" +
-                                            "  \"openQuestionList\": [\n" +
-                                            "    {\"questionTitle\": \"주인공은 어떤 성격을 가지고 있나요?\"},\n" +
-                                            "    {\"questionTitle\": \"이야기에서 가장 흥미로운 장면은 무엇인가요?\"},\n" +
-                                            "    {\"questionTitle\": \"이야기 속에서 배우는 교훈은 무엇인가요?\"}\n" +
-                                            "  ],\n" +
-                                            "  \"quizzeList\": [\n" +
-                                            "    {\"question\": \"주인공이 만난 첫 번째 인물은 누구인가요?\",\n" +
-                                            "     \"answer\": \"어머니\",\n" +
-                                            "     \"firstChoice\": \"아버지\",\n" +
-                                            "     \"secondChoice\": \"어머니\",\n" +
-                                            "     \"thirdChoice\": \"친구\",\n" +
-                                            "     \"fourthChoice\": \"스승\"\n" +
-                                            "    },\n" +
-                                            "    {\"question\": \"주인공이 선택한 길은 무엇인가요?\",\n" +
-                                            "     \"answer\": \"오솔길\",\n" +
-                                            "     \"firstChoice\": \"산길\",\n" +
-                                            "     \"secondChoice\": \"오솔길\",\n" +
-                                            "     \"thirdChoice\": \"해변길\",\n" +
-                                            "     \"fourthChoice\": \"강가길\"\n" +
-                                            "    }\n" +
-                                            "  ],\n" +
-                                            "}"
-                            )
+                            schema = @Schema(implementation = LessonMaterialRequestDto.class)
                     )
             )
     )
@@ -138,14 +111,14 @@ public class LessonMaterialController {
                     content = @Content(schema = @Schema(implementation = String.class))
             )
     })
-    @PostMapping
-    public ResponseEntity<String> createLessonMaterial(
-            @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto,
-            @RequestBody Long lessonMaterialId
+    @PutMapping
+    public ResponseEntity<String> updateLessonMaterial(
+            @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto
     ) {
+        log.info("수정한 값: {}", lessonMaterialRequestDto);
 
         // 1. 서비스에 복합 DTO 전달하여 저장 로직 처리
-        lessonMaterialService.updateLessonMaterial(lessonMaterialId, lessonMaterialRequestDto);
+        lessonMaterialService.updateLessonMaterial(lessonMaterialRequestDto);
 
         log.info("저장 완료");
 
@@ -177,29 +150,6 @@ public class LessonMaterialController {
 
         return ResponseEntity.ok(lessonMaterial);
     }
-
-
-    /**
-     * 수업자료 id로 수업자료 수정
-     */
-    @Operation(summary = "수업 자료 수정", description = "수업 자료를 수정합니다.")
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "수정 성공",
-                    content = @Content(schema = @Schema(implementation = String.class))
-            )
-    })
-    @PutMapping("/{lessonMaterialId}")
-    public ResponseEntity<String> updateLessonMaterial(
-            @PathVariable("lessonMaterialId") Long lessonMaterial,
-            @RequestBody LessonMaterialRequestDto updateLessonMaterialInfo) {
-
-        lessonMaterialService.updateLessonMaterial(lessonMaterial, updateLessonMaterialInfo);
-
-        return ResponseEntity.ok("수정 완료");
-    }
-
 
     /**
      * 수업자료 id로 수업자료 삭제

@@ -25,8 +25,8 @@ public class OpenQuestion {
     @JoinColumn(name = "lesson_material_id", nullable = false) // 수업 자료
     private LessonMaterial lessonMaterial;
 
-    @Column(name = "open_question_title", nullable = false) // 열린 질문(내용)
-    private String questionTitle;
+    @Column(name = "open_question", nullable = false) // 열린 질문(내용)
+    private String question;
 
     @OneToMany(mappedBy = "openQuestion", // 열린 질문 답변 
             cascade = CascadeType.ALL, // 질문 삭제시 답변도 삭제
@@ -34,12 +34,12 @@ public class OpenQuestion {
     private List<OpenQuestionAnswer> openQuestionAnswerList;
 
     // 생성자
-    public OpenQuestion(LessonMaterial lessonMaterial, String questionTitle) {
+    public OpenQuestion(LessonMaterial lessonMaterial, String question) {
 
-        validateOpenQuestionTitle(questionTitle); // 답변 검증
+        validateOpenQuestionTitle(question); // 답변 검증
 
         this.lessonMaterial = lessonMaterial;
-        this.questionTitle = questionTitle;
+        this.question = question;
         this.openQuestionAnswerList = new ArrayList<>();
     }
 
@@ -81,7 +81,7 @@ public class OpenQuestion {
     @Override
     public String toString() {
         return "OpenQuestion{" +
-                "questionTitle='" + questionTitle + '\'' +
+                "question='" + question + '\'' +
                 ", openQuestionAnswerList=" + openQuestionAnswerList +
                 '}';
     }

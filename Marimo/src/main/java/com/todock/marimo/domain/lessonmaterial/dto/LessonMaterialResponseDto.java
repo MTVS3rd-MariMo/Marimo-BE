@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LessonMaterialResponseDto { // pdf 결과 수정 후 저장
+public class LessonMaterialResponseDto { // pdf 결과 전송
 
     // 수업 자료 Id
     private Long LessonMaterialId;
@@ -20,6 +20,6 @@ public class LessonMaterialResponseDto { // pdf 결과 수정 후 저장
     private List<Quiz> quizList;
 
     // 열린 질문 리스트
-    private List<OpenQuestion> openQuestionList;
+    private List<OpenQuestionDto> openQuestions;
 
 }

@@ -53,8 +53,8 @@ public class LessonMaterial {
 
     // 생성자
     public LessonMaterial(Long userId, String bookTitle, String bookContents) {
-        validateTeacherId(userId);
-        validateBookInfo(bookTitle, bookContents);
+        // validateTeacherId(userId);
+        // validateBookInfo(bookTitle, bookContents);
 
         this.userId = userId;
         this.bookTitle = bookTitle;
