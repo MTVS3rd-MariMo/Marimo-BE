@@ -3,6 +3,7 @@ package com.todock.marimo.domain.lessonresult.service;
 import com.todock.marimo.domain.lesson.dto.LessonOpenQuestionRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.OpenQuestionAnswerDto;
 import com.todock.marimo.domain.lessonmaterial.dto.OpenQuestionDto;
+import com.todock.marimo.domain.lessonresult.dto.SelfIntroduceRequestDto;
 import com.todock.marimo.domain.lessonresult.entity.LessonResult;
 import com.todock.marimo.domain.lessonresult.entity.resultopenquestion.ResultOpenQuestion;
 import com.todock.marimo.domain.lessonresult.entity.resultopenquestion.ResultOpenQuestionAnswer;
@@ -73,4 +74,10 @@ public class LessonResultService {
     }
 
 
+    /**
+     * 핫시팅 자기소개 저장
+     */
+    public void updateUserByLessonId(Long userId, SelfIntroduceRequestDto selfIntroduceRequestDto) {
+
+    }
 }

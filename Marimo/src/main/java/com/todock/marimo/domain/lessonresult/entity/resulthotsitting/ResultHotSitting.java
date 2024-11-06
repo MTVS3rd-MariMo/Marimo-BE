@@ -19,15 +19,14 @@ import java.util.List;
 public class ResultHotSitting {
 
     @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long hotSittingId;
 
-    @OneToOne
-    @JoinColumn(name = "lesson_result_id")
-    private LessonResult lessonResult;
+    private Long lessonId;  // Lesson과의 관계 설정
 
-    @Column(name = "summary")
-    private String summary;
+    private String SelfIntroduction;
 
-    @OneToMany(mappedBy = "resultHotSitting")
-    private List<ResultIntroduction> introductionList = new ArrayList<>();
+    private Long introduceId;
+
+    private List<QuestionAnswer> questionAnswers;  // 질문과 답변의 리스트
 }

@@ -31,6 +31,6 @@ public class HotSitting {
     private List<SelfIntroduction> selfIntroductionList = new ArrayList<>();
 
     // 음성파일 요약
-    @Column(nullable = false)
-    private String summation;
+    @Column(name = "summary", nullable = false)
+    private String summary;
 }
