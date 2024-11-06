@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lessonmaterial.dto;
 
+import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestionAnswer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,15 +9,12 @@ import lombok.Setter;
 
 import java.util.List;
 
-@Setter
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OpenQuestionDto {
+public class OpenQuestionResponseDto {
 
-    private Long OpenQuestionId;
+    private String question; // 질문 제목
 
-    private String question;
-
-    private List<OpenQuestionAnswerDto> openQuestionAnswerList;
 }

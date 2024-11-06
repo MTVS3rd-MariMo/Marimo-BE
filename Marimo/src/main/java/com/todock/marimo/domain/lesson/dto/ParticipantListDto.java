@@ -1,15 +1,17 @@
-package com.todock.marimo.domain.lessonmaterial.dto;
+package com.todock.marimo.domain.lesson.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
+import java.util.List;
+
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LessonRoleDto {
-    
-    private String character; // 역할
+public class ParticipantListDto {
+
+    private List<Long> userId;
 }

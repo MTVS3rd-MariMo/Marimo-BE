@@ -2,15 +2,13 @@ package com.todock.marimo.domain.lessonresult.entity.resultopenquestion;
 
 import com.todock.marimo.domain.lessonresult.entity.LessonResult;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,13 +19,13 @@ public class ResultOpenQuestion {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 열린 질문 id
     private Long openQuestionId;
 
-    @Column(name = "open_question_title") // 열린 질문 제목
-    private String questionTitle;
-
     @ManyToOne
     @JoinColumn(name = "lesson_result_id") // 수업 결과
     private LessonResult lessonResult;
 
+    @Column(name = "open_question") // 열린 질문 제목
+    private String question;
+
     @OneToMany(mappedBy = "resultOpenQuestion")
-    private List<ResultOpenQuestionAnswer> answers = new ArrayList<>();
+    private List<ResultOpenQuestionAnswer> openQuestionAnswerList = new ArrayList<>();
 }

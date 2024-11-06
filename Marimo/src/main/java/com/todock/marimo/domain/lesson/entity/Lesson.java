@@ -23,6 +23,9 @@ public class Lesson {
     @Column(name = "lesson_id")
     private Long lessonId; // 수업 id
 
+    @Column(name = "lesson_material_id")
+    private Long lessonMaterialId; // 사용한 수업 자료
+    
     // 수업은 여러개의 참가자를 가진다.
     @OneToMany(mappedBy = "lesson")
     private List<Participant> participantList = new ArrayList<>();

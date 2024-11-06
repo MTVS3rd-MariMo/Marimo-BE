@@ -20,6 +20,6 @@ public class LessonMaterialResponseDto { // pdf 결과 전송
     private List<QuizDto> quizList;
 
     // 열린 질문 리스트
-    private List<OpenQuestionDto> openQuestions;
+    private List<OpenQuestionResponseDto> openQuestions;
 
 }

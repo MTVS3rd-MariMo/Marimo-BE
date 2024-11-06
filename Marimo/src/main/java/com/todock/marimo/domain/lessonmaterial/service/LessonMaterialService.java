@@ -11,6 +11,7 @@ import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialReposito
 import com.todock.marimo.domain.user.entity.Role;
 import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,11 +125,11 @@ public class LessonMaterialService {
         // 클라이언트에 반환할 LessonMaterialResponseDto 생성
 
         // 열린 질문을 OpenQuestionDto로 변환하여 클라이언트에 보낼 준비
-        List<OpenQuestionDto> openQuestionDtos = new ArrayList<>();
+        List<OpenQuestionResponseDto> openQuestionDtos = new ArrayList<>();
         JsonNode openQuestionsNode = root.path("open_questions");
         if (!openQuestionsNode.isMissingNode()) {
             openQuestionsNode.forEach(questionNode -> {
-                openQuestionDtos.add(new OpenQuestionDto(questionNode.path("question").asText("")));
+                openQuestionDtos.add(new OpenQuestionResponseDto(questionNode.path("question").asText("")));
             });
         }
 
@@ -210,6 +211,46 @@ public class LessonMaterialService {
 
     }
 
+    /**
+     * 수업 중 학생용 lessonMaterialId로 수업용 수업 상세 자료 조회
+     */
+    public StudentLessonMaterialDto getLessonMaterialById(Long lessonMaterialId) {
+
+        // lessonMaterial 조회
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
+                .orElseThrow(() -> new EntityNotFoundException("LessonMaterial not found with id: " + lessonMaterialId));
+
+        // openQuestions 변환
+        List<OpenQuestionResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
+                .map(openQuestion -> new OpenQuestionResponseDto(openQuestion.getQuestion()))
+                .toList();
+
+        // quizzes 변환
+        List<LessonQuizDto> quizzes = lessonMaterial.getQuizList().stream()
+                .map(quiz -> new LessonQuizDto(
+                        quiz.getQuestion(),
+                        quiz.getAnswer(),
+                        quiz.getChoices1(),
+                        quiz.getChoices2(),
+                        quiz.getChoices3(),
+                        quiz.getChoices4()
+                ))
+                .toList();
+
+        // lessonRoles 변환
+        List<LessonRoleDto> lessonRoles = lessonMaterial.getLessonRoleList().stream()
+                .map(role -> new LessonRoleDto(role.getRoleName()))
+                .toList();
+
+        // TeacherLessonMaterialDto 생성 및 반환
+        return new StudentLessonMaterialDto(
+                lessonMaterial.getBookTitle(),
+                lessonMaterial.getBookContents(),
+                quizzes,
+                openQuestions,
+                lessonRoles
+        );
+    }
 
     /**
      * 수업 자료를 수업자료 id로 수정 (수정 페이지에서 수정하고 요청)
@@ -268,7 +309,7 @@ public class LessonMaterialService {
     // LessonRole 리스트 생성 헬퍼 메서드
     private List<LessonRole> createLessonRoleList(List<LessonRoleDto> roleDto) {
         return roleDto.stream()
-                .map(roleRequest -> new LessonRole(null, roleRequest.getRoleName()))
+                .map(roleRequest -> new LessonRole(null, roleRequest.getCharacter()))
                 .collect(Collectors.toList());
     }
 
