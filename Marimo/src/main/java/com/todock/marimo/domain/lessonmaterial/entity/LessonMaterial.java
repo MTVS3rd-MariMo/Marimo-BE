@@ -2,7 +2,7 @@ package com.todock.marimo.domain.lessonmaterial.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
-import com.todock.marimo.domain.lessonmaterial.entity.quiz.SelectedQuiz;
+import com.todock.marimo.domain.lessonmaterial.entity.quiz.Quiz;
 import com.todock.marimo.domain.user.entity.Role;
 import com.todock.marimo.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -39,10 +39,9 @@ public class LessonMaterial {
             cascade = CascadeType.ALL)
     private List<OpenQuestion> openQuestionList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "lessonMaterial", // 선택한 퀴즈
-            cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<SelectedQuiz> selectedQuizList = new ArrayList<>();
+    @OneToMany(mappedBy = "lessonMaterial" // 퀴즈
+            , cascade = CascadeType.ALL)
+    private List<Quiz> quizList = new ArrayList<>();
 
     @OneToMany(mappedBy = "lessonMaterial", // 역할
             cascade = CascadeType.ALL)
@@ -60,13 +59,13 @@ public class LessonMaterial {
 
     public LessonMaterial(Long teacherId, String bookTitle, String bookContents,
                           List<OpenQuestion> openQuestionList,
-                          List<SelectedQuiz> selectedQuizList,
+                          List<Quiz> quizList,
                           List<LessonRole> lessonRoleList) {
         this.userId = teacherId;
         this.bookTitle = bookTitle;
         this.bookContents = bookContents;
         this.openQuestionList = openQuestionList;
-        this.selectedQuizList = selectedQuizList;
+        this.quizList = quizList;
         this.lessonRoleList = lessonRoleList;
     }
 
@@ -78,10 +77,9 @@ public class LessonMaterial {
     }
 
     // 퀴즈 추가
-    public void addSelectedQuiz(SelectedQuiz selectedQuiz) {
+    public void addSelectedQuiz(Quiz quiz) {
         //validateSelectedQuizCount();
-        this.selectedQuizList.add(selectedQuiz);
-        selectedQuiz.setLessonMaterial(this);
+        this.quizList.add(quiz);
     }
 
     // 역할 추가
@@ -146,7 +144,7 @@ public class LessonMaterial {
                 ", bookContents='" + bookContents + '\'' +
                 ", lessonMaterialId=" + lessonMaterialId +
                 ", openQuestionList=" + openQuestionList +
-                ", selectedQuizList=" + selectedQuizList +
+                ", quizList=" + quizList +
                 ", lessonRoleList=" + lessonRoleList +
                 '}';
     }

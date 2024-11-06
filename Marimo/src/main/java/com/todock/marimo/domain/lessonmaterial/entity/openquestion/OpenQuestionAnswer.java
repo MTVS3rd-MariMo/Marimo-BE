@@ -1,6 +1,7 @@
 package com.todock.marimo.domain.lessonmaterial.entity.openquestion;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class OpenQuestionAnswer {
     private Long openQuestionAnswerId; // 열린 질문 대답 id
 
     @ManyToOne(fetch = FetchType.LAZY) // 열린 질문
+    @JsonIgnoreProperties
     @JoinColumn(name = "open_question_id", nullable = false)
     private OpenQuestion openQuestion;
 

@@ -9,10 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LessonMaterialNameResponseDto {
+public class OpenQuestionRequestDto {
 
-    private Long lessonMaterialId;
-
-    private String bookTitle;
+    private Long openQuestionId;  // 열린 질문 ID
+    private String questionTitle; // 질문 제목
 
 }

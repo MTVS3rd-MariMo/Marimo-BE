@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LessonMaterialNameResponseDto {
-
-    private Long lessonMaterialId;
-
-    private String bookTitle;
-
+public class LessonMaterialNamesRequestDto {
+    private List<LessonMaterialNameResponseDto> lessonMaterials; // 수업 자료 리스트
 }

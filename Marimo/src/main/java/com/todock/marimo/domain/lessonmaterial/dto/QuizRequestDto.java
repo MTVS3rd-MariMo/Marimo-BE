@@ -9,10 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuizDto {
+public class QuizRequestDto {
 
-    private Long quizId;
-
+    private Long quizId;       // 퀴즈 ID
     private String question; // 문제
 
     private int answer; // 정답

@@ -28,6 +28,7 @@ public class OpenQuestion {
     @Column(name = "open_question", nullable = false) // 열린 질문(내용)
     private String question;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "openQuestion", // 열린 질문 답변 
             cascade = CascadeType.ALL, // 질문 삭제시 답변도 삭제
             orphanRemoval = true) // 고아 객체 자동으로 삭제

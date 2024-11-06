@@ -47,7 +47,6 @@ public class Avatar {
                 "animations=" + animations +
                 ", avatarImg='" + avatarImg + '\'' +
                 ", userId=" + userId +
-                ", lesson=" + lesson +
                 ", avatarId=" + avatarId +
                 '}';
     }

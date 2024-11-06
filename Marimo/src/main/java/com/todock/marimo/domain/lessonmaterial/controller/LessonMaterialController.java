@@ -1,7 +1,7 @@
 package com.todock.marimo.domain.lessonmaterial.controller;
 
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRequestDto;
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialResponseDto;
+import com.todock.marimo.domain.lesson.service.LessonService;
+import com.todock.marimo.domain.lessonmaterial.dto.*;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -24,10 +25,12 @@ import java.util.Optional;
 public class LessonMaterialController {
 
     private final LessonMaterialService lessonMaterialService;
+    private final LessonService lessonService;
 
     @Autowired
-    public LessonMaterialController(LessonMaterialService lessonMaterialService) {
+    public LessonMaterialController(LessonMaterialService lessonMaterialService, LessonService lessonService) {
         this.lessonMaterialService = lessonMaterialService;
+        this.lessonService = lessonService;
     }
 
 
@@ -115,9 +118,37 @@ public class LessonMaterialController {
     @PutMapping
     public ResponseEntity<String> updateLessonMaterial(
             @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto) {
-        log.info("수정한 값: {}", lessonMaterialRequestDto);
 
-        // 1. 서비스에 복합 DTO 전달하여 저장 로직 처리
+        log.info("수업 자료 ID: {}", lessonMaterialRequestDto.getLessonMaterialId());
+
+        // 열린 질문 리스트 출력
+        List<OpenQuestionRequestDto> openQuestions = lessonMaterialRequestDto.getOpenQuestions();
+        if (openQuestions != null && !openQuestions.isEmpty()) {
+            for (int i = 0; i < openQuestions.size(); i++) {
+                OpenQuestionRequestDto question = openQuestions.get(i);
+                log.info("열린 질문 {} - 질문 제목: {}", i + 1, question.getQuestionTitle());
+            }
+        } else {
+            log.info("열린 질문이 존재하지 않습니다.");
+        }
+
+        // 퀴즈 리스트 출력
+        List<QuizRequestDto> quizzes = lessonMaterialRequestDto.getQuizzes();
+        if (quizzes != null && !quizzes.isEmpty()) {
+            for (int i = 0; i < quizzes.size(); i++) {
+                QuizRequestDto quiz = quizzes.get(i);
+                log.info("퀴즈 {} - 문제: {}", i + 1, quiz.getQuestion());
+                log.info("퀴즈 {} - 정답: {}", i + 1, quiz.getAnswer());
+                log.info("퀴즈 {} - 보기1: {}", i + 1, quiz.getChoices1());
+                log.info("퀴즈 {} - 보기2: {}", i + 1, quiz.getChoices2());
+                log.info("퀴즈 {} - 보기3: {}", i + 1, quiz.getChoices3());
+                log.info("퀴즈 {} - 보기4: {}", i + 1, quiz.getChoices4());
+            }
+        } else {
+            log.info("퀴즈가 존재하지 않습니다.");
+        }
+
+        // 서비스에 DTO 전달하여 저장 로직 처리
         lessonMaterialService.updateLessonMaterial(lessonMaterialRequestDto);
 
         log.info("저장 완료");
@@ -151,6 +182,21 @@ public class LessonMaterialController {
     }
 
     /**
+     * userId로 lessonMaterial 전체 조회
+     */
+    @GetMapping
+    public ResponseEntity<LessonMaterialNamesRequestDto> getLessonMaterialNames(
+            @RequestHeader("userId") Long userId) {
+
+        List<LessonMaterialNameResponseDto> lessonMaterialNameResponseDtos
+                = lessonMaterialService.getLessonMaterialByUserId(userId);
+
+        LessonMaterialNamesRequestDto responseDto = new LessonMaterialNamesRequestDto(lessonMaterialNameResponseDtos);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    /**
      * 수업자료 id로 수업자료 삭제
      */
     @Operation(summary = "수업 자료 삭제", description = "수업 자료를 삭제합니다.")
@@ -169,5 +215,6 @@ public class LessonMaterialController {
         return ResponseEntity.ok("수업자료를 삭제했습니다.");
 
     }
+
 
 }
