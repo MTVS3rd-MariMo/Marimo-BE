@@ -31,7 +31,7 @@ public class HotSitting {
     private Lesson lesson;
 
     @Column(name = "self_introduce")
-    private String SelfIntroduction;
+    private String SelfIntroduce;
 
     @OneToMany(mappedBy = "hotSitting")
     private List<QuestionAnswer> questionAnswers = new ArrayList<>();
