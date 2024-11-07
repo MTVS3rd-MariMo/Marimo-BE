@@ -27,5 +27,5 @@ public class StudentLessonMaterialDto {
 
     private List<OpenQuestionResponseDto> openQuestions = new ArrayList<>();
 
-    private List<LessonRoleDto> lessonRoles = new ArrayList<>();
+    private List<String> lessonRoles = new ArrayList<>();
 }

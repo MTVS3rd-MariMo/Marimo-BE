@@ -22,6 +22,18 @@ public class CorsConfig {
                 registry.addMapping("/api/lesson-material/**")
                         .allowedOrigins("*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE");
+
+                registry.addMapping("/api/lesson/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE");
+
+                registry.addMapping("/api/lessonresult/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE");
+
+                registry.addMapping("/api/user/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE");
             }
         };
     }

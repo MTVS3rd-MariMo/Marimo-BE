@@ -15,6 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class OpenQuestionResponseDto {
 
-    private String question; // 질문 제목
+    private String questionTitle; // 질문 제목
 
 }

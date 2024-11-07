@@ -34,7 +34,7 @@ public class LessonController {
     @Operation(summary = "수업 생성", description = "lessonMaterialId를 받고 새로운 수업을 생성하여 반환합니다.")
     @PostMapping("/{lessonMaterialId}")
     public ResponseEntity<TeacherLessonMaterialDto> createLesson(
-            @Parameter(description = "선생님의 사용자 ID", example = "3", required = true) @RequestHeader("userId") Long userId,
+            @Parameter(description = "선생님의 사용자 ID", example = "3", required = true) @RequestHeader(value = "userId", required = false) Long userId,
             @Parameter(description = "수업 자료 ID", example = "1", required = true) @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
         log.info("Creating lesson by lessonMaterialId: {}", lessonMaterialId);
@@ -51,8 +51,12 @@ public class LessonController {
     @Operation(summary = "수업에 참가", description = "주어진 LessonId로 유저를 수업에 참가시킵니다.")
     @PutMapping("/enter/{lessonId}")
     public ResponseEntity<String> enter(
-            @Parameter(description = "참가하려는 사용자 ID", example = "1", required = true) @RequestHeader("userId") Long userId,
+            @Parameter(description = "참가하려는 사용자 ID", example = "1", required = true) @RequestHeader(value = "userId", required = false) Long userId,
             @Parameter(description = "참가하려는 수업 ID", example = "101", required = true) @PathVariable("lessonId") Long lessonId) {
+
+        if (userId == null) {
+            return ResponseEntity.badRequest().body("userId 헤더가 필요합니다.");
+        }
 
         log.info("userId = {}, lessonId = {}", userId, lessonId);
 

@@ -238,8 +238,9 @@ public class LessonMaterialService {
                 .toList();
 
         // lessonRoles 변환
-        List<LessonRoleDto> lessonRoles = lessonMaterial.getLessonRoleList().stream()
-                .map(role -> new LessonRoleDto(role.getRoleName()))
+        // lessonRoles를 List<LessonRoleDto> -> List<String>으로 변환
+        List<String> lessonRoles = lessonMaterial.getLessonRoleList().stream()
+                .map(LessonRole::getRoleName) // LessonRole 객체의 역할 이름을 추출
                 .toList();
 
         // TeacherLessonMaterialDto 생성 및 반환
