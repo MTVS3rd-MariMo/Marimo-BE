@@ -17,7 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentLessonMaterialDto {
-    
+
+
     private String bookTitle;
 
     private String bookContents;

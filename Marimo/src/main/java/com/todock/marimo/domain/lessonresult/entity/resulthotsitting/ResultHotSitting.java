@@ -22,11 +22,11 @@ public class ResultHotSitting {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long hotSittingId;
 
-    private Long lessonId;  // Lesson과의 관계 설정
+    //private Long lessonId;  // Lesson과의 관계 설정
 
     private String SelfIntroduction;
 
     private Long introduceId;
 
-    private List<QuestionAnswer> questionAnswers;  // 질문과 답변의 리스트
+    //private List<QuestionAnswer> questionAnswers;  // 질문과 답변의 리스트
 }

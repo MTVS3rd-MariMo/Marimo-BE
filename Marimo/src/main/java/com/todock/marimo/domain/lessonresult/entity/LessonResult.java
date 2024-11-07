@@ -34,8 +34,8 @@ public class LessonResult {
     @OneToMany(mappedBy = "lessonResult")
     private List<ResultOpenQuestion> resultOpenQuestionList = new ArrayList<>(); // 열린 질문
 
-    @OneToOne(mappedBy = "lessonResult")
-    private ResultHotSitting resultHotSitting; // 핫시팅
+    //@OneToOne(mappedBy = "lessonResult")
+   // private ResultHotSitting resultHotSitting; // 핫시팅
 
     @ElementCollection
     @CollectionTable(name = "result_quiz")

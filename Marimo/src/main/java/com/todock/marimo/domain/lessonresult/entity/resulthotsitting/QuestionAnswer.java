@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lessonresult.entity.resulthotsitting;
 
+import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,14 +12,17 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "question_answer")
+@Table(name = "tbl_SpeechToText")
 public class QuestionAnswer {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long questionAnswerId;
 
-    private Long introduceId;  // SelfIntroduction과의 관계 설정
+    @ManyToOne
+    @JoinColumn(name = "hot_sitting_id")
+    private HotSitting hotSitting; // 핫시팅에 연결된 질문-답변
 
-    private String content;  // 예시에서 수연[도원]의 발언 내용
+    @Column(name = "contents")
+    private String contents;
 }

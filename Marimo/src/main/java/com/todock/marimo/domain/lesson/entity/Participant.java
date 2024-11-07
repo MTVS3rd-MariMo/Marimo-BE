@@ -6,7 +6,6 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_participant")
@@ -26,4 +25,10 @@ public class Participant {
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
+    @Override
+    public String toString() {
+        return "Participant{" +
+                "participantName='" + participantName + '\'' +
+                '}';
+    }
 }

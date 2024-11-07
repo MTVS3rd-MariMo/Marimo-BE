@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 
+/**
+ * 수업 서비스 클래스: 수업 생성, 참가자 관리, 열린 질문 저장 등의 기능을 담당
+ */
 @Slf4j
 @Service
 public class LessonService {
@@ -45,7 +48,7 @@ public class LessonService {
 
 
     /**
-     * 수업 생성 - lessonMaterialId를 받고 수업자료와 LessonId와 LessonMaterial 반환
+     * 수업 생성 - lessonMaterialId를 받고 수업 자료와 LessonId 및 LessonMaterial 반환
      */
     public TeacherLessonMaterialDto createLesson(Long userId, Long lessonMaterialId) {
 
@@ -55,14 +58,15 @@ public class LessonService {
 
         // Lesson 생성 및 설정
         Lesson newlesson = new Lesson();
+        lessonRepository.save(newlesson); // 저장 후 ID가 생성됨
         Long lessonId = newlesson.getLessonId(); // lessonId 추출
 
-        // 선생님 참가자 목록에 추가하기
+        // 선생님을 참가자 목록에 추가하기
         updateUserByLessonId(userId, lessonId);
 
-        // 결과를 저장할 lessonResult 객체 생성
+        // 결과를 저장할 lessonResult 객체 생성 및 lessonId 연결
         LessonResult lessonResult = new LessonResult();
-        lessonResult.setLessonId(lessonId); // lessonId로 lessonResult 와 연결
+        lessonResult.setLessonId(lessonId);
 
         // openQuestions 변환
         List<OpenQuestionResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
@@ -110,9 +114,11 @@ public class LessonService {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new IllegalArgumentException("수업을 찾을 수 없습니다."));
 
-        // 참가자 생성
+        // 참가자 생성 및 정보 설정
         Participant participant = new Participant();
         participant.setUserId(userId);
+
+        // 유저 이름 설정
         String participantName = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId))
                 .getName();
@@ -126,10 +132,11 @@ public class LessonService {
 
 
     /**
-     * 참가자들이 participant 목록 서버에 요청
+     * LessonId로 참가자 목록을 조회하여 반환
      */
     public ParticipantListDto findParticipantByLessonId(Long lessonId) {
 
+        // lessonId에 해당하는 수업 조회
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new EntityNotFoundException("LessonId에 맞는 수업이 없습니다"));
 
@@ -144,17 +151,24 @@ public class LessonService {
 
 
     /**
-     * 열린질문 결과 저장
+     * 열린 질문 결과 저장
      */
     public void updateOpenQuestion(LessonOpenQuestionRequestDto lessonOpenQuestionRequestDto) {
 
+        // lessonId에 해당하는 수업 조회
         Lesson lesson = lessonRepository.findById(lessonOpenQuestionRequestDto.getLessonId())
                 .orElseThrow(() -> new EntityNotFoundException(("LessonId에 맞는 수업이 없습니다.")));
 
         // lessonResult에 열린 질문 저장
         LessonResult lessonResult = lessonResultRepository
                 .findByLessonId(lessonOpenQuestionRequestDto.getLessonId());
-        
-        
+
+        // 여기서 lessonResult 객체에 열린 질문 데이터를 추가할 코드가 필요합니다.
+        // 예를 들어, lessonResult.setOpenQuestions(lessonOpenQuestionRequestDto.getQuestions());
+        // 코드 작성 후 lessonResult를 저장해야 합니다.
+
+        // lessonResult 저장 (생략된 부분)
+        // lessonResultRepository.save(lessonResult);
+
     }
 }

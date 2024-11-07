@@ -35,9 +35,8 @@ public class Lesson {
     private List<Avatar> avatarList = new ArrayList<>();
 
     // 수업은 하나의 핫시팅을 가진다.
-    @OneToOne(mappedBy = "lesson")
-    @JoinColumn(name = "hot_sitting_id")
-    private HotSitting hotSitting;
+    @OneToMany(mappedBy = "lesson")
+    private List<HotSitting> hotSittings = new ArrayList<>();
 
     // 수업은 하나의 단체사진을 가진다.
     @OneToOne(mappedBy = "lesson")

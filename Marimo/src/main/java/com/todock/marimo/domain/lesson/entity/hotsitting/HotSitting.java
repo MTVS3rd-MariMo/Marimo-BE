@@ -1,6 +1,7 @@
 package com.todock.marimo.domain.lesson.entity.hotsitting;
 
 import com.todock.marimo.domain.lesson.entity.Lesson;
+import com.todock.marimo.domain.lessonresult.entity.resulthotsitting.QuestionAnswer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,22 +16,23 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="hot_sitting")
+@Table(name = "hot_sitting")
 public class HotSitting {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long hotSittingId; // 핫시팅 id
 
-    // 수업은 하나의 핫시팅를 가진다.
-    @OneToOne
+    @Column(name = "user_id")
+    private Long userId;
+
+    @ManyToOne
+    @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
-    // 핫시팅은 여러개의 자기소개를 가진다.
-    @OneToMany(mappedBy = "hotSitting")
-    private List<SelfIntroduction> selfIntroductionList = new ArrayList<>();
+    @Column(name = "self_introduce")
+    private String SelfIntroduction;
 
-    // 음성파일 요약
-    @Column(name = "summary", nullable = false)
-    private String summary;
+    @OneToMany(mappedBy = "hotSitting")
+    private List<QuestionAnswer> questionAnswers = new ArrayList<>();
 }
