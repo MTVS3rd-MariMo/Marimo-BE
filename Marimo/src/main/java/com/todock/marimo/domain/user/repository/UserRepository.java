@@ -8,6 +8,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 이름과 비밀번호로 유저 찾기
     User findByNameAndPassword(String name, String password);
 
+    User findByUserId(Long userId);
+
     // 유저 만들기
     
     // 유저 아이디로 수업 결과 조회하기

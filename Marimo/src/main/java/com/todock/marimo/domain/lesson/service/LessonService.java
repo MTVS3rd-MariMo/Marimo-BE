@@ -6,6 +6,7 @@ import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.Participant;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lessonmaterial.dto.*;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionResponseDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
 import com.todock.marimo.domain.lessonmaterial.repository.ParticipantRepository;
@@ -50,7 +51,7 @@ public class LessonService {
     /**
      * 수업 생성 - lessonMaterialId를 받고 수업 자료와 LessonId 및 LessonMaterial 반환
      */
-    public TeacherLessonMaterialDto createLesson(Long userId, Long lessonMaterialId) {
+    public Long createLesson(Long userId, Long lessonMaterialId) {
 
         // lessonMaterial 조회
         LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
@@ -64,44 +65,35 @@ public class LessonService {
         // 선생님을 참가자 목록에 추가하기
         updateUserByLessonId(userId, lessonId);
 
-        // 결과를 저장할 lessonResult 객체 생성 및 lessonId 연결
-        LessonResult lessonResult = new LessonResult();
-        lessonResult.setLessonId(lessonId);
-
-        // openQuestions 변환
-        List<OpenQuestionResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
-                .map(openQuestion -> new OpenQuestionResponseDto(openQuestion.getQuestion()))
-                .toList();
-
-        // quizzes 변환
-        List<QuizDto> quizzes = lessonMaterial.getQuizList().stream()
-                .map(quiz -> new QuizDto(
-                        quiz.getQuizId(),
-                        quiz.getQuestion(),
-                        quiz.getAnswer(),
-                        quiz.getChoices1(),
-                        quiz.getChoices2(),
-                        quiz.getChoices3(),
-                        quiz.getChoices4()
-                ))
-                .toList();
-
-        // lessonRoles 변환
-        List<LessonRoleDto> lessonRoles = lessonMaterial.getLessonRoleList().stream()
-                .map(role -> new LessonRoleDto(role.getRoleName()))
-                .toList();
+//        // 결과를 저장할 lessonResult 객체 생성 및 lessonId 연결
+//        LessonResult lessonResult = new LessonResult();
+//        lessonResult.setLessonId(lessonId);
+//
+//        // openQuestions 변환
+//        List<OpenQuestionResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
+//                .map(openQuestion -> new OpenQuestionResponseDto(openQuestion.getQuestion()))
+//                .toList();
+//
+//        // quizzes 변환
+//        List<QuizDto> quizzes = lessonMaterial.getQuizList().stream()
+//                .map(quiz -> new QuizDto(
+//                        quiz.getQuizId(),
+//                        quiz.getQuestion(),
+//                        quiz.getAnswer(),
+//                        quiz.getChoices1(),
+//                        quiz.getChoices2(),
+//                        quiz.getChoices3(),
+//                        quiz.getChoices4()
+//                ))
+//                .toList();
+//
+//        // lessonRoles 변환
+//        List<LessonRoleDto> lessonRoles = lessonMaterial.getLessonRoleList().stream()
+//                .map(role -> new LessonRoleDto(role.getRoleName()))
+//                .toList();
 
         // TeacherLessonMaterialDto 생성 및 반환
-        return new TeacherLessonMaterialDto(
-                newlesson.getLessonId(),
-                lessonMaterial.getLessonMaterialId(),
-                lessonMaterial.getBookTitle(),
-                lessonMaterial.getBookContents(),
-                openQuestions,
-                quizzes,
-                lessonRoles
-        );
-
+        return lessonId;
     }
 
 

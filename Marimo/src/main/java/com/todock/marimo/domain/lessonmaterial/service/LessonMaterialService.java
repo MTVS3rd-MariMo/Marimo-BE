@@ -2,7 +2,15 @@ package com.todock.marimo.domain.lessonmaterial.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.todock.marimo.domain.lesson.entity.Lesson;
+import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lessonmaterial.dto.*;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialNameResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.QuizRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonRole;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
@@ -38,18 +46,21 @@ public class LessonMaterialService {
 
     private final RestTemplate restTemplate;
     private final UserRepository userRepository;
+    private final LessonRepository lessonRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
     private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 파싱용 ObjectMapper 추가
 
     @Autowired
     public LessonMaterialService(
-            UserRepository userRepository,
             LessonMaterialRepository lessonMaterialRepository,
+            LessonRepository lessonRepository,
+            UserRepository userRepository,
             RestTemplate restTemplate) {
 
-        this.userRepository = userRepository;
-        this.lessonMaterialRepository = lessonMaterialRepository;
         this.restTemplate = restTemplate;
+        this.userRepository = userRepository;
+        this.lessonRepository = lessonRepository;
+        this.lessonMaterialRepository = lessonMaterialRepository;
     }
 
 
@@ -57,7 +68,7 @@ public class LessonMaterialService {
      * pdf 업로드
      */
     @Transactional
-    public LessonMaterialResponseDto sendPdfToAiServer(MultipartFile pdf, String pdfName) {
+    public LessonMaterialResponseDto sendPdfToAiServer(MultipartFile pdf) {
         try {
 
             // 1. AI 서버 URI 설정
@@ -85,8 +96,14 @@ public class LessonMaterialService {
             // 확인용 응답 로그
             log.info("AI 서버 응답: {}", response.getBody());
 
+            // 파일 이름에서 확장자를 제거
+            String originalPdfName = pdf.getOriginalFilename();
+            // 확장자가 없거나 다른 경우 그대로 사용
+
             // 6. AI 서버에서 받은 JSON 반환
-            return parseLessonMaterialJson(response.getBody(), pdfName);
+            return parseLessonMaterialJson(response.getBody(), (originalPdfName != null && originalPdfName.endsWith(".pdf"))
+                    ? originalPdfName.substring(0, originalPdfName.length() - 4) // .pdf 제거
+                    : originalPdfName);
 
         } catch (Exception e) { // 예외 처리 로직 추가
             throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
@@ -172,21 +189,43 @@ public class LessonMaterialService {
             throw new IllegalArgumentException("존재하지 않는 수업 자료입니다: " + lessonMaterialInfo.getLessonMaterialId());
         }
 
-        //List<QuizDto> quizList = lessonMaterialInfo.getQuizzes();
-        //List<OpenQuestionDto> openQuestionList = lessonMaterialInfo.getOpenQuestions();
+        List<QuizRequestDto> quizzes = lessonMaterialInfo.getQuizList(); // 수업자료에서 퀴즈 가져오기
+
+        if (quizzes != null && !quizzes.isEmpty()) {
+            for (QuizRequestDto quizDto : quizzes) { // lessonMaterial의 퀴즈리스트에 선택된 퀴즈 추가
+                Quiz quiz = new Quiz(
+                        lessonMaterial,
+                        quizDto.getQuestion(),
+                        quizDto.getAnswer(),
+                        quizDto.getChoices1(),
+                        quizDto.getChoices2(),
+                        quizDto.getChoices3(),
+                        quizDto.getChoices4()
+                );
+                lessonMaterial.getQuizList().add(quiz);
+            }
+        } else { // 확인용 로그
+            log.info("퀴즈가 존재하지 않습니다.");
+        }
 
 
-        // 모든 질문을 한번에 추가
-        lessonMaterial.setOpenQuestionList(createOpenQuestionreList
-                (lessonMaterial, lessonMaterialInfo.getOpenQuestions()));
+        List<OpenQuestionRequestDto> openQuestions = lessonMaterialInfo.getOpenQuestionRequestList(); // 수업자료에서 열린 질문 가져오기
 
-        // createQuizList 메서드에서 생성된 퀴즈 리스트의 각 항목을 lessonMaterial의 quizList에 추가
-        List<Quiz> createdQuizList = createQuizreList(lessonMaterial, lessonMaterialInfo.getQuizzes());
-        lessonMaterial.getQuizList().addAll(createdQuizList); // 전체 리스트를 개별 항목으로 추가
+        if (openQuestions != null && !openQuestions.isEmpty()) {
+            for (OpenQuestionRequestDto OqDto : openQuestions) { // lessonMaterial의 퀴즈리스트에 선택된 퀴즈 추가
+                OpenQuestion openQuestion = new OpenQuestion(
+                        lessonMaterial,
+                        OqDto.getQuestionTitle()
+                );
+                lessonMaterial.getOpenQuestionList().add(openQuestion);
+            }
+        } else { // 확인용 로그
+            log.info("열린 질문이 존재하지 않습니다.");
 
+            // DB에 저장
+            lessonMaterialRepository.save(lessonMaterial);
+        }
 
-        // DB에 저장
-        lessonMaterialRepository.save(lessonMaterial);
     }
 
 
@@ -211,14 +250,16 @@ public class LessonMaterialService {
 
     }
 
-    /**
-     * 수업 중 학생용 lessonMaterialId로 수업용 수업 상세 자료 조회
-     */
-    public StudentLessonMaterialDto getLessonMaterialById(Long lessonMaterialId) {
 
+    /**
+     * 수업 lessonId로 수업용 수업 상세 자료 조회
+     */
+    public StudentLessonMaterialDto getLessonMaterialById(Long lessonId) {
+
+        Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
         // lessonMaterial 조회
-        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
-                .orElseThrow(() -> new EntityNotFoundException("LessonMaterial not found with id: " + lessonMaterialId));
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId())
+                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + lessonId));
 
         // openQuestions 변환
         List<OpenQuestionResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
@@ -253,6 +294,7 @@ public class LessonMaterialService {
         );
     }
 
+
     /**
      * 수업 자료를 수업자료 id로 수정 (수정 페이지에서 수정하고 요청)
      */
@@ -268,7 +310,8 @@ public class LessonMaterialService {
 
 
     // OpenQuestion 리스트 생성 헬퍼 메서드
-    private List<OpenQuestion> createOpenQuestionList(LessonMaterial lessonMaterial, List<OpenQuestionDto> openQuestionDtos) {
+    private List<OpenQuestion> createOpenQuestionList(LessonMaterial
+                                                              lessonMaterial, List<OpenQuestionDto> openQuestionDtos) {
         if (openQuestionDtos == null) {  // null 체크 추가
             return new ArrayList<>();
         }
@@ -287,8 +330,16 @@ public class LessonMaterialService {
                 .collect(Collectors.toList());
     }
 
-    // ReOpenQuestion 리스트 생성 헬퍼 메서드
-    private List<OpenQuestion> createOpenQuestionreList(LessonMaterial lessonMaterial, List<OpenQuestionRequestDto> openQuestionDtos) {
+    // LessonRole 리스트 생성 헬퍼 메서드
+    private List<LessonRole> createLessonRoleList(List<LessonRoleDto> roleDto) {
+        return roleDto.stream()
+                .map(roleRequest -> new LessonRole(null, roleRequest.getCharacter()))
+                .collect(Collectors.toList());
+    }
+
+    // RequestQuestOpenQuestion 리스트 생성 헬퍼 메서드
+    private List<OpenQuestion> createRequestOpenQuestionList(
+            LessonMaterial lessonMaterial, List<OpenQuestionRequestDto> openQuestionDtos) {
         if (openQuestionDtos == null) {  // null 체크 추가
             return new ArrayList<>();
         }
@@ -297,20 +348,13 @@ public class LessonMaterialService {
                 .collect(Collectors.toList());
     }
 
-    // ReQuiz 리스트 생성 헬퍼 메서드
-    private List<Quiz> createQuizreList(LessonMaterial lessonMaterial, List<QuizRequestDto> questionDtos) {
-        if (questionDtos == null) {  // null 체크 추가
+    // RequestQuiz 리스트 생성 헬퍼 메서드
+    private List<Quiz> createRequestQuizList(LessonMaterial lessonMaterial, List<QuizRequestDto> quizDtos) {
+        if (quizDtos == null) {  // null 체크 추가
             return new ArrayList<>();
         }
-        return questionDtos.stream()
+        return quizDtos.stream()
                 .map(quiz -> new Quiz())
-                .collect(Collectors.toList());
-    }
-
-    // LessonRole 리스트 생성 헬퍼 메서드
-    private List<LessonRole> createLessonRoleList(List<LessonRoleDto> roleDto) {
-        return roleDto.stream()
-                .map(roleRequest -> new LessonRole(null, roleRequest.getCharacter()))
                 .collect(Collectors.toList());
     }
 

@@ -1,5 +1,6 @@
-package com.todock.marimo.domain.lessonmaterial.dto;
+package com.todock.marimo.domain.lessonmaterial.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class OpenQuestionRequestDto {
 
-    private Long openQuestionId;  // 열린 질문 ID
+    @JsonProperty("questionTitle")
     private String questionTitle; // 질문 제목
 
 }

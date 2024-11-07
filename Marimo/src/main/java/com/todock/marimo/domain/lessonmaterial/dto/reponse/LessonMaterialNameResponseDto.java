@@ -1,4 +1,4 @@
-package com.todock.marimo.domain.lessonmaterial.dto;
+package com.todock.marimo.domain.lessonmaterial.dto.reponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

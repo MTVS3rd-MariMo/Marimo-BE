@@ -1,20 +1,22 @@
 package com.todock.marimo.domain.lesson.dto;
 
-import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LessonResponseDto {
+public class WavFileToServerRequestDto {
 
-    private Long LessonId;
+    private Long lessonId;
 
-    private LessonMaterialResponseDto lessonMaterialResponseDto;
+    private String userName;
 
+    private String character;
 
+    private MultipartFile wavFile;
 }

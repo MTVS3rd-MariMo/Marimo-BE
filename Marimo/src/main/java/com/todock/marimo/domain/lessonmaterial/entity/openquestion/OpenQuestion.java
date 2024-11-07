@@ -2,6 +2,7 @@ package com.todock.marimo.domain.lessonmaterial.entity.openquestion;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,8 +42,8 @@ public class OpenQuestion {
 
         this.lessonMaterial = lessonMaterial;
         this.question = question;
-        this.openQuestionAnswerList = new ArrayList<>();
     }
+
 
     // 답변 추가 메서드
     public void addAnswer(Long userId, String answer) {

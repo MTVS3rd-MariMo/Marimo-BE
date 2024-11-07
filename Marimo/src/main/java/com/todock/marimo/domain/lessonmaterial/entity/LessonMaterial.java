@@ -69,41 +69,43 @@ public class LessonMaterial {
         this.lessonRoleList = lessonRoleList;
     }
 
-    // 열린 질문 추가
-    public void addOpenQuestion(OpenQuestion openQuestion) {
-        validateOpenQuestionCount();
-        this.openQuestionList.add(openQuestion);
-        openQuestion.setLessonMaterial(this);
-    }
 
-    // 퀴즈 추가
-    public void addSelectedQuiz(Quiz quiz) {
-        //validateSelectedQuizCount();
-        this.quizList.add(quiz);
-    }
 
-    // 역할 추가
-    public void addRole(LessonRole lessonRole) {
-        //validateRoleCount();
-        this.lessonRoleList.add(lessonRole);
-    }
-
-    // 유저 권한 검증
-    private void validateTeacherId(Long teacherId) {
-        if (teacherId == null) {
-            throw new IllegalArgumentException("선생님의 id가 없습니다.");
-        }
-    }
-
-    // 책 내용 검증
-    private void validateBookInfo(String title, String contents) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("책 제목이 없습니다.");
-        }
-        if (contents == null || contents.trim().isEmpty()) {
-            throw new IllegalArgumentException("책 내용이 없습니다.");
-        }
-    }
+//    // 열린 질문 추가
+//    public void addOpenQuestion(OpenQuestion openQuestion) {
+//        validateOpenQuestionCount();
+//        this.openQuestionList.add(openQuestion);
+//        openQuestion.setLessonMaterial(this);
+//    }
+//
+//    // 퀴즈 추가
+//    public void addSelectedQuiz(Quiz quiz) {
+//        //validateSelectedQuizCount();
+//        this.quizList.add(quiz);
+//    }
+//
+//    // 역할 추가
+//    public void addRole(LessonRole lessonRole) {
+//        //validateRoleCount();
+//        this.lessonRoleList.add(lessonRole);
+//    }
+//
+//    // 유저 권한 검증
+//    private void validateTeacherId(Long teacherId) {
+//        if (teacherId == null) {
+//            throw new IllegalArgumentException("선생님의 id가 없습니다.");
+//        }
+//    }
+//
+//    // 책 내용 검증
+//    private void validateBookInfo(String title, String contents) {
+//        if (title == null || title.trim().isEmpty()) {
+//            throw new IllegalArgumentException("책 제목이 없습니다.");
+//        }
+//        if (contents == null || contents.trim().isEmpty()) {
+//            throw new IllegalArgumentException("책 내용이 없습니다.");
+//        }
+//    }
 
     // 열린 질문 수 검증
     private void validateOpenQuestionCount() {

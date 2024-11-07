@@ -1,6 +1,5 @@
 package com.todock.marimo.domain.lessonmaterial.repository;
 
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameResponseDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import org.springframework.data.jpa.repository.JpaRepository;
 

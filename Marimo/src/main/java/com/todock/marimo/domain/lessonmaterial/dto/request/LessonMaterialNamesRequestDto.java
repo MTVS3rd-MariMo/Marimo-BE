@@ -1,5 +1,6 @@
-package com.todock.marimo.domain.lessonmaterial.dto;
+package com.todock.marimo.domain.lessonmaterial.dto.request;
 
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialNameResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,5 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LessonMaterialNamesRequestDto {
+
     private List<LessonMaterialNameResponseDto> lessonMaterials; // 수업 자료 리스트
+
 }

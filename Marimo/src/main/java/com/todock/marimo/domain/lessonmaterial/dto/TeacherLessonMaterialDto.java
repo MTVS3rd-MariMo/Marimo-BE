@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lessonmaterial.dto;
 
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -33,16 +33,16 @@ public class LessonController {
      */
     @Operation(summary = "수업 생성", description = "lessonMaterialId를 받고 새로운 수업을 생성하여 반환합니다.")
     @PostMapping("/{lessonMaterialId}")
-    public ResponseEntity<TeacherLessonMaterialDto> createLesson(
+    public ResponseEntity<Long> createLesson(
             @Parameter(description = "선생님의 사용자 ID", example = "3", required = true) @RequestHeader(value = "userId", required = false) Long userId,
             @Parameter(description = "수업 자료 ID", example = "1", required = true) @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
         log.info("Creating lesson by lessonMaterialId: {}", lessonMaterialId);
         log.info("Lesson ID: {}", lessonMaterialId);
 
-        TeacherLessonMaterialDto teacherLessonMaterialDto = lessonService.createLesson(userId, lessonMaterialId);
+        Long lessonId = lessonService.createLesson(userId, lessonMaterialId);
 
-        return ResponseEntity.ok(teacherLessonMaterialDto);
+        return ResponseEntity.ok(lessonId);
     }
 
     /**
@@ -82,14 +82,15 @@ public class LessonController {
      * 수업 중 학생용 lessonMaterialId로 수업용 수업자료 상세 조회
      */
     @Operation(summary = "학생용 수업 자료 조회", description = "수업 중 학생이 조회할 수업 자료의 상세 정보를 반환합니다.")
-    @GetMapping("/{lessonMaterialId}")
+    @GetMapping("/{lessonId}")
     public ResponseEntity<StudentLessonMaterialDto> getLessonMaterial(
-            @Parameter(description = "조회하려는 수업 자료 ID", example = "101", required = true) @PathVariable("lessonMaterialId") Long lessonMaterialId) {
+            @Parameter(description = "조회하려는 수업 자료 ID", example = "101", required = true) @PathVariable("lessonId") Long lessonId) {
 
-        log.info("getLessonMaterial: {}", lessonMaterialId);
+        log.info("getLessonId: {}", lessonId);
 
-        StudentLessonMaterialDto studentLessonMaterialDto = lessonMaterialService.getLessonMaterialById(lessonMaterialId);
+        StudentLessonMaterialDto studentLessonMaterialDto = lessonMaterialService.getLessonMaterialById(lessonId);
 
         return ResponseEntity.ok(studentLessonMaterialDto);
     }
+
 }

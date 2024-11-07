@@ -1,12 +1,8 @@
 package com.todock.marimo.domain.lessonmaterial.entity.quiz;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 /**
  * 퀴즈 엔티티
@@ -14,6 +10,7 @@ import lombok.ToString;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_quiz")
@@ -46,7 +43,7 @@ public class Quiz {
     private LessonMaterial lessonMaterial;
 
     // 생성자
-    public Quiz(String question, int answer,
+    public Quiz(LessonMaterial lessonMaterial, String question, int answer,
                 String choice1, String choice2,
                 String choice3, String choice4) {
 

@@ -1,6 +1,5 @@
-package com.todock.marimo.domain.lessonresult.entity.resulthotsitting;
+package com.todock.marimo.domain.lesson.entity.hotsitting;
 
-import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,10 +8,9 @@ import lombok.ToString;
 
 @Entity
 @Getter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "tbl_SpeechToText")
+@Table(name = "tbl_QuestionAnswer")
 public class QuestionAnswer {
 
     @Id
@@ -25,4 +23,11 @@ public class QuestionAnswer {
 
     @Column(name = "contents")
     private String contents;
+
+    @Override
+    public String toString() {
+        return "QuestionAnswer{" +
+                "contents='" + contents + '\'' +
+                '}';
+    }
 }

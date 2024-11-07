@@ -1,7 +1,13 @@
 package com.todock.marimo.domain.lessonmaterial.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todock.marimo.domain.lesson.service.LessonService;
-import com.todock.marimo.domain.lessonmaterial.dto.*;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialNameResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialNamesRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.QuizRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -26,6 +33,7 @@ public class LessonMaterialController {
 
     private final LessonMaterialService lessonMaterialService;
     private final LessonService lessonService;
+    private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 매핑용 ObjectMapper
 
     @Autowired
     public LessonMaterialController(LessonMaterialService lessonMaterialService, LessonService lessonService) {
@@ -81,11 +89,10 @@ public class LessonMaterialController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } // 파일 용량 null 확인
 
-        String pdfName = pdfFile.getOriginalFilename(); // 파일 이름
-
         LessonMaterialResponseDto lessonMaterialResponseDto
-                = lessonMaterialService.sendPdfToAiServer(pdfFile, pdfName);
+                = lessonMaterialService.sendPdfToAiServer(pdfFile);
         log.info("수정한 값: {}", lessonMaterialResponseDto);
+
         return ResponseEntity.status(HttpStatus.OK).body(lessonMaterialResponseDto);
     }
 
@@ -116,44 +123,36 @@ public class LessonMaterialController {
             )
     })
     @PutMapping
-    public ResponseEntity<String> updateLessonMaterial(
-            @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto) {
+    public ResponseEntity<String> updateLessonMaterial(@RequestBody Map<String, Object> requestData) {
+        // JSON 데이터 로깅
+        log.info("받은 JSON 데이터: {}", requestData);
 
-        log.info("수업 자료 ID: {}", lessonMaterialRequestDto.getLessonMaterialId());
+        try {
+            // JSON 데이터를 DTO로 매핑
+            LessonMaterialRequestDto lessonMaterialRequestDto = objectMapper.convertValue(requestData, LessonMaterialRequestDto.class);
 
-        // 열린 질문 리스트 출력
-        List<OpenQuestionRequestDto> openQuestions = lessonMaterialRequestDto.getOpenQuestions();
-        if (openQuestions != null && !openQuestions.isEmpty()) {
-            for (int i = 0; i < openQuestions.size(); i++) {
-                OpenQuestionRequestDto question = openQuestions.get(i);
-                log.info("열린 질문 {} - 질문 제목: {}", i + 1, question.getQuestionTitle());
+            log.info("수업 자료 ID: {}", lessonMaterialRequestDto.getLessonMaterialId());
+
+            // 열린 질문 리스트 확인 및 출력
+            List<OpenQuestionRequestDto> openQuestions = lessonMaterialRequestDto.getOpenQuestionRequestList();
+            if (openQuestions != null && !openQuestions.isEmpty()) {
+                for (int i = 0; i < openQuestions.size(); i++) {
+                    OpenQuestionRequestDto question = openQuestions.get(i);
+                    log.info("열린 질문 {} - 질문 제목: {}", i + 1, question.getQuestionTitle());
+                }
+            } else {
+                log.info("열린 질문이 존재하지 않습니다.");
             }
-        } else {
-            log.info("열린 질문이 존재하지 않습니다.");
+
+            // 서비스 호출
+            lessonMaterialService.updateLessonMaterial(lessonMaterialRequestDto);
+            log.info("저장 완료");
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("수업 자료를 생성했습니다.");
+        } catch (Exception e) {
+            log.error("DTO 매핑 중 오류 발생: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("수업 자료 생성 중 오류가 발생했습니다.");
         }
-
-        // 퀴즈 리스트 출력
-        List<QuizRequestDto> quizzes = lessonMaterialRequestDto.getQuizzes();
-        if (quizzes != null && !quizzes.isEmpty()) {
-            for (int i = 0; i < quizzes.size(); i++) {
-                QuizRequestDto quiz = quizzes.get(i);
-                log.info("퀴즈 {} - 문제: {}", i + 1, quiz.getQuestion());
-                log.info("퀴즈 {} - 정답: {}", i + 1, quiz.getAnswer());
-                log.info("퀴즈 {} - 보기1: {}", i + 1, quiz.getChoices1());
-                log.info("퀴즈 {} - 보기2: {}", i + 1, quiz.getChoices2());
-                log.info("퀴즈 {} - 보기3: {}", i + 1, quiz.getChoices3());
-                log.info("퀴즈 {} - 보기4: {}", i + 1, quiz.getChoices4());
-            }
-        } else {
-            log.info("퀴즈가 존재하지 않습니다.");
-        }
-
-        // 서비스에 DTO 전달하여 저장 로직 처리
-        lessonMaterialService.updateLessonMaterial(lessonMaterialRequestDto);
-
-        log.info("저장 완료");
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("수업 자료를 생성했습니다.");
     }
 
 
@@ -215,6 +214,5 @@ public class LessonMaterialController {
         return ResponseEntity.ok("수업자료를 삭제했습니다.");
 
     }
-
 
 }

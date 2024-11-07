@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class SelfIntroduceRequestDto {
 
-    private Long selfIntroduceId; // 음성과 식별하기 위한 Id
+    private Long selfIntNum; // 누가 말했는지 확인
 
     private Long LessonId; // 수업 id
 

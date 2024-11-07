@@ -1,7 +1,6 @@
-package com.todock.marimo.domain.lessonmaterial.dto;
+package com.todock.marimo.domain.lessonmaterial.dto.reponse;
 
-import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
-import com.todock.marimo.domain.lessonmaterial.entity.quiz.Quiz;
+import com.todock.marimo.domain.lessonmaterial.dto.QuizDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +19,6 @@ public class LessonMaterialResponseDto { // pdf 결과 전송
     private List<QuizDto> quizList;
 
     // 열린 질문 리스트
-    private List<OpenQuestionResponseDto> openQuestions;
+    private List<OpenQuestionResponseDto> open_questions;
 
 }
