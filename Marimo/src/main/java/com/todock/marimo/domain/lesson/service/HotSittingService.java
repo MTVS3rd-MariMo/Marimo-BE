@@ -5,8 +5,6 @@ import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
 import com.todock.marimo.domain.lesson.repository.HotSittingRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
-import com.todock.marimo.domain.lessonresult.dto.SelfIntroduceRequestDto;
-import com.todock.marimo.domain.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -35,25 +33,6 @@ public class HotSittingService {
         this.hotSittingRepository = hotSittingRepository;
         this.lessonRepository = lessonRepository;
         this.restTemplate = restTemplate;
-    }
-
-    /**
-     * 핫시팅 자기소개 저장
-     */
-    public void registIntroduce(Long userId, SelfIntroduceRequestDto selfIntroduceRequestDto) {
-
-        Lesson lesson = lessonRepository.findById(selfIntroduceRequestDto.getLessonId()) // lesson 생성
-                .orElseThrow(() -> new IllegalArgumentException("LessonId가 없습니다."));
-
-        HotSitting hotSitting = new HotSitting(
-                lesson,
-                userId,
-                selfIntroduceRequestDto.getSelfIntNum(),
-                selfIntroduceRequestDto.getSelfIntroduce()
-        );
-        lesson.getHotSittings().add(hotSitting); // 핫시팅 자기소개 등록
-        log.info("userId: {}, selfIntroduce: {} ", hotSitting.getUserId(), hotSitting.getSelfIntroduce());
-        hotSittingRepository.save(hotSitting);
     }
 
 

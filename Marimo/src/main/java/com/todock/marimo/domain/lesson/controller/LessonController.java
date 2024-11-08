@@ -110,7 +110,7 @@ public class LessonController {
     /**
      * 단체사진 저장
      */
-    @PutMapping("/photo/{lessonId}")
+    @PostMapping("/photo/{lessonId}")
     public ResponseEntity<String> updatePhoto(
             @PathVariable("lessonId") Long lessonId
             , @RequestParam("img") MultipartFile photo) {
@@ -160,12 +160,16 @@ public class LessonController {
         } catch (Exception e) {
             log.error("파일 업로드 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    //.body("파일 처리 중 오류가 발생했습니다.");
-                    .body(null);
+                    .body("파일 처리 중 오류가 발생했습니다.");
         }
     }
 
-    
+
+    /**
+     * 유저 Id로 모든 단체 사진 조회
+     */
+    @GetMapping("/")
+
     /**
      * 파일 확장자 추출
      */

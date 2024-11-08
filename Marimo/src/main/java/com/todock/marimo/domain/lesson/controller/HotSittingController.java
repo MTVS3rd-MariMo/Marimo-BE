@@ -2,7 +2,6 @@ package com.todock.marimo.domain.lesson.controller;
 
 import com.todock.marimo.domain.lesson.dto.WavFileToAIRequestDto;
 import com.todock.marimo.domain.lesson.service.HotSittingService;
-import com.todock.marimo.domain.lessonresult.dto.SelfIntroduceRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -20,19 +19,6 @@ public class HotSittingController {
     @Autowired
     public HotSittingController(HotSittingService hotSittingService) {
         this.hotSittingService = hotSittingService;
-    }
-
-    /**
-     * 핫시팅 자기소개 저장
-     */
-    @PutMapping("/self-introduce")
-    public ResponseEntity<String> hotSittingSelfIntroduce(
-            @RequestHeader("userId") Long userId
-            , @RequestBody SelfIntroduceRequestDto selfIntroduceRequestDto) {
-
-        hotSittingService.registIntroduce(userId, selfIntroduceRequestDto);
-
-        return ResponseEntity.ok().body("자기소개를 저장했습니다.");
     }
 
     /**

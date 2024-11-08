@@ -5,13 +5,8 @@ import com.todock.marimo.domain.lesson.dto.ParticipantListDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.Participant;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
-import com.todock.marimo.domain.lessonmaterial.dto.*;
-import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionResponseDto;
-import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
 import com.todock.marimo.domain.lessonmaterial.repository.ParticipantRepository;
-import com.todock.marimo.domain.lessonresult.entity.LessonResult;
-import com.todock.marimo.domain.lessonresult.repository.LessonResultRepository;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +36,6 @@ public class LessonService {
     //@Value("${server.port}")
     private String serverPort = "8202";
 
-    private final LessonResultRepository lessonResultRepository;
     private final ParticipantRepository participantRepository;
     private final LessonRepository lessonRepository;
     private final UserRepository userRepository;
@@ -50,11 +44,9 @@ public class LessonService {
 
     @Autowired
     public LessonService(LessonMaterialRepository lessonMaterialRepository
-            , LessonResultRepository lessonResultRepository
             , ParticipantRepository participantRepository
             , LessonRepository lessonRepository
             , UserRepository userRepository) {
-        this.lessonResultRepository = lessonResultRepository;
         this.participantRepository = participantRepository;
         this.lessonRepository = lessonRepository;
         this.userRepository = userRepository;
@@ -174,18 +166,6 @@ public class LessonService {
         // lessonId에 해당하는 수업 조회
         Lesson lesson = lessonRepository.findById(lessonOpenQuestionRequestDto.getLessonId())
                 .orElseThrow(() -> new EntityNotFoundException(("LessonId에 맞는 수업이 없습니다.")));
-
-        // lessonResult에 열린 질문 저장
-        LessonResult lessonResult = lessonResultRepository
-                .findByLessonId(lessonOpenQuestionRequestDto.getLessonId());
-
-        // 여기서 lessonResult 객체에 열린 질문 데이터를 추가할 코드가 필요합니다.
-        // 예를 들어, lessonResult.setOpenQuestions(lessonOpenQuestionRequestDto.getQuestions());
-        // 코드 작성 후 lessonResult를 저장해야 합니다.
-
-        // lessonResult 저장 (생략된 부분)
-        // lessonResultRepository.save(lessonResult);
-
     }
 
 
