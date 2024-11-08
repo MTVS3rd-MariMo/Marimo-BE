@@ -54,14 +54,14 @@ public class LessonService {
     public Long createLesson(Long userId, Long lessonMaterialId) {
 
         // lessonMaterial 조회
-        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
-                .orElseThrow(() -> new EntityNotFoundException("LessonMaterial not found with id: " + lessonMaterialId));
 
         // Lesson 생성 및 설정
-        Lesson newlesson = new Lesson();
+        Lesson newlesson = new Lesson(// 수업에 lessonMaterial 넣어서 수업으로 찾을 수 있게 함
+                lessonMaterialId
+        );
         lessonRepository.save(newlesson); // 저장 후 ID가 생성됨
         Long lessonId = newlesson.getLessonId(); // lessonId 추출
-
+        log.info("lessonId : {}", lessonId);
         // 선생님을 참가자 목록에 추가하기
         updateUserByLessonId(userId, lessonId);
 

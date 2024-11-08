@@ -40,8 +40,8 @@ public class HotSittingController {
     @PostMapping("/wav-file")
     public ResponseEntity<String> hotSittingWavFile(
             @ModelAttribute WavFileToAIRequestDto wavDto) {
-        log.info("lessonId : {}, userName : {}, character : {}, SelfIntNum : {}"
-                , wavDto.getLessonId(), wavDto.getUserName(), wavDto.getCharacter(), wavDto.getSelfIntNum());
+        log.info("lessonId : {}, userName : {}, character : {}, SelfIntNum : {}, wavFile : {}"
+                , wavDto.getLessonId(), wavDto.getUserName(), wavDto.getCharacter(), wavDto.getSelfIntNum(), wavDto.getWavFile());
 
         hotSittingService.sendWavToAiServer(wavDto);
 

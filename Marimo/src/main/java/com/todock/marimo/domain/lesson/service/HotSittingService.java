@@ -82,6 +82,7 @@ public class HotSittingService {
 
         // hotSitting 에서 hotSittingId 추출 후 적용
         wavDto.setSelfIntroductionId(hotSitting.getHotSittingId());
+        log.info("sendWavToAiServer : {}", wavDto.getSelfIntroductionId());
 
         // 핫시팅 ID 추가 설정
         wavDto.setSelfIntroductionId(hotSitting.getHotSittingId());
@@ -92,7 +93,7 @@ public class HotSittingService {
         bodyMap.add("lessonId", wavDto.getLessonId());
         bodyMap.add("userName", wavDto.getUserName());
         bodyMap.add("character", wavDto.getCharacter());
-        //bodyMap.add("wavFile", wavDto.getSelfIntNum().getResource()); // 파일은 Resource로 추가
+        bodyMap.add("wavFile", wavDto.getWavFile().getResource()); // 파일은 Resource로 추가
         bodyMap.add("selfIntNum", wavDto.getSelfIntNum());
 
         // 헤더 설정

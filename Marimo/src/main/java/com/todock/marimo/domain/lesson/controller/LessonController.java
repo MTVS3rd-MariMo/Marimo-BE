@@ -3,7 +3,6 @@ package com.todock.marimo.domain.lesson.controller;
 import com.todock.marimo.domain.lesson.dto.ParticipantListDto;
 import com.todock.marimo.domain.lesson.service.LessonService;
 import com.todock.marimo.domain.lessonmaterial.dto.StudentLessonMaterialDto;
-import com.todock.marimo.domain.lessonmaterial.dto.TeacherLessonMaterialDto;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,13 +36,13 @@ public class LessonController {
             @Parameter(description = "선생님의 사용자 ID", example = "3", required = true) @RequestHeader(value = "userId", required = false) Long userId,
             @Parameter(description = "수업 자료 ID", example = "1", required = true) @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
-        log.info("Creating lesson by lessonMaterialId: {}", lessonMaterialId);
-        log.info("Lesson ID: {}", lessonMaterialId);
+        log.info("수업에 진행할 lessonMaterialId: {}", lessonMaterialId);
 
         Long lessonId = lessonService.createLesson(userId, lessonMaterialId);
 
         return ResponseEntity.ok(lessonId);
     }
+
 
     /**
      * LessonId로 participant 목록에 userId, userName 추가하기
@@ -65,6 +64,7 @@ public class LessonController {
         return ResponseEntity.ok("유저 " + userId + "가 " + lessonId + "에 참가하였습니다.");
     }
 
+
     /**
      * 참가자들이 participant 목록 서버에 요청
      */
@@ -77,6 +77,7 @@ public class LessonController {
 
         return ResponseEntity.ok(participantListDto);
     }
+
 
     /**
      * 수업 중 학생용 lessonMaterialId로 수업용 수업자료 상세 조회

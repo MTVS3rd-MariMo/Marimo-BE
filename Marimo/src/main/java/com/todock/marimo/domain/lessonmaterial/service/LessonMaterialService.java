@@ -144,10 +144,20 @@ public class LessonMaterialService {
         // 열린 질문을 OpenQuestionDto로 변환하여 클라이언트에 보낼 준비
         List<OpenQuestionResponseDto> openQuestionDtos = new ArrayList<>();
         JsonNode openQuestionsNode = root.path("open_questions");
+
+        // 추가된 디버그 로그
+        log.info("open_questions 노드 내용: {}", openQuestionsNode.toString());
+
         if (!openQuestionsNode.isMissingNode()) {
             openQuestionsNode.forEach(questionNode -> {
-                openQuestionDtos.add(new OpenQuestionResponseDto(questionNode.path("question").asText("")));
+                String questionText = questionNode.asText(""); // "question" 하위 노드가 아닌 바로 텍스트 값으로 처리
+                log.info("열린 질문 텍스트: {}", questionText); // 각 질문 텍스트 로그
+                if (!questionText.isEmpty()) { // 빈 문자열 확인
+                    openQuestionDtos.add(new OpenQuestionResponseDto(questionText));
+                }
             });
+        } else {
+            log.info("open_questions 노드가 존재하지 않음");
         }
 
         // 퀴즈를 QuizDto로 변환하여 클라이언트에 보낼 준비
@@ -209,7 +219,7 @@ public class LessonMaterialService {
         }
 
 
-        List<OpenQuestionRequestDto> openQuestions = lessonMaterialInfo.getOpenQuestionRequestList(); // 수업자료에서 열린 질문 가져오기
+        List<OpenQuestionRequestDto> openQuestions = lessonMaterialInfo.getOpenQuestionList(); // 수업자료에서 열린 질문 가져오기
 
         if (openQuestions != null && !openQuestions.isEmpty()) {
             for (OpenQuestionRequestDto OqDto : openQuestions) { // lessonMaterial의 퀴즈리스트에 선택된 퀴즈 추가

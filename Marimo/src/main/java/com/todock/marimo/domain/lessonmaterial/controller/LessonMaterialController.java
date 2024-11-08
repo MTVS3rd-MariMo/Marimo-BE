@@ -7,6 +7,7 @@ import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialRespons
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialNamesRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.QuizRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -123,8 +124,8 @@ public class LessonMaterialController {
     })
     @PutMapping
     public ResponseEntity<String> updateLessonMaterial(@RequestBody Map<String, Object> requestData) {
-        // JSON 데이터 로깅
-        log.info("받은 JSON 데이터: {}", requestData);
+
+        log.info("받은 JSON 데이터: {}", requestData); // JSON 데이터 로깅
 
         try {
             // JSON 데이터를 DTO로 매핑
@@ -133,7 +134,7 @@ public class LessonMaterialController {
             log.info("수업 자료 ID: {}", lessonMaterialRequestDto.getLessonMaterialId());
 
             // 열린 질문 리스트 확인 및 출력
-            List<OpenQuestionRequestDto> openQuestions = lessonMaterialRequestDto.getOpenQuestionRequestList();
+            List<OpenQuestionRequestDto> openQuestions = lessonMaterialRequestDto.getOpenQuestionList();
             if (openQuestions != null && !openQuestions.isEmpty()) {
                 for (int i = 0; i < openQuestions.size(); i++) {
                     OpenQuestionRequestDto question = openQuestions.get(i);
@@ -141,6 +142,22 @@ public class LessonMaterialController {
                 }
             } else {
                 log.info("열린 질문이 존재하지 않습니다.");
+            }
+
+            // 퀴즈 리스트 확인 및 출력
+            List<QuizRequestDto> quizList = lessonMaterialRequestDto.getQuizList();
+            if (quizList != null && !quizList.isEmpty()) {
+                for (int i = 0; i < quizList.size(); i++) {
+                    QuizRequestDto quiz = quizList.get(i);
+                    log.info("퀴즈 {} - 질문: {}", i + 1, quiz.getQuestion());
+                    log.info("선택지 1: {}", quiz.getChoices1());
+                    log.info("선택지 2: {}", quiz.getChoices2());
+                    log.info("선택지 3: {}", quiz.getChoices3());
+                    log.info("선택지 4: {}", quiz.getChoices4());
+                    log.info("정답: {}", quiz.getAnswer());
+                }
+            } else {
+                log.info("퀴즈가 존재하지 않습니다.");
             }
 
             // 서비스 호출

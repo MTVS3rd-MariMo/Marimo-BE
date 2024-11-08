@@ -18,7 +18,7 @@ public class LessonMaterialRequestDto {
     private Long lessonMaterialId; // 수업 자료 id
 
     @JsonProperty("openQuestionList")
-    private List<OpenQuestionRequestDto> openQuestionRequestList;  // 열린 질문 // 2개
+    private List<OpenQuestionRequestDto> openQuestionList;  // 열린 질문 // 2개
 
     @JsonProperty("quizList")
     private List<QuizRequestDto> quizList;               // 퀴즈 // 2개

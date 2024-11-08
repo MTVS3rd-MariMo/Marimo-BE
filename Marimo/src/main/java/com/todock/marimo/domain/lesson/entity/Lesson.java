@@ -43,4 +43,7 @@ public class Lesson {
     @JoinColumn(name = "photo_id")
     private Photo photo;
 
+    public Lesson(Long lessonMaterialId) {
+        this.lessonMaterialId = lessonMaterialId;
+    }
 }
