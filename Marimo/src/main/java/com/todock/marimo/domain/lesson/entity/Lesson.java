@@ -39,9 +39,8 @@ public class Lesson {
     private List<HotSitting> hotSittings = new ArrayList<>();
 
     // 수업은 하나의 단체사진을 가진다.
-    @OneToOne(mappedBy = "lesson")
-    @JoinColumn(name = "photo_id")
-    private Photo photo;
+    @Column(name="photo_url")
+    private String photoUrl;
 
     public Lesson(Long lessonMaterialId) {
         this.lessonMaterialId = lessonMaterialId;

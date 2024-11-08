@@ -29,11 +29,12 @@ public class OpenQuestionAnswer {
     private String answer;
 
     // 열린 질문 답변 생성자
-    public OpenQuestionAnswer(Long userId, String answer) {
+    public OpenQuestionAnswer(OpenQuestion openQuestion,Long userId, String answer) {
         
         validateUserId(userId);
         validateAnswer(answer);
 
+        this.openQuestion = openQuestion;
         this.userId = userId;
         this.answer = answer;
     }

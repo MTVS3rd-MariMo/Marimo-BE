@@ -11,10 +11,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OpenQuestionResponseDto {
 
-    @JsonProperty("question")
-    private String questionTitle; // 질문 제목
+    @JsonProperty("questionTitle")
+    private String question; // 질문 제목
 
-    public OpenQuestionResponseDto(String questionTitle) {
-        this.questionTitle = questionTitle;
+    public OpenQuestionResponseDto(String question) {
+        this.question = question;
     }
 }

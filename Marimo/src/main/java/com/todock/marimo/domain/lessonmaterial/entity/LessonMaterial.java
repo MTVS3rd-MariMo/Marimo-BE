@@ -47,6 +47,7 @@ public class LessonMaterial {
             cascade = CascadeType.ALL)
     private List<LessonRole> lessonRoleList = new ArrayList<>();
 
+
     // 생성자
     public LessonMaterial(Long userId, String bookTitle, String bookContents) {
         // validateTeacherId(userId);
@@ -69,8 +70,10 @@ public class LessonMaterial {
         this.lessonRoleList = lessonRoleList;
     }
 
-
-
+    public void addQuiz(Quiz quiz) {
+        quiz.setLessonMaterial(this); // Quiz 엔티티에 LessonMaterial 설정
+        this.quizList.add(quiz); // LessonMaterial의 quizList에 Quiz 추가
+    }
 //    // 열린 질문 추가
 //    public void addOpenQuestion(OpenQuestion openQuestion) {
 //        validateOpenQuestionCount();

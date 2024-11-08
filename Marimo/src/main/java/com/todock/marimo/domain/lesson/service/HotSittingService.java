@@ -24,19 +24,16 @@ public class HotSittingService {
 
     private final HotSittingRepository hotSittingRepository;
     private final LessonRepository lessonRepository;
-    private final UserRepository userRepository;
     private final RestTemplate restTemplate;
 
     @Autowired
     public HotSittingService(
             HotSittingRepository hotSittingRepository
             , LessonRepository lessonRepository
-            , UserRepository userRepository
             , RestTemplate restTemplate) {
 
         this.hotSittingRepository = hotSittingRepository;
         this.lessonRepository = lessonRepository;
-        this.userRepository = userRepository;
         this.restTemplate = restTemplate;
     }
 
@@ -82,18 +79,15 @@ public class HotSittingService {
 
         // hotSitting 에서 hotSittingId 추출 후 적용
         wavDto.setSelfIntroductionId(hotSitting.getHotSittingId());
-        log.info("sendWavToAiServer : {}", wavDto.getSelfIntroductionId());
-
-        // 핫시팅 ID 추가 설정
-        wavDto.setSelfIntroductionId(hotSitting.getHotSittingId());
+        log.info("Service Received DTO: {}", wavDto);
 
         // MultiValueMap을 통해 데이터 구성
         MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
         bodyMap.add("selfIntroductionId", wavDto.getSelfIntroductionId());
         bodyMap.add("lessonId", wavDto.getLessonId());
-        bodyMap.add("userName", wavDto.getUserName());
+        bodyMap.add("userName", wavDto.getName());
         bodyMap.add("character", wavDto.getCharacter());
-        bodyMap.add("wavFile", wavDto.getWavFile().getResource()); // 파일은 Resource로 추가
+        // bodyMap.add("wavFile", wavDto.getWavFile().getResource()); // 파일은 Resource로 추가
         bodyMap.add("selfIntNum", wavDto.getSelfIntNum());
 
         // 헤더 설정

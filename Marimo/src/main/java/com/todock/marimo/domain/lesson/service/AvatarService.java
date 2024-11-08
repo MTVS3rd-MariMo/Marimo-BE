@@ -6,11 +6,10 @@ import com.todock.marimo.domain.lesson.entity.avatar.Animation;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
-import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -40,7 +39,7 @@ import java.util.zip.ZipInputStream;
 @Service
 public class AvatarService {
 
-    private final LessonMaterialRepository lessonMaterialRepository;
+
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
     private String serverHost = "211.250.74.75";
@@ -57,11 +56,10 @@ public class AvatarService {
     private static final String AVATAR_DIR = "data/avatar"; // avatar 파일 저장 경로
 
     @Autowired
-    public AvatarService(LessonMaterialRepository lessonMaterialRepository
-            , LessonRepository lessonRepository
+    public AvatarService(
+            LessonRepository lessonRepository
             , AvatarRepository avatarRepository
             , RestTemplate restTemplate) {
-        this.lessonMaterialRepository = lessonMaterialRepository;
         this.lessonRepository = lessonRepository;
         this.avatarRepository = avatarRepository;
         this.restTemplate = restTemplate;
@@ -110,7 +108,7 @@ public class AvatarService {
             HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
             // 5. AI 서버로 POST 요청을 보내고 응답을 받음
-            ResponseEntity<byte[]> response = restTemplate.postForEntity(
+            ResponseEntity<byte[]> AIResponse = restTemplate.postForEntity(
                     AIServerUrI, request, byte[].class);
 
             // 고유한 zip 파일명 생성
@@ -124,7 +122,7 @@ public class AvatarService {
             }
 
             // zip 파일 저장
-            Files.write(zipPath, response.getBody());
+            Files.write(zipPath, AIResponse.getBody());
 
             // zip 파일 압축 해제 경로 설정 및 압축 해제 수행
             String unzipDirPath = Paths.get(AVATAR_DIR, zipFileName.replace(".zip", "")).toString();
@@ -133,11 +131,9 @@ public class AvatarService {
             // 아바타 엔티티 생성 및 파일 저장
             Avatar avatar = new Avatar();
             avatar.setUserId(userId);
-            Optional<Lesson> lessonOptional = lessonRepository.findById(lessonId);
-            if (!lessonOptional.isPresent()) {
-                throw new IllegalArgumentException("해당 lessonId를 가진 수업을 찾을 수 없습니다: " + lessonId);
-            }
-            Lesson lesson = lessonOptional.get();
+            Lesson lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+
 
 
             // 애니메이션 엔티티 연결
@@ -229,13 +225,17 @@ public class AvatarService {
         return filePaths;
     }
 
-    // MultipartFile을 로컬 파일 시스템에 저장하고 저장된 경로를 반환
+
+    /**
+     * MultipartFile을 로컬 파일 시스템에 저장하고 저장된 경로를 반환
+     */
     private String saveImageFile(MultipartFile file) throws IOException {
         String fileName = UUID.randomUUID().toString() + getFileExtension(file.getOriginalFilename());
         Path destinationPath = Paths.get(DATA_DIR, fileName);
         Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
         return destinationPath.toString();
     }
+
 
     /**
      * 파일명에서 확장자를 추출
@@ -246,6 +246,7 @@ public class AvatarService {
                 .map(f -> "." + f.substring(filename.lastIndexOf(".") + 1))
                 .orElse("");
     }
+
 
     /**
      * 파일 확장자에 따라 다른 폴더에 저장
@@ -275,6 +276,7 @@ public class AvatarService {
 
         return destinationPath.toString();
     }
+
 
     /**
      * 파일 경로를 URL 형식으로 변환

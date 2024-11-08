@@ -46,18 +46,18 @@ public class OpenQuestion {
 
 
     // 답변 추가 메서드
-    public void addAnswer(Long userId, String answer) {
-
-        // 유효성 검증
-        validateOpenQuestionUserId(userId);
-        // 답변 객체 생성
-        OpenQuestionAnswer openQuestionAnswer = new OpenQuestionAnswer(userId, answer);
-
-        validateOpenQuestionAnswer(openQuestionAnswer); // 답변 객체 생성 확인
-
-        openQuestionAnswerList.add(openQuestionAnswer); // 리스트에 추가
-        openQuestionAnswer.setOpenQuestion(this); // 적용 후 openQuestionAnswer에 적용하기
-    }
+//    public void addAnswer(Long userId, String answer) {
+//
+//        // 유효성 검증
+//        validateOpenQuestionUserId(userId);
+//        // 답변 객체 생성
+//        OpenQuestionAnswer openQuestionAnswer = new OpenQuestionAnswer(userId, answer);
+//
+//        validateOpenQuestionAnswer(openQuestionAnswer); // 답변 객체 생성 확인
+//
+//        openQuestionAnswerList.add(openQuestionAnswer); // 리스트에 추가
+//        openQuestionAnswer.setOpenQuestion(this); // 적용 후 openQuestionAnswer에 적용하기
+//    }
 
     // 동화 제목 검증
     private void validateOpenQuestionTitle(String questionTitle) {

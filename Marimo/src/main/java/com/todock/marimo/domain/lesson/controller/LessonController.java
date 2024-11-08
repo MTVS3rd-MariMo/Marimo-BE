@@ -1,6 +1,7 @@
 package com.todock.marimo.domain.lesson.controller;
 
 import com.todock.marimo.domain.lesson.dto.ParticipantListDto;
+import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.service.LessonService;
 import com.todock.marimo.domain.lessonmaterial.dto.StudentLessonMaterialDto;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
@@ -9,8 +10,16 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/lesson")
@@ -20,12 +29,15 @@ public class LessonController {
 
     private final LessonService lessonService;
     private final LessonMaterialService lessonMaterialService;
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png");
 
     @Autowired
-    public LessonController(LessonService lessonService, LessonMaterialService lessonMaterialService) {
+    public LessonController(LessonService lessonService, LessonMaterialService lessonMaterialService, LessonRepository lessonRepository) {
         this.lessonService = lessonService;
         this.lessonMaterialService = lessonMaterialService;
     }
+
 
     /**
      * 수업 생성 - lessonMaterialId를 받고 수업자료와 LessonId와 LessonMaterial 반환
@@ -92,6 +104,76 @@ public class LessonController {
         StudentLessonMaterialDto studentLessonMaterialDto = lessonMaterialService.getLessonMaterialById(lessonId);
 
         return ResponseEntity.ok(studentLessonMaterialDto);
+    }
+
+
+    /**
+     * 단체사진 저장
+     */
+    @PutMapping("/photo/{lessonId}")
+    public ResponseEntity<String> updatePhoto(
+            @PathVariable("lessonId") Long lessonId
+            , @RequestParam("img") MultipartFile photo) {
+        try {
+            // 1. 파일 존재 여부 검증
+            if (photo == null || photo.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(null);
+            }
+
+            // 2. 파일 크기 검증
+            if (photo.getSize() > MAX_FILE_SIZE) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(null);
+            }
+
+
+            String originalFilename = photo.getOriginalFilename();
+            String fileExtension = getFileExtension(originalFilename);
+            // 3. 파일 확장자 검증
+            if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        // .body("허용되지 않는 파일 형식입니다. jpg, jpeg, png 파일만 업로드 가능합니다.");
+                        .body(null);
+            }
+
+            // 4. 파일 내용 검증
+            try {
+                BufferedImage bufferedImage = ImageIO.read(photo.getInputStream());
+                if (bufferedImage == null) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            //.body("유효하지 않은 이미지 파일입니다.");
+                            .body(null);
+                }
+            } catch (IOException e) {
+                log.error("이미지 파일 검증 중 오류 발생", e);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                        .body("이미지 파일 검증 중 오류가 발생했습니다.");
+                        .body(null);
+            }
+
+            // 5. 서비스 호출
+            lessonService.savePhoto(lessonId, photo);
+
+            return ResponseEntity.ok("사진이 저장되었습니다.");
+
+        } catch (Exception e) {
+            log.error("파일 업로드 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    //.body("파일 처리 중 오류가 발생했습니다.");
+                    .body(null);
+        }
+    }
+
+    
+    /**
+     * 파일 확장자 추출
+     */
+    private String getFileExtension(String filename) {
+        if (filename == null || filename.lastIndexOf(".") == -1) {
+            return "";
+        }
+        return filename.substring(filename.lastIndexOf(".") + 1);
     }
 
 }

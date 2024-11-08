@@ -143,21 +143,19 @@ public class LessonMaterialService {
 
         // 열린 질문을 OpenQuestionDto로 변환하여 클라이언트에 보낼 준비
         List<OpenQuestionResponseDto> openQuestionDtos = new ArrayList<>();
-        JsonNode openQuestionsNode = root.path("open_questions");
 
-        // 추가된 디버그 로그
-        log.info("open_questions 노드 내용: {}", openQuestionsNode.toString());
-
-        if (!openQuestionsNode.isMissingNode()) {
+        JsonNode openQuestionsNode = root.path("open_questions"); //  라는 JSON에서 open_questions 노드 찾기
+        if (!openQuestionsNode.isMissingNode()) { // 있으면
             openQuestionsNode.forEach(questionNode -> {
-                String questionText = questionNode.asText(""); // "question" 하위 노드가 아닌 바로 텍스트 값으로 처리
-                log.info("열린 질문 텍스트: {}", questionText); // 각 질문 텍스트 로그
-                if (!questionText.isEmpty()) { // 빈 문자열 확인
-                    openQuestionDtos.add(new OpenQuestionResponseDto(questionText));
+                String questionText = questionNode.path("question").asText(""); // question 노드 찾아서 추출
+                if (!questionText.isEmpty()) {  // 빈 문자열 체크 추가
+                    OpenQuestionResponseDto openQuestionResponseDto = new OpenQuestionResponseDto(
+                            questionText
+                    );
+
+                    openQuestionDtos.add(openQuestionResponseDto);
                 }
             });
-        } else {
-            log.info("open_questions 노드가 존재하지 않음");
         }
 
         // 퀴즈를 QuizDto로 변환하여 클라이언트에 보낼 준비
@@ -189,20 +187,14 @@ public class LessonMaterialService {
      */
     @Transactional
     public void updateLessonMaterial(LessonMaterialRequestDto lessonMaterialInfo) {
-
-        // validateUserRole(lessonMaterialInfo.getUserId());
-        // validateRequestCounts(lessonMaterialInfo); // 여기서 한번에 검증
-
         LessonMaterial lessonMaterial = lessonMaterialRepository
-                .findById(lessonMaterialInfo.getLessonMaterialId()).orElse(null);
-        if (lessonMaterial == null) {  // lessonMaterial이 null인지 확인
-            throw new IllegalArgumentException("존재하지 않는 수업 자료입니다: " + lessonMaterialInfo.getLessonMaterialId());
-        }
+                .findById(lessonMaterialInfo.getLessonMaterialId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수업 자료입니다: " + lessonMaterialInfo.getLessonMaterialId()));
 
-        List<QuizRequestDto> quizzes = lessonMaterialInfo.getQuizList(); // 수업자료에서 퀴즈 가져오기
+        List<QuizDto> quizzes = lessonMaterialInfo.getQuizList(); // 수업자료에서 퀴즈 가져오기
 
         if (quizzes != null && !quizzes.isEmpty()) {
-            for (QuizRequestDto quizDto : quizzes) { // lessonMaterial의 퀴즈리스트에 선택된 퀴즈 추가
+            for (QuizDto quizDto : quizzes) {
                 Quiz quiz = new Quiz(
                         lessonMaterial,
                         quizDto.getQuestion(),
@@ -212,30 +204,29 @@ public class LessonMaterialService {
                         quizDto.getChoices3(),
                         quizDto.getChoices4()
                 );
-                lessonMaterial.getQuizList().add(quiz);
+                lessonMaterial.addQuiz(quiz); // addQuiz 메서드를 통해 연관 관계 설정
             }
-        } else { // 확인용 로그
+        } else {
             log.info("퀴즈가 존재하지 않습니다.");
         }
 
+        lessonMaterialRepository.save(lessonMaterial); // DB에 저장
 
         List<OpenQuestionRequestDto> openQuestions = lessonMaterialInfo.getOpenQuestionList(); // 수업자료에서 열린 질문 가져오기
 
         if (openQuestions != null && !openQuestions.isEmpty()) {
-            for (OpenQuestionRequestDto OqDto : openQuestions) { // lessonMaterial의 퀴즈리스트에 선택된 퀴즈 추가
+            for (OpenQuestionRequestDto oqDto : openQuestions) {
                 OpenQuestion openQuestion = new OpenQuestion(
                         lessonMaterial,
-                        OqDto.getQuestionTitle()
+                        oqDto.getQuestionTitle()
                 );
                 lessonMaterial.getOpenQuestionList().add(openQuestion);
             }
-        } else { // 확인용 로그
+        } else {
             log.info("열린 질문이 존재하지 않습니다.");
-
-            // DB에 저장
-            lessonMaterialRepository.save(lessonMaterial);
         }
 
+        lessonMaterialRepository.save(lessonMaterial); // 최종 저장
     }
 
 

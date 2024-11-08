@@ -17,8 +17,14 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -28,11 +34,19 @@ import java.util.List;
 @Service
 public class LessonService {
 
-    private final LessonMaterialRepository lessonMaterialRepository;
+    // 클래스 내부에서 주입된 값을 사용하기 위해 추가
+    //@Value("${server.host}")
+    private String serverHost = "211.250.74.75";
+    // 125.132.216.190:8202
+    //@Value("${server.port}")
+    private String serverPort = "8202";
+
     private final LessonResultRepository lessonResultRepository;
     private final ParticipantRepository participantRepository;
     private final LessonRepository lessonRepository;
     private final UserRepository userRepository;
+
+    private static final String PHOTO_DIR = "data/photo"; // zip 파일 저장 경로
 
     @Autowired
     public LessonService(LessonMaterialRepository lessonMaterialRepository
@@ -40,11 +54,21 @@ public class LessonService {
             , ParticipantRepository participantRepository
             , LessonRepository lessonRepository
             , UserRepository userRepository) {
-        this.lessonMaterialRepository = lessonMaterialRepository;
         this.lessonResultRepository = lessonResultRepository;
         this.participantRepository = participantRepository;
         this.lessonRepository = lessonRepository;
         this.userRepository = userRepository;
+        initDirectories();
+    }
+
+    // 필요한 디렉토리를 초기화 하는 메서드
+    public void initDirectories() {
+        try { // 디렉토리 생성
+            Files.createDirectories(Paths.get(PHOTO_DIR)); // PHOTO 파일 저장 경로
+
+        } catch (IOException e) {
+            throw new RuntimeException("디렉토리 생성 실패", e);
+        }
     }
 
 
@@ -162,5 +186,43 @@ public class LessonService {
         // lessonResult 저장 (생략된 부분)
         // lessonResultRepository.save(lessonResult);
 
+    }
+
+
+    /**
+     * 단체 사진 저장
+     */
+    public void savePhoto(Long lessonId, MultipartFile photo) {
+
+        try {
+            String photoName = UUID.randomUUID().toString()+".png"; // 사진 이름 생성
+            Path photoPath = Paths.get(PHOTO_DIR, photoName); // 파일 저장 경로 생성
+
+            if (!photoPath.normalize().startsWith(Paths.get(PHOTO_DIR))) {
+                throw new SecurityException("잘못된 파일 경로입니다.");
+            }
+            
+            Files.write(photoPath, photo.getBytes()); // 파일 저장
+
+            Lesson lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+
+            lesson.setPhotoUrl(createFileUrl(photoName)); // photoUrl 추가
+
+            lessonRepository.save(lesson);
+
+        } catch (IOException e) {
+            throw new IllegalArgumentException("사진을 저장하지 못했습니다.");
+        }
+    }
+
+
+    /**
+     * 파일 경로를 URL 형식으로 변환
+     */
+    private String createFileUrl(String filePath) {
+        // 파일 경로에서 중복된 루트 디렉토리를 제거
+        String relativePath = filePath.replace("\\", "/");
+        return "http://" + serverHost + ":" + serverPort + "/data/photo/" + relativePath;
     }
 }

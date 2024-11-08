@@ -105,13 +105,14 @@ public class AvatarController {
                         .body(null);
             }
 
-            // 3. 파일 확장자 검증
+
             String originalFilename = img.getOriginalFilename();
             String fileExtension = getFileExtension(originalFilename);
 
+            // 3. 파일 확장자 검증
             if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                        .body("허용되지 않는 파일 형식입니다. jpg, jpeg, png 파일만 업로드 가능합니다.");
+                        // .body("허용되지 않는 파일 형식입니다. jpg, jpeg, png 파일만 업로드 가능합니다.");
                         .body(null);
             }
 
@@ -159,6 +160,7 @@ public class AvatarController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(avatarResponseDto);
     }
+
 
     /**
      * 파일 확장자 추출

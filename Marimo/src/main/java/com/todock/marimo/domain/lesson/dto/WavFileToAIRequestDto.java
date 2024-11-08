@@ -1,22 +1,20 @@
 package com.todock.marimo.domain.lesson.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Setter
 @Getter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class WavFileToAIRequestDto {
 
-    private Long selfIntroductionId = null; // 기본값
+    private Long selfIntroductionId; // 기본값
 
     private Long lessonId;
 
-    private String userName;
+    private String name;
 
     private String character;
 

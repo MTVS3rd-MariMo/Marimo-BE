@@ -14,13 +14,15 @@ import java.util.List;
 public class LessonMaterialResponseDto { // pdf 결과 전송
 
     // 수업 자료 Id
+    @JsonProperty("lessonMaterialId")
     private Long lessonMaterialId;
 
     // 퀴즈 리스트
+    @JsonProperty("quizList")
     private List<QuizDto> quizList;
 
     // 열린 질문 리스트
-    @JsonProperty("open_questions")
-    private List<OpenQuestionResponseDto> openQuestionList;
+    @JsonProperty("openQuestionList")
+    private List<OpenQuestionResponseDto> open_questions;
 
 }

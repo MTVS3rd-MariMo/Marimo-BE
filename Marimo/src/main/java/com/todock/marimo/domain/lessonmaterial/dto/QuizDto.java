@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class QuizDto {
 
-    @JsonProperty("quiz_id")
+    @JsonProperty("quizId")
     private Long quizId;
 
     @JsonProperty("question")
@@ -33,4 +33,24 @@ public class QuizDto {
     @JsonProperty("choices4")
     private String choices4; // 네번째 보기
 
+    public QuizDto(String question, int answer, String choices1, String choices2, String choices3, String choices4) {
+        this.question = question;
+        this.answer = answer;
+        this.choices1 = choices1;
+        this.choices2 = choices2;
+        this.choices3 = choices3;
+        this.choices4 = choices4;
+    }
+
+    @Override
+    public String toString() {
+        return "QuizDto{" +
+                "question='" + question + '\'' +
+                ", answer=" + answer +
+                ", choices1='" + choices1 + '\'' +
+                ", choices2='" + choices2 + '\'' +
+                ", choices3='" + choices3 + '\'' +
+                ", choices4='" + choices4 + '\'' +
+                '}';
+    }
 }
