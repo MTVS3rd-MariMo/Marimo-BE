@@ -16,7 +16,7 @@ public class SelfIntroduceRequestDto {
 
     private Long selfIntNum; // 누가 말했는지 확인
 
-    private Long LessonId; // 수업 id
+    private Long lessonId; // 수업 id
 
     private String selfIntroduce; // 자기소개
 

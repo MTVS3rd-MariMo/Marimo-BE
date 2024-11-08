@@ -67,19 +67,17 @@ public class HotSittingService {
 
         String AIServerUrI = "AI SERVER URI";
 
-        String userName = wavDto.getUserName();
+        Long selfIntNum = wavDto.getSelfIntNum();
         Long lessonId = wavDto.getLessonId();
 
         // 파라미터 값 확인을 위한 로그 추가
-        log.info("Received userName: {}, lessonId: {}", userName, lessonId);
+        log.info("Received selfIntNum: {}, lessonId: {}", lessonId, selfIntNum);
 
         // userName, lessonId로 hotSitting 찾기
-        HotSitting hotSitting = hotSittingRepository.findBySelfIntNumAndLesson_LessonId(
-                wavDto.getUserName()
-                , wavDto.getLessonId());
+        HotSitting hotSitting = hotSittingRepository.findByLesson_lessonIdAndSelfIntNum(lessonId, selfIntNum);
 
         if (hotSitting == null) {
-            log.error("HotSitting not found for userName: {}, lessonId: {}", userName, lessonId);
+            log.error("HotSitting not found for lessonId: {}, selfIntNum: {}", lessonId, selfIntNum);
         }
 
         // hotSitting 에서 hotSittingId 추출 후 적용

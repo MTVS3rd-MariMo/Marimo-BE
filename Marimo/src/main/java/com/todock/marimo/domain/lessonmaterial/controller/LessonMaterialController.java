@@ -7,7 +7,6 @@ import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialRespons
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialNamesRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
-import com.todock.marimo.domain.lessonmaterial.dto.request.QuizRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;

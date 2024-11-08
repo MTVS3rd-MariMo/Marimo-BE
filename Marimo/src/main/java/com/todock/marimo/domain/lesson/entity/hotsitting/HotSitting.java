@@ -22,7 +22,7 @@ public class HotSitting {
     @Column(name = "user_id") // 말한 사람
     private Long userId;
 
-    @Column(name = "self_int_num")
+    @Column(name = "self_int_num") // 자기소개 식별 번호
     private Long selfIntNum;
 
     @ManyToOne
