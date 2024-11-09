@@ -21,18 +21,17 @@ public class QuestionAnswer {
     @JoinColumn(name = "self_introduce_id")
     private SelfIntroduce selfIntroduce; // 핫시팅에 연결된 질문-답변
 
-    @Column(name = "contents")
-    private String contents;
+    @Column(name = "QnA_contents")
+    private String qnAContents;
 
+    public QuestionAnswer(SelfIntroduce selfIntroduce, String qnAContents) {
+        this.selfIntroduce = selfIntroduce;
+        this.qnAContents = qnAContents;
+    }
     @Override
     public String toString() {
         return "QuestionAnswer{" +
-                "contents='" + contents + '\'' +
+                "qnAContents ='" + qnAContents + '\'' +
                 '}';
-    }
-
-    public QuestionAnswer(SelfIntroduce selfIntroduce, String contents) {
-        this.selfIntroduce = selfIntroduce;
-        this.contents = contents;
     }
 }

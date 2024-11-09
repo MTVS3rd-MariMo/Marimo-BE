@@ -5,8 +5,8 @@ import com.todock.marimo.domain.lesson.dto.ParticipantListDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.Participant;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
+import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
-import com.todock.marimo.domain.lessonmaterial.repository.ParticipantRepository;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -69,8 +69,6 @@ public class LessonService {
      */
     public Long createLesson(Long userId, Long lessonMaterialId) {
 
-        // lessonMaterial 조회
-
         // Lesson 생성 및 설정
         Lesson newlesson = new Lesson(// 수업에 lessonMaterial 넣어서 수업으로 찾을 수 있게 함
                 lessonMaterialId
@@ -78,8 +76,8 @@ public class LessonService {
         lessonRepository.save(newlesson); // 저장 후 ID가 생성됨
         Long lessonId = newlesson.getLessonId(); // lessonId 추출
         log.info("lessonId : {}", lessonId);
-        // 선생님을 참가자 목록에 추가하기
-        updateUserByLessonId(userId, lessonId);
+        // 선생님을 참가자 목록에 추가하기 - 필요 없다고 함
+        // updateUserByLessonId(userId, lessonId);
 
 //        // 결과를 저장할 lessonResult 객체 생성 및 lessonId 연결
 //        LessonResult lessonResult = new LessonResult();

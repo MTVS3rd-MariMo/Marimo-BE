@@ -110,9 +110,4 @@ public class HotSittingController {
     }
 
 
-//    /**
-//     * AI가 자기소개에 대한 대답 정리해서 반환
-//     */
-//    @PutMapping("/record")
-//    public
 }

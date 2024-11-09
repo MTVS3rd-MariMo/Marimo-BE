@@ -1,10 +1,13 @@
 package com.todock.marimo.domain.lesson.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todock.marimo.domain.lesson.dto.SelfIntroduceRequestDto;
 import com.todock.marimo.domain.lesson.dto.WavFileClientToServerRequestDto;
 import com.todock.marimo.domain.lesson.dto.WavFileServerToAIRequestDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
+import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
 import com.todock.marimo.domain.lesson.entity.hotsitting.SelfIntroduce;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.SelfIntroduceRepository;
@@ -93,9 +96,9 @@ public class HotSittingService {
 
             // AI 서버로 POST 요청 전송
             ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, requestEntity, String.class);
-
             if (response.getStatusCode() == HttpStatus.OK) {
                 log.info("AI 서버로 파일 전송 성공: {}", response.getBody());
+                handleAIResponse(response.getBody());
             } else {
                 throw new RuntimeException("AI 서버로 파일 전송 실패 - 상태 코드: " + response.getStatusCode());
             }
@@ -105,7 +108,78 @@ public class HotSittingService {
         }
     }
 
+
     /**
-     * AI가 자기소개에 대한 대답 정리해서 반환
+     * AI 서버 응답을 처리하고 저장하는 메서드
      */
+    private void handleAIResponse(String responseBody) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            // JSON 응답 파싱
+            JsonNode jsonNode = objectMapper.readTree(responseBody);
+            Long lessonId = jsonNode.get("lessonId").asLong();
+            Long selfIntroduceId = jsonNode.get("selfIntroduceId").asLong();
+            String contents = jsonNode.get("contents").asText();
+
+            // 로그 출력
+            log.info("Received AI Response - lessonId: {}, selfIntroduceId: {}, contents: {}", lessonId, selfIntroduceId, contents);
+
+            // 저장 로직 호출
+            saveAIResponse(lessonId, selfIntroduceId, contents);
+
+        } catch (Exception e) {
+            log.error("Failed to parse AI server response", e);
+        }
+    }
+
+
+    /**
+     * AI 서버 응답을 데이터베이스에 저장하는 메서드
+     */
+    private void saveAIResponse(Long lessonId, Long selfIntroduceId, String qnAContents) {
+
+        SelfIntroduce selfIntroduce = selfIntroduceRepository.findById(selfIntroduceId)
+                .orElseThrow(() -> new EntityNotFoundException("selfIntroduceId로 자기소개를 찾을 수 없습니다."));
+
+        selfIntroduce.getQuestionAnswers().add(
+                new QuestionAnswer(
+                        selfIntroduce,
+                        qnAContents
+                )
+        );
+        selfIntroduceRepository.save(selfIntroduce);
+
+    }
+
+
+    /**
+     * 핫시팅 자기소개 저장
+     */
+    public void saveAIRequest(SelfIntroduceRequestDto selfIntroduceDto) {
+
+        // 수업 찾기
+        Lesson lesson = lessonRepository.findById(selfIntroduceDto.getLessonId())
+                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+
+        // 핫시팅 찾기
+        HotSitting hotSitting = lesson.getHotSitting();
+
+        // 핫시팅에 자기소개 추가
+        SelfIntroduce selfIntroduce = new SelfIntroduce(
+                hotSitting,
+                selfIntroduceDto.getSelfIntNum(),
+                selfIntroduceDto.getSelfIntroduce()
+        );
+
+        // 핫시팅에 자기소개 추가
+        hotSitting.getSelfIntroduces().add(selfIntroduce);
+
+        // 변경된 hotSitting 엔티티를 다시 저장
+        selfIntroduceRepository.save(selfIntroduce);
+
+        // 변경된 핫시팅을 다시 저장하여 관계 갱신
+        // hotSittingRepository.save(hotSitting);
+    }
+
+
 }

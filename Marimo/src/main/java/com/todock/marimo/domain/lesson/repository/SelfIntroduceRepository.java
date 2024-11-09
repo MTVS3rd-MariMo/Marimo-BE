@@ -7,5 +7,4 @@ public interface SelfIntroduceRepository extends JpaRepository<SelfIntroduce, Lo
 
     // 자기소개 엔티티를 수업Id와 자기소개 식별 번호로 조회
     SelfIntroduce findByHotSitting_HotSittingIdAndSelfIntNum(Long lessonId, Long selfIntNum);
-
 }

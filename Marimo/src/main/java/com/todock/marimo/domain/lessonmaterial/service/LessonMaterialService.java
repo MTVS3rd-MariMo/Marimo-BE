@@ -35,6 +35,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -234,11 +235,14 @@ public class LessonMaterialService {
      * 유저 id로 유저의 수업 자료 전체 조회
      */
     public List<LessonMaterialNameResponseDto> getLessonMaterialByUserId(Long userId) {
-        validateUserRole(userId);
-        return lessonMaterialRepository.findByUserId(userId)
+        
+        validateUserRole(userId); // 선생님 검증
+        
+        List<LessonMaterialNameResponseDto> lessonMaterialNameList =  lessonMaterialRepository.findByUserId(userId)
                 .stream()
                 .map(dto -> new LessonMaterialNameResponseDto(dto.getLessonMaterialId(), dto.getBookTitle()))
                 .collect(Collectors.toList());
+        return lessonMaterialNameList.isEmpty() ? Collections.emptyList() : lessonMaterialNameList;
     }
 
 
