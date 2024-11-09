@@ -5,6 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface HotSittingRepository extends JpaRepository<HotSitting, Long> {
 
-    // selfIntNum, lessonId로 유저 검색
-    HotSitting findByLesson_lessonIdAndSelfIntNum(Long lessonId, Long selfIntNum);
 }

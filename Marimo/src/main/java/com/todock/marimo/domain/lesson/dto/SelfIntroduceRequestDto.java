@@ -4,19 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class WavFileToServerRequestDto {
+public class SelfIntroduceRequestDto {
+
+    private Long userId;
 
     private Long lessonId;
 
-    private String userName;
+    private Long selfIntNum; // 자기소개 확인 키값
 
-    private String character;
-
-    private MultipartFile wavFile;
+    private String selfIntroduce; // 기본값
 }

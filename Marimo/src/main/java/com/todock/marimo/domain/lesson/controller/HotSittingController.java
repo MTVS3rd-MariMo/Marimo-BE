@@ -1,14 +1,18 @@
 package com.todock.marimo.domain.lesson.controller;
 
-import com.todock.marimo.domain.lesson.dto.HotSittingAIRequestDto;
-import com.todock.marimo.domain.lesson.dto.WavFileToAIRequestDto;
+import com.todock.marimo.domain.lesson.dto.SelfIntroduceRequestDto;
+import com.todock.marimo.domain.lesson.dto.WavFileClientToServerRequestDto;
 import com.todock.marimo.domain.lesson.service.HotSittingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Base64;
 
 @Slf4j
 @RestController
@@ -21,6 +25,21 @@ public class HotSittingController {
     public HotSittingController(HotSittingService hotSittingService) {
         this.hotSittingService = hotSittingService;
     }
+
+
+    /**
+     * 자기소개 저장
+     */
+    @PutMapping("/self-introduce")
+    public ResponseEntity<String> hotSittingRecord(@RequestBody SelfIntroduceRequestDto selfIntroduceDto) {
+
+        log.info("Received Request DTO: {}", selfIntroduceDto);
+
+        hotSittingService.saveAIRequest(selfIntroduceDto);
+
+        return ResponseEntity.ok().body("저장 성공했습니다.");
+    }
+
 
     /**
      * 핫시팅 wavFile AI서버로 전달 - introduceId 추가해서 전달
@@ -46,8 +65,7 @@ public class HotSittingController {
             String originalFilename = wavFile.getOriginalFilename();
 
             // MIME 타입 체크
-            boolean isWavMimeType = "audio/wav".equals(contentType) || "audio/x-wav".equals(contentType);
-
+            boolean isWavMimeType = "audio/wav".equals(contentType) || "audio/x-wav".equals(contentType) || "audio/wave".equals(contentType);
             // 파일 확장자 체크
             boolean isWavExtension = originalFilename != null && originalFilename.toLowerCase().endsWith(".wav");
 
@@ -65,12 +83,24 @@ public class HotSittingController {
         }
 
         // WavFileToAIRequestDto 생성 및 설정
-        WavFileToAIRequestDto wavDto = new WavFileToAIRequestDto();
+        WavFileClientToServerRequestDto wavDto = new WavFileClientToServerRequestDto();
         wavDto.setLessonId(lessonId);
         wavDto.setName(userName);
         wavDto.setCharacter(character);
         wavDto.setSelfIntNum(selfIntNum);
-        wavDto.setWavFile(wavFile);
+
+        // 파일을 Base64로 인코딩하여 JSON에 포함
+        try {
+            byte[] fileBytes = wavFile.getBytes();
+            String encodedFile = Base64.getEncoder().encodeToString(fileBytes);
+            wavDto.setWavFile(encodedFile);
+
+            log.info("Encoded WAV file content: {}", encodedFile.substring(0, 50) + "...");
+
+        } catch (IOException e) {
+            log.error("File encoding error: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 인코딩 중 오류 발생");
+        }
 
         log.info("Controller Received DTO: {}", wavDto);
 
@@ -80,14 +110,9 @@ public class HotSittingController {
     }
 
 
-    /**
-     * 핫시팅 결과 전체 저장
-     */
-    @PutMapping("/record")
-    public ResponseEntity<String> hotSittingRecord(@RequestBody HotSittingAIRequestDto textDto){
-
-
-
-        return ResponseEntity.ok().body("저장 성공했습니다.");
-    }
+//    /**
+//     * AI가 자기소개에 대한 대답 정리해서 반환
+//     */
+//    @PutMapping("/record")
+//    public
 }

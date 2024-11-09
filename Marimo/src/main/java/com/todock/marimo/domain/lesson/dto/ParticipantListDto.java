@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class ParticipantListDto {
 
-    private List<Long> userId;
+    private List<Long> userIds;
 }

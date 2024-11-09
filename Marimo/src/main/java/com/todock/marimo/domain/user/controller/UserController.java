@@ -1,6 +1,7 @@
 package com.todock.marimo.domain.user.controller;
 
 import com.todock.marimo.domain.user.dto.LoginUserRequestDto;
+import com.todock.marimo.domain.user.dto.LoginUserResponseDto;
 import com.todock.marimo.domain.user.dto.RegistUserRequestDto;
 import com.todock.marimo.domain.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,14 +40,14 @@ public class UserController {
      */
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginUserRequestDto loginUserRequestDto) { // @RequestBody 추가
+    public ResponseEntity<LoginUserResponseDto> login(@RequestBody LoginUserRequestDto loginUserRequestDto) { // @RequestBody 추가
 
-        Long userId = userService.login(loginUserRequestDto); // 로그인 후 userId 반환
+        LoginUserResponseDto loginDto = userService.login(loginUserRequestDto); // 로그인 후 userId 반환
 
-        if (userId != null) {
-            return ResponseEntity.ok(userId);
+        if (loginDto != null) {
+            return ResponseEntity.ok(loginDto);
         } else {
-            return ResponseEntity.status(401).body("존재하지 않는 유저입니다.");
+            return ResponseEntity.status(401).body(loginDto);
         }
     }
 

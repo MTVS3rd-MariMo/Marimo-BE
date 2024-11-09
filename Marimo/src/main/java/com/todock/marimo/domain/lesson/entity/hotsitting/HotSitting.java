@@ -12,42 +12,21 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "hot_sitting")
+@Table(name = "tbl_hot_sitting")
 public class HotSitting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long hotSittingId; // 핫시팅 id
 
-    @Column(name = "user_id") // 말한 사람
-    private Long userId;
-
-    @Column(name = "self_int_num") // 자기소개 식별 번호
-    private Long selfIntNum;
-
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
-    @Column(name = "self_introduce")
-    private String selfIntroduce;
+    @OneToMany(mappedBy = "hotSitting", cascade = CascadeType.ALL)
+    private List<SelfIntroduce> selfIntroduces = new ArrayList<>();
 
-    @OneToMany(mappedBy = "hotSitting")
-    private List<QuestionAnswer> questionAnswers;
-
-    public HotSitting(Lesson lesson, Long userId, Long selfIntNum, String selfIntroduce) {
+    public HotSitting(Lesson lesson) {
         this.lesson = lesson;
-        this.userId = userId;
-        this.selfIntNum = selfIntNum;
-        this.selfIntroduce = selfIntroduce;
-        questionAnswers = new ArrayList<>();
-    }
-
-    @Override
-    public String toString() {
-        return "HotSitting{" +
-                "selfIntroduce='" + selfIntroduce + '\'' +
-                ", questionAnswers=" + questionAnswers +
-                '}';
     }
 }

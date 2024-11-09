@@ -18,8 +18,8 @@ public class QuestionAnswer {
     private Long questionAnswerId;
 
     @ManyToOne
-    @JoinColumn(name = "hot_sitting_id")
-    private HotSitting hotSitting; // 핫시팅에 연결된 질문-답변
+    @JoinColumn(name = "self_introduce_id")
+    private SelfIntroduce selfIntroduce; // 핫시팅에 연결된 질문-답변
 
     @Column(name = "contents")
     private String contents;
@@ -29,5 +29,10 @@ public class QuestionAnswer {
         return "QuestionAnswer{" +
                 "contents='" + contents + '\'' +
                 '}';
+    }
+
+    public QuestionAnswer(SelfIntroduce selfIntroduce, String contents) {
+        this.selfIntroduce = selfIntroduce;
+        this.contents = contents;
     }
 }

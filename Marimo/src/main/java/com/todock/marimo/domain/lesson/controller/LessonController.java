@@ -168,7 +168,9 @@ public class LessonController {
     /**
      * 유저 Id로 모든 단체 사진 조회
      */
-    @GetMapping("/")
+//    @GetMapping("/")
+//    public ResponseEntity<StudentLessonMaterialDto> getStudentLessonMaterial() {}
+
 
     /**
      * 파일 확장자 추출
