@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lesson.controller;
 
+import com.todock.marimo.domain.lesson.dto.HotSittingAIRequestDto;
 import com.todock.marimo.domain.lesson.dto.WavFileToAIRequestDto;
 import com.todock.marimo.domain.lesson.service.HotSittingService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +28,9 @@ public class HotSittingController {
     @PostMapping(value = "/wav-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> hotSittingWavFile(
             @RequestParam("lessonId") Long lessonId,
-            @RequestParam("userName") String userName ,
-            @RequestParam("character") String character ,
-            @RequestParam("selfIntNum") Long selfIntNum ,
+            @RequestParam("userName") String userName,
+            @RequestParam("character") String character,
+            @RequestParam("selfIntNum") Long selfIntNum,
             @RequestPart("wavFile") MultipartFile wavFile) {
 
         log.info("Received Content-Type: {}", wavFile.getContentType());
@@ -78,4 +79,10 @@ public class HotSittingController {
         return ResponseEntity.ok().body("정상적으로 전송되었습니다.");
     }
 
+
+    /**
+     * 핫시팅 결과 전체 저장
+     */
+    @PutMapping("/record")
+    public ResponseEntity<String> hotSittingRecord(@RequestBody HotSittingAIRequestDto textDto)
 }

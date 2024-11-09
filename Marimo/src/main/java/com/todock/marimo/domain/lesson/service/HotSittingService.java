@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lesson.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todock.marimo.domain.lesson.dto.WavFileToAIRequestDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
@@ -7,10 +8,8 @@ import com.todock.marimo.domain.lesson.repository.HotSittingRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -23,15 +22,18 @@ public class HotSittingService {
     private final HotSittingRepository hotSittingRepository;
     private final LessonRepository lessonRepository;
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public HotSittingService(
             HotSittingRepository hotSittingRepository
             , LessonRepository lessonRepository
-            , RestTemplate restTemplate) {
-
+            , ObjectMapper objectMapper
+            , RestTemplate restTemplate
+    ) {
         this.hotSittingRepository = hotSittingRepository;
         this.lessonRepository = lessonRepository;
+        this.objectMapper = objectMapper;
         this.restTemplate = restTemplate;
     }
 
@@ -41,7 +43,7 @@ public class HotSittingService {
      */
     public void sendWavToAiServer(WavFileToAIRequestDto wavDto) {
 
-        String AIServerUrI = "AI SERVER URI";
+        String AIServerUrI = "http://metaai2.iptime.org:61987/hotseating";
 
         Long selfIntNum = wavDto.getSelfIntNum();
         Long lessonId = wavDto.getLessonId();
@@ -60,14 +62,14 @@ public class HotSittingService {
         wavDto.setSelfIntroductionId(hotSitting.getHotSittingId());
         log.info("Service Received DTO: {}", wavDto);
 
-        // MultiValueMap을 통해 데이터 구성
+        // 폼 데이터 구성
         MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
         bodyMap.add("selfIntroductionId", wavDto.getSelfIntroductionId());
         bodyMap.add("lessonId", wavDto.getLessonId());
-        bodyMap.add("userName", wavDto.getName());
+        bodyMap.add("name", wavDto.getName());
         bodyMap.add("character", wavDto.getCharacter());
-        // bodyMap.add("wavFile", wavDto.getWavFile().getResource()); // 파일은 Resource로 추가
         bodyMap.add("selfIntNum", wavDto.getSelfIntNum());
+        bodyMap.add("wavFile", wavDto.getWavFile().getResource()); // MultipartFile을 Resource로 변환하여 추가
 
         // 헤더 설정
         HttpHeaders headers = new HttpHeaders();
@@ -77,14 +79,20 @@ public class HotSittingService {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
         // 요청 보내기
-        ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, requestEntity, String.class);
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, requestEntity, String.class);
 
-        // 응답 처리
-        if (response.getStatusCode().is2xxSuccessful()) {
-            System.out.println("AI 서버로 파일 전송 성공: " + response.getBody());
-        } else {
-            System.out.println("AI 서버로 파일 전송 실패: " + response.getStatusCode());
+            // 상태 코드가 200인 경우 성공 처리
+            if (response.getStatusCode() == HttpStatus.OK) {
+                log.info("AI 서버로 파일 전송 성공: {}", response.getBody());
+            } else {
+                // 200이 아닌 경우 예외 발생
+                throw new RuntimeException("AI 서버로 파일 전송 실패 - 상태 코드: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            log.error("AI 서버로 파일 전송 중 예외 발생", e);
+            // 필요시 추가 예외 처리
         }
-    }
 
+    }
 }
