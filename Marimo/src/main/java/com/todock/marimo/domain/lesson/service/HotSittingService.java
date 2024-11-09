@@ -68,10 +68,10 @@ public class HotSittingService {
         wavServerToAIDto.setSelfIntroduceId(wavDto.getSelfIntroductionId());
         wavServerToAIDto.setName(wavDto.getName());
         wavServerToAIDto.setCharacter(wavDto.getCharacter());
-        wavServerToAIDto.setWavFile("wavDto.getWavFile()");
+        wavServerToAIDto.setWavFile(wavDto.getWavFile());
 
         // 필드 설정 후 wavDto에 저장된 데이터 확인
-        log.info("AI로 보내기 전 최종 DTO 확인 : " + wavServerToAIDto.toString());
+        // log.info("AI로 보내기 전 최종 DTO 확인 : " + wavServerToAIDto.toString());
 
         // 필수 필드 null 체크
         if (wavDto.getLessonId() == null || wavDto.getSelfIntroductionId() == null ||
@@ -79,7 +79,6 @@ public class HotSittingService {
                 wavDto.getWavFile() == null) {
             throw new RuntimeException("===========================\n필수 필드가 비어 있습니다.\n============================\n");
         }
-
 
         // AI 서버로 전송
         try {
@@ -105,37 +104,6 @@ public class HotSittingService {
             throw new RuntimeException("AI 서버로 파일 전송 중 오류 발생", e);
         }
     }
-
-
-    /**
-     * 핫시팅 자기소개 저장
-     */
-    public void saveAIRequest(SelfIntroduceRequestDto selfIntroduceDto) {
-
-        // 수업 찾기
-        Lesson lesson = lessonRepository.findById(selfIntroduceDto.getLessonId())
-                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
-
-        // 핫시팅 찾기
-        HotSitting hotSitting = lesson.getHotSitting();
-
-        // 핫시팅에 자기소개 추가
-        SelfIntroduce selfIntroduce = new SelfIntroduce(
-                hotSitting,
-                selfIntroduceDto.getSelfIntNum(),
-                selfIntroduceDto.getSelfIntroduce()
-        );
-
-        // 핫시팅에 자기소개 추가
-        hotSitting.getSelfIntroduces().add(selfIntroduce);
-
-        // 변경된 hotSitting 엔티티를 다시 저장
-        selfIntroduceRepository.save(selfIntroduce);
-
-        // 변경된 핫시팅을 다시 저장하여 관계 갱신
-        // hotSittingRepository.save(hotSitting);
-    }
-
 
     /**
      * AI가 자기소개에 대한 대답 정리해서 반환
