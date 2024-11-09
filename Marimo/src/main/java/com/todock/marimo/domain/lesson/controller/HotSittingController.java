@@ -84,5 +84,10 @@ public class HotSittingController {
      * 핫시팅 결과 전체 저장
      */
     @PutMapping("/record")
-    public ResponseEntity<String> hotSittingRecord(@RequestBody HotSittingAIRequestDto textDto)
+    public ResponseEntity<String> hotSittingRecord(@RequestBody HotSittingAIRequestDto textDto){
+
+
+
+        return ResponseEntity.ok().body("저장 성공했습니다.");
+    }
 }
