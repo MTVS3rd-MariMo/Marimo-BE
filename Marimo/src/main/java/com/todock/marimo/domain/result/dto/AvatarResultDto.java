@@ -14,4 +14,8 @@ public class AvatarResultDto {
     private String userName;
 
     private String avatar;
+
+    public AvatarResultDto(String avatar) {
+        this.avatar = avatar;
+    }
 }

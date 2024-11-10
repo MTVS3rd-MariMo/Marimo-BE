@@ -4,6 +4,8 @@ import com.todock.marimo.domain.lesson.dto.AnswerRequestDto;
 import com.todock.marimo.domain.lesson.repository.OpenQuestionRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestionAnswer;
+import com.todock.marimo.domain.result.entity.Result;
+import com.todock.marimo.domain.result.repository.ResultRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,14 +14,16 @@ import org.springframework.stereotype.Service;
 public class OpenQuestionService {
 
     private final OpenQuestionRepository openQuestionRepository;
+    private final ResultRepository resultRepository;
 
     @Autowired
-    public OpenQuestionService(OpenQuestionRepository openQuestionRepository) {
+    public OpenQuestionService(OpenQuestionRepository openQuestionRepository, ResultRepository resultRepository) {
         this.openQuestionRepository = openQuestionRepository;
+        this.resultRepository = resultRepository;
     }
 
     /**
-     * 단체 사진 저장
+     * 열린 질문 저장
      */
     public void saveAnswer(Long userId, AnswerRequestDto answerDto) {
 
@@ -34,6 +38,5 @@ public class OpenQuestionService {
                 )
         );
         openQuestionRepository.save(openQuestion);
-
     }
 }

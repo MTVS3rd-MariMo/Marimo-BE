@@ -86,7 +86,7 @@ public class HotSittingService {
         // AI 서버로 전송
         try {
 
-            String AIServerUrI = "http://metaai2.iptime.org:64987/hotseating";
+            String AIServerUrI = "http://metaai2.iptime.org:62987/hotseating";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -106,6 +106,7 @@ public class HotSittingService {
             log.error("AI 서버로 파일 전송 중 예외 발생", e);
             throw new RuntimeException("AI 서버로 파일 전송 중 오류 발생", e);
         }
+        
     }
 
 

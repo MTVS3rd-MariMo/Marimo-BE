@@ -6,7 +6,10 @@ import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.Participant;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
+import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
+import com.todock.marimo.domain.result.entity.Result;
+import com.todock.marimo.domain.result.repository.ResultRepository;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +32,8 @@ import java.util.UUID;
 @Service
 public class LessonService {
 
+    private final LessonMaterialRepository lessonMaterialRepository;
+    private final ResultRepository resultRepository;
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
     private String serverHost = "211.250.74.75";
@@ -46,11 +51,13 @@ public class LessonService {
     public LessonService(LessonMaterialRepository lessonMaterialRepository
             , ParticipantRepository participantRepository
             , LessonRepository lessonRepository
-            , UserRepository userRepository) {
+            , UserRepository userRepository, ResultRepository resultRepository) {
         this.participantRepository = participantRepository;
         this.lessonRepository = lessonRepository;
         this.userRepository = userRepository;
         initDirectories();
+        this.lessonMaterialRepository = lessonMaterialRepository;
+        this.resultRepository = resultRepository;
     }
 
     // 필요한 디렉토리를 초기화 하는 메서드
@@ -79,37 +86,17 @@ public class LessonService {
         log.info("\n\n생성된 lessonId : {}\n\n", lessonId);
         log.info("\n\n적용된 lessonMaterialId : {}\n\n", newlesson.getLessonMaterialId());
 
-        // 선생님을 참가자 목록에 추가하기 - 필요 없다고 함
-        // updateUserByLessonId(userId, lessonId);
-
-//        // 결과를 저장할 lessonResult 객체 생성 및 lessonId 연결
-//        LessonResult lessonResult = new LessonResult();
-//        lessonResult.setLessonId(lessonId);
+        // 수업 결과에 역할, 책 내용, 책 제목 저장, lessonId 저장
 //
-//        // openQuestions 변환
-//        List<OpenQuestionResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
-//                .map(openQuestion -> new OpenQuestionResponseDto(openQuestion.getQuestion()))
-//                .toList();
+//        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
+//                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업자료를 조회할 수 없습니다."));
 //
-//        // quizzes 변환
-//        List<QuizDto> quizzes = lessonMaterial.getQuizList().stream()
-//                .map(quiz -> new QuizDto(
-//                        quiz.getQuizId(),
-//                        quiz.getQuestion(),
-//                        quiz.getAnswer(),
-//                        quiz.getChoices1(),
-//                        quiz.getChoices2(),
-//                        quiz.getChoices3(),
-//                        quiz.getChoices4()
-//                ))
-//                .toList();
-//
-//        // lessonRoles 변환
-//        List<LessonRoleDto> lessonRoles = lessonMaterial.getLessonRoleList().stream()
-//                .map(role -> new LessonRoleDto(role.getRoleName()))
-//                .toList();
-
-        // TeacherLessonMaterialDto 생성 및 반환
+//        Result result = new Result(
+//                lessonId,
+//                lessonMaterial.getBookTitle(),
+//                lessonMaterial.getBookContents()
+//        );
+//        resultRepository.save(result);
 
         return lessonId;
     }
@@ -161,29 +148,18 @@ public class LessonService {
 
 
     /**
-     * 열린 질문 결과 저장
-     */
-    public void updateOpenQuestion(LessonOpenQuestionRequestDto lessonOpenQuestionRequestDto) {
-
-        // lessonId에 해당하는 수업 조회
-        Lesson lesson = lessonRepository.findById(lessonOpenQuestionRequestDto.getLessonId())
-                .orElseThrow(() -> new EntityNotFoundException(("LessonId에 맞는 수업이 없습니다.")));
-    }
-
-
-    /**
      * 단체 사진 저장
      */
     public void savePhoto(Long lessonId, MultipartFile photo) {
 
         try {
-            String photoName = UUID.randomUUID().toString()+".png"; // 사진 이름 생성
+            String photoName = UUID.randomUUID().toString() + ".png"; // 사진 이름 생성
             Path photoPath = Paths.get(PHOTO_DIR, photoName); // 파일 저장 경로 생성
 
             if (!photoPath.normalize().startsWith(Paths.get(PHOTO_DIR))) {
                 throw new SecurityException("잘못된 파일 경로입니다.");
             }
-            
+
             Files.write(photoPath, photo.getBytes()); // 파일 저장
 
             Lesson lesson = lessonRepository.findById(lessonId)
@@ -207,4 +183,5 @@ public class LessonService {
         String relativePath = filePath.replace("\\", "/");
         return "http://" + serverHost + ":" + serverPort + "/data/photo/" + relativePath;
     }
+
 }

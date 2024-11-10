@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -27,24 +28,29 @@ public class LessonResultDto {
     private String bookContents;
 
     // 참가자
-    private List<ParticipantDto> participants;
+    private List<ParticipantDto> participants = new ArrayList<>();
 
     // 역할
-    private List<LessonRoleResultDto> Roles;
+    private List<LessonRoleResultDto> Roles = new ArrayList<>();
 
     // 아바타 이미지
-    private List<AvatarResultDto> avatars;
+    private List<AvatarResultDto> avatars = new ArrayList<>();
 
     // 열린 질문
-    private List<OpenQuestionResultDto> openQuestions;
+    private List<OpenQuestionResultDto> openQuestions = new ArrayList<>();
 
     // 핫시팅
-    private List<HotSittingResultDto> hotSittings;
+    private List<HotSittingResultDto> hotSittings = new ArrayList<>();
 
     // 퀴즈
-    private List<QuizResultDto> quizzes;
+    private List<QuizResultDto> quizzes = new ArrayList<>();
 
     // 사진
     private String photoUrl;
 
+    public LessonResultDto(String bookTitle, String bookContents, String photoUrl) {
+        this.bookTitle = bookTitle;
+        this.bookContents = bookContents;
+        this.photoUrl = photoUrl;
+    }
 }

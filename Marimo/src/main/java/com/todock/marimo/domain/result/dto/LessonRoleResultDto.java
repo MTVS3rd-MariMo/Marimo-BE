@@ -12,5 +12,10 @@ import lombok.Setter;
 public class LessonRoleResultDto {
 
     private String userName;
+
     private String character;
+
+    public LessonRoleResultDto(String character) {
+        this.character = character;
+    }
 }

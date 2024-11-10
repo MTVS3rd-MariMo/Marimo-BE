@@ -28,8 +28,7 @@ public class ResultController {
      * 학생이 참가한 모든 수업 리스트 조회 (사진 리스트로 보여줌) - LessonId, photoList 반환
      */
     @GetMapping("/student")
-    public ResponseEntity<List<StudentResultDto>> getPhotoList(
-            @RequestHeader("userId") Long userId) {
+    public ResponseEntity<List<StudentResultDto>> getPhotoList(@RequestHeader("userId") Long userId) {
 
         return ResponseEntity.ok().body(resultService.findAllPhotos(userId));
     }
@@ -37,7 +36,8 @@ public class ResultController {
 
     /**
      * 학생이 참가한 수업 사진 조회 - photo 반환
-     *//*
+     */
+    /*
     @GetMapping("/{lessonId}")
     public ResponseEntity<String> getPhoto(@PathVariable("lessonId") Long lessonId) {
 
@@ -49,12 +49,14 @@ public class ResultController {
     /**
      * 선생님이 참가한 모든 수업 조회 ( 참가자 이름?)
      */
-//    @GetMapping
-//    public ResponseEntity<List<TeacherResultDto>> getLessonList(
-//            @RequestHeader("userId") Long userId) {
-//
-//        return ResponseEntity.ok().body(resultService.findAllLessons(userId));
-//    }
+    /*
+    @GetMapping
+    public ResponseEntity<List<TeacherResultDto>> getLessonList(
+            @RequestHeader("userId") Long userId) {
+
+        return ResponseEntity.ok().body(resultService.findAllLessons(userId));
+    }
+    */
 
 
     /**
@@ -65,4 +67,5 @@ public class ResultController {
 
         return ResponseEntity.ok().body(resultService.lessonDetail(lessonId));
     }
+
 }

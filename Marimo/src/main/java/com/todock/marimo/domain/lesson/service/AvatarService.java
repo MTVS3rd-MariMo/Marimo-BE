@@ -6,6 +6,10 @@ import com.todock.marimo.domain.lesson.entity.avatar.Animation;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
+import com.todock.marimo.domain.result.entity.ParticipantResult;
+import com.todock.marimo.domain.result.entity.Result;
+import com.todock.marimo.domain.result.repository.ResultRepository;
+import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -40,15 +44,17 @@ import java.util.zip.ZipInputStream;
 public class AvatarService {
 
 
+    private final UserRepository userRepository;
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
-    private String serverHost = "211.250.74.75";
+    private String serverHost = "125.132.216.28";
     // 125.132.216.190:8202
     //@Value("${server.port}")
-    private String serverPort = "8202";
+    private String serverPort = "8203";
 
     private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
+    private final ResultRepository resultRepository;
     private final RestTemplate restTemplate;
 
     private static final String DATA_DIR = "data"; // 파일 저장 경로
@@ -59,11 +65,15 @@ public class AvatarService {
     public AvatarService(
             LessonRepository lessonRepository
             , AvatarRepository avatarRepository
-            , RestTemplate restTemplate) {
+            , ResultRepository resultRepository
+            , RestTemplate restTemplate, UserRepository userRepository) {
+
         this.lessonRepository = lessonRepository;
         this.avatarRepository = avatarRepository;
+        this.resultRepository = resultRepository;
         this.restTemplate = restTemplate;
         initDirectories();
+        this.userRepository = userRepository;
     }
 
     // 필요한 디렉토리를 초기화 하는 메서드
@@ -86,8 +96,9 @@ public class AvatarService {
     public AvatarResponseDto sendImgToAiServer(Long userId, Long lessonId, MultipartFile img) {
 
         try {
+
             // 1. AI 서버 URI 설정
-            String AIServerUrI = "http://metaai2.iptime.org:62987/animation/";
+            String AIServerUrI = "http://metaai2.iptime.org:64987/animation/";
 
             // 2. HttpHeaders 설정
             HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
@@ -134,8 +145,6 @@ public class AvatarService {
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
 
-
-
             // 애니메이션 엔티티 연결
             List<Animation> animations = new ArrayList<>();
             for (String filePath : filePaths) {
@@ -153,8 +162,22 @@ public class AvatarService {
 
             // 8. 저장된 아바타와 애니메이션 정보로 AvatarResponseDto 생성
             avatar = avatarRepository.save(avatar);
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
 
+//            // 수업 결과에 저장
+//            Result result = resultRepository.findByLessonId(lessonId);
+//            result.getParticipants().add(
+//                    new ParticipantResult(
+//                            userId,
+//                            userRepository.findById(userId)
+//                                    .orElseThrow(() -> new EntityNotFoundException("userId로 유저를 찾을 수 없습니다."))
+//                                    .getName(),
+//                            avatar.getAvatarImg()
+//                    )
+//            );
+//            resultRepository.save(result);
+
+            // 유저에게 반환
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
 
         } catch (Exception e) {
             log.error("파일 처리 중 오류 발생", e);
