@@ -3,6 +3,8 @@ package com.todock.marimo.domain.result.service;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
+import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
+import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
 import com.todock.marimo.domain.result.dto.StudentResultDto;
 import com.todock.marimo.domain.result.dto.TeacherResultDto;
 import com.todock.marimo.domain.result.dto.LessonResultDto;
@@ -17,13 +19,15 @@ public class ResultService {
 
     private final LessonRepository lessonRepository;
     private final ParticipantRepository participantRepository;
+    private final LessonMaterialRepository lessonMaterialRepository;
 
     @Autowired
     public ResultService(
             LessonRepository lessonRepository
-            , ParticipantRepository participantRepository) {
+            , ParticipantRepository participantRepository, LessonMaterialRepository lessonMaterialRepository) {
         this.lessonRepository = lessonRepository;
         this.participantRepository = participantRepository;
+        this.lessonMaterialRepository = lessonMaterialRepository;
     }
 
 
@@ -53,6 +57,7 @@ public class ResultService {
         return lesson.getPhotoUrl();
     }*/
 
+
     /**
      * 선생님이 참가한 모든 수업 조회
      */
@@ -70,8 +75,25 @@ public class ResultService {
      */
     public LessonResultDto lessonDetail(Long lessonId) {
 
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new IllegalArgumentException("lessonId로 수업을 찾을 수 없습니다."));
+
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId())
+                .orElseThrow(() -> new IllegalArgumentException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."));
 
         LessonResultDto lessonResultDto = new LessonResultDto();
+
+//        LessonResultDto lessonResultDto = new LessonResultDto(
+//                lessonMaterial.getBookTitle(),
+//                lessonMaterial.getBookContents(),
+//                lessonMaterial.getQuizList(),
+//                lessonMaterial.getOpenQuestionList(),
+//                lessonMaterial.getLessonRoleList(),
+//                lesson.getParticipantList(),
+//                lesson.getAvatarList(),
+//                lesson.getHotSitting(),
+//                lesson.getPhotoUrl()
+//                )
 
         return lessonResultDto;
 
