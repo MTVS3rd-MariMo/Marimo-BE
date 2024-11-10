@@ -6,8 +6,6 @@ import com.todock.marimo.domain.lesson.entity.avatar.Animation;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
-import com.todock.marimo.domain.result.entity.ParticipantResult;
-import com.todock.marimo.domain.result.entity.Result;
 import com.todock.marimo.domain.result.repository.ResultRepository;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -47,10 +45,10 @@ public class AvatarService {
     private final UserRepository userRepository;
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
-    private String serverHost = "125.132.216.28";
+    private String serverHost = "211.250.74.75";
     // 125.132.216.190:8202
     //@Value("${server.port}")
-    private String serverPort = "8203";
+    private String serverPort = "8202";
 
     private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;

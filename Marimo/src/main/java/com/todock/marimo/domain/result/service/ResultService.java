@@ -9,6 +9,7 @@ import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
 import com.todock.marimo.domain.result.dto.*;
 import com.todock.marimo.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -101,7 +102,9 @@ public class ResultService {
 
         // 참가자 목록 설정
         List<ParticipantDto> participants = lesson.getParticipantList().stream()
-                .map(participant -> new ParticipantDto(userRepository.findNameByUserId(participant.getUserId())))
+                .map(participant -> new ParticipantDto(userRepository.findById(participant.getUserId())
+                        .orElseThrow(()-> new EntityNotFoundException("userId로 유저를 찾을 수 없습니다."))
+                        .getName()))
                 .collect(Collectors.toList());
         lessonResultDto.setParticipants(participants); // 참가자 리스트 설정
 
@@ -123,7 +126,9 @@ public class ResultService {
                         question.getQuestion(),
                         question.getOpenQuestionAnswerList().stream()
                                 .map(answer -> new ResultAnswerDto(
-                                        userRepository.findNameByUserId(answer.getUserId()),
+                                        userRepository.findById(answer.getUserId())
+                                                .orElseThrow(()->new EntityNotFoundException("userId로 유저를 찾을 수 없습니다."))
+                                                .getName(),
                                         answer.getAnswer()))
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
