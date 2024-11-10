@@ -7,6 +7,7 @@ import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lessonmaterial.dto.*;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialNameResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionForLessonResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
@@ -69,44 +70,51 @@ public class LessonMaterialService {
      * pdf 업로드
      */
     @Transactional
-    public LessonMaterialResponseDto sendPdfToAiServer(MultipartFile pdf) {
+    public LessonMaterialResponseDto sendPdfToAiServer(MultipartFile pdf, Long userId) {
         try {
 
             // 1. AI 서버 URI 설정
             String AIServerUrI = "http://metaai2.iptime.org:7993/pdfupload";
+            log.info("AI 서버 URI 설정: {}", AIServerUrI);
 
             // 2. HttpHeaders 설정(멀티파트 형식 지정)
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            log.info("HTTP 헤더 설정 완료 - ContentType: {}", headers.getContentType());
 
             // 3. PDF 파일을 멀티파트 형식으로 Wrapping
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("pdf", new ByteArrayResource(pdf.getBytes()) {
                 @Override
                 public String getFilename() {
+                    log.info("파일 원본 이름: {}", pdf.getOriginalFilename());
                     return pdf.getOriginalFilename(); // 파일 이름 설정
                 }
             });
 
             // 4. HttpEntity 생성
             HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+            log.info("HttpEntity 생성 완료 - Request: {}", request);
 
             // 5. AI 서버로 요청 전송
             ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, request, String.class);
+            log.info("AI 서버 응답 수신 - Status: {}, Body: {}", response.getStatusCode(), response.getBody());  // 응답 로그
 
             // 확인용 응답 로그
             log.info("AI 서버 응답: {}", response.getBody());
 
             // 파일 이름에서 확장자를 제거
             String originalPdfName = pdf.getOriginalFilename();
-            // 확장자가 없거나 다른 경우 그대로 사용
+            String pdfName = (originalPdfName != null && originalPdfName.endsWith(".pdf"))
+                    ? originalPdfName.substring(0, originalPdfName.length() - 4) // .pdf 제거
+                    : originalPdfName;
+            log.info("PDF 이름에서 확장자 제거 후: {}", pdfName);
 
             // 6. AI 서버에서 받은 JSON 반환
-            return parseLessonMaterialJson(response.getBody(), (originalPdfName != null && originalPdfName.endsWith(".pdf"))
-                    ? originalPdfName.substring(0, originalPdfName.length() - 4) // .pdf 제거
-                    : originalPdfName);
+            return parseLessonMaterialJson(userId, response.getBody(), pdfName); // 수정된 파일 이름 사용
 
         } catch (Exception e) { // 예외 처리 로직 추가
+            log.error("파일 전송 중 오류 발생: {}", e.getMessage(), e);
             throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
         }
     }
@@ -115,14 +123,16 @@ public class LessonMaterialService {
     /**
      * AI 반환 Json 파싱 메서드
      */
-    private LessonMaterialResponseDto parseLessonMaterialJson(String jsonResponse, String pdfName) throws Exception {
+    private LessonMaterialResponseDto parseLessonMaterialJson(Long userId, String jsonResponse, String pdfName) throws Exception {
 
         JsonNode root = objectMapper.readTree(jsonResponse);
 
         // LessonMaterial 객체 생성
-        LessonMaterial lessonMaterial = new LessonMaterial();
-        lessonMaterial.setUserId(1L);// 임시 userId 생성
-        //lessonMaterial.setUserId(lessonMaterial.getUserId());
+        LessonMaterial lessonMaterial = new LessonMaterial(
+                userId
+        );
+
+        lessonMaterial.setUserId(lessonMaterial.getUserId());
         lessonMaterial.setBookTitle(pdfName); // 책 제목
         lessonMaterial.setBookContents(root.path("pdftext").asText("")); // 책 내용
 
@@ -146,6 +156,7 @@ public class LessonMaterialService {
         List<OpenQuestionResponseDto> openQuestionDtos = new ArrayList<>();
 
         JsonNode openQuestionsNode = root.path("open_questions"); //  라는 JSON에서 open_questions 노드 찾기
+
         if (!openQuestionsNode.isMissingNode()) { // 있으면
             openQuestionsNode.forEach(questionNode -> {
                 String questionText = questionNode.path("question").asText(""); // question 노드 찾아서 추출
@@ -235,10 +246,10 @@ public class LessonMaterialService {
      * 유저 id로 유저의 수업 자료 전체 조회
      */
     public List<LessonMaterialNameResponseDto> getLessonMaterialByUserId(Long userId) {
-        
+
         validateUserRole(userId); // 선생님 검증
-        
-        List<LessonMaterialNameResponseDto> lessonMaterialNameList =  lessonMaterialRepository.findByUserId(userId)
+
+        List<LessonMaterialNameResponseDto> lessonMaterialNameList = lessonMaterialRepository.findByUserId(userId)
                 .stream()
                 .map(dto -> new LessonMaterialNameResponseDto(dto.getLessonMaterialId(), dto.getBookTitle()))
                 .collect(Collectors.toList());
@@ -259,7 +270,7 @@ public class LessonMaterialService {
     /**
      * 수업 lessonId로 수업용 수업 상세 자료 조회
      */
-    public StudentLessonMaterialDto getLessonMaterialById(Long lessonId) {
+    public ParticipantLessonMaterialDto getLessonMaterialById(Long lessonId) {
 
         Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
         // lessonMaterial 조회
@@ -267,8 +278,10 @@ public class LessonMaterialService {
                 .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + lessonId));
 
         // openQuestions 변환
-        List<OpenQuestionResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
-                .map(openQuestion -> new OpenQuestionResponseDto(openQuestion.getQuestion()))
+        List<OpenQuestionForLessonResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
+                .map(openQuestion -> new OpenQuestionForLessonResponseDto(
+                        openQuestion.getOpenQuestionId(),
+                        openQuestion.getQuestion()))
                 .toList();
 
         // quizzes 변환
@@ -290,7 +303,7 @@ public class LessonMaterialService {
                 .toList();
 
         // TeacherLessonMaterialDto 생성 및 반환
-        return new StudentLessonMaterialDto(
+        return new ParticipantLessonMaterialDto(
                 lessonMaterial.getBookTitle(),
                 lessonMaterial.getBookContents(),
                 quizzes,

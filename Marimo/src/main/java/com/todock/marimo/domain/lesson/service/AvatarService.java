@@ -87,7 +87,7 @@ public class AvatarService {
 
         try {
             // 1. AI 서버 URI 설정
-            String AIServerUrI = "http://metaai2.iptime.org:64987/animation/";
+            String AIServerUrI = "http://metaai2.iptime.org:62987/animation/";
 
             // 2. HttpHeaders 설정
             HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성

@@ -1,4 +1,4 @@
-package com.todock.marimo.domain.lesson.dto;
+package com.todock.marimo.domain.result.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ParticipantDto {
+public class LessonRoleResultDto {
 
-    private String userName; // 참가자 id
-
+    private String userName;
+    private String character;
 }

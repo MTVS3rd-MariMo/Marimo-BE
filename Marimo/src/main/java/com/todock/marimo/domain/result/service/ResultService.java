@@ -44,24 +44,25 @@ public class ResultService {
     /**
      * 학생이 참가한 수업 사진 상세 조회 - photo 반환
      */
+    /*
     public String findPhotoByLessonId(Long lessonId) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new IllegalArgumentException("lessonId로 수업을 찾을수 없습니다."));
 
         return lesson.getPhotoUrl();
-    }
+    }*/
 
     /**
      * 선생님이 참가한 모든 수업 조회
      */
-    public List<TeacherResultDto> findAllLessons(Long userId) {
-
-        participantRepository.findAllByUserId(userId);
-         TeacherResultDto teacherResultDto;
-       return teacherResultDto;
-
-    }
+//    public List<TeacherResultDto> findAllLessons(Long userId) {
+//
+//        participantRepository.findAllByUserId(userId);
+//         TeacherResultDto teacherResultDto;
+//       return teacherResultDto;
+//
+//    }
 
 
     /**
@@ -70,7 +71,8 @@ public class ResultService {
     public LessonResultDto lessonDetail(Long lessonId) {
 
 
-        LessonResultDto lessonResultDto;
+        LessonResultDto lessonResultDto = new LessonResultDto();
+
         return lessonResultDto;
 
     }

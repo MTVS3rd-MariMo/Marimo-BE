@@ -1,6 +1,6 @@
 package com.todock.marimo.domain.lessonmaterial.dto;
 
-import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionForLessonResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentLessonMaterialDto {
+public class ParticipantLessonMaterialDto {
 
 
     private String bookTitle;
@@ -26,7 +26,7 @@ public class StudentLessonMaterialDto {
 
     private List<LessonQuizDto> quizzes = new ArrayList<>();
 
-    private List<OpenQuestionResponseDto> openQuestions = new ArrayList<>();
+    private List<OpenQuestionForLessonResponseDto> openQuestions = new ArrayList<>();
 
     private List<String> lessonRoles = new ArrayList<>();
 }

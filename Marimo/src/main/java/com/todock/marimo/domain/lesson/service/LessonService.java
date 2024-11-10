@@ -65,7 +65,7 @@ public class LessonService {
 
 
     /**
-     * 수업 생성 - lessonMaterialId를 받고 수업 자료와 LessonId 및 LessonMaterial 반환
+     * 수업 생성 - lessonMaterialId를 받고 수업 자료와 LessonId 반환
      */
     public Long createLesson(Long userId, Long lessonMaterialId) {
 
@@ -73,9 +73,12 @@ public class LessonService {
         Lesson newlesson = new Lesson(// 수업에 lessonMaterial 넣어서 수업으로 찾을 수 있게 함
                 lessonMaterialId
         );
+
         lessonRepository.save(newlesson); // 저장 후 ID가 생성됨
         Long lessonId = newlesson.getLessonId(); // lessonId 추출
-        log.info("lessonId : {}", lessonId);
+        log.info("\n\n생성된 lessonId : {}\n\n", lessonId);
+        log.info("\n\n적용된 lessonMaterialId : {}\n\n", newlesson.getLessonMaterialId());
+
         // 선생님을 참가자 목록에 추가하기 - 필요 없다고 함
         // updateUserByLessonId(userId, lessonId);
 
@@ -107,6 +110,7 @@ public class LessonService {
 //                .toList();
 
         // TeacherLessonMaterialDto 생성 및 반환
+
         return lessonId;
     }
 

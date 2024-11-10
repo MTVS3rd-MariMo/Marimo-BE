@@ -84,14 +84,16 @@ public class LessonMaterialController {
     })
     @PostMapping("/upload-pdf")
     public ResponseEntity<LessonMaterialResponseDto> sendPdfToAiServer(
-            @RequestParam("pdf") MultipartFile pdfFile) {
+            @RequestHeader("userId") Long userId,
+            @RequestParam("pdf") MultipartFile pdfFile
+    ) {
 
         if (pdfFile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } // 파일 용량 null 확인
 
         LessonMaterialResponseDto lessonMaterialResponseDto
-                = lessonMaterialService.sendPdfToAiServer(pdfFile);
+                = lessonMaterialService.sendPdfToAiServer(pdfFile, userId);
         log.info("수정한 값: {}", lessonMaterialResponseDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(lessonMaterialResponseDto);

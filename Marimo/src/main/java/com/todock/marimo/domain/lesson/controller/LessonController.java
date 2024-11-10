@@ -3,7 +3,7 @@ package com.todock.marimo.domain.lesson.controller;
 import com.todock.marimo.domain.lesson.dto.ParticipantListDto;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.service.LessonService;
-import com.todock.marimo.domain.lessonmaterial.dto.StudentLessonMaterialDto;
+import com.todock.marimo.domain.lessonmaterial.dto.ParticipantLessonMaterialDto;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,9 +40,9 @@ public class LessonController {
 
 
     /**
-     * 수업 생성 - lessonMaterialId를 받고 수업자료와 LessonId와 LessonMaterial 반환
+     * 수업 생성 - userId와 lessonMaterialId를 받고 수업 생성 후 LessonId 반환
      */
-    @Operation(summary = "수업 생성", description = "lessonMaterialId를 받고 새로운 수업을 생성하여 반환합니다.")
+    @Operation(summary = "수업 생성", description = "userId와 lessonMaterialId를 받고 수업 생성 후 LessonId 반환합니다.")
     @PostMapping("/{lessonMaterialId}")
     public ResponseEntity<Long> createLesson(
             @Parameter(description = "선생님의 사용자 ID", example = "3", required = true) @RequestHeader(value = "userId", required = false) Long userId,
@@ -92,18 +92,18 @@ public class LessonController {
 
 
     /**
-     * 수업 중 학생용 lessonMaterialId로 수업용 수업자료 상세 조회
+     * 수업 중  lessonId로 수업용 수업자료 상세 조회
      */
     @Operation(summary = "학생용 수업 자료 조회", description = "수업 중 학생이 조회할 수업 자료의 상세 정보를 반환합니다.")
     @GetMapping("/{lessonId}")
-    public ResponseEntity<StudentLessonMaterialDto> getLessonMaterial(
+    public ResponseEntity<ParticipantLessonMaterialDto> getLessonMaterial(
             @Parameter(description = "조회하려는 수업 자료 ID", example = "101", required = true) @PathVariable("lessonId") Long lessonId) {
 
         log.info("getLessonId: {}", lessonId);
 
-        StudentLessonMaterialDto studentLessonMaterialDto = lessonMaterialService.getLessonMaterialById(lessonId);
+        ParticipantLessonMaterialDto participantLessonMaterialDto = lessonMaterialService.getLessonMaterialById(lessonId);
 
-        return ResponseEntity.ok(studentLessonMaterialDto);
+        return ResponseEntity.ok(participantLessonMaterialDto);
     }
 
 

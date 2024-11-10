@@ -70,6 +70,11 @@ public class LessonMaterial {
         this.lessonRoleList = lessonRoleList;
     }
 
+    public LessonMaterial(Long userId) {
+        this.userId = userId;
+    }
+
+
     public void addQuiz(Quiz quiz) {
         quiz.setLessonMaterial(this); // Quiz 엔티티에 LessonMaterial 설정
         this.quizList.add(quiz); // LessonMaterial의 quizList에 Quiz 추가

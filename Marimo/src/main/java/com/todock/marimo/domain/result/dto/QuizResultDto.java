@@ -1,5 +1,6 @@
-package com.todock.marimo.domain.lesson.dto;
+package com.todock.marimo.domain.result.dto;
 
+import com.todock.marimo.domain.lessonmaterial.dto.QuizDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,8 +10,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ParticipantDto {
+public class QuizResultDto {
 
-    private String userName; // 참가자 id
+    private QuizDto quiz;
 
 }
