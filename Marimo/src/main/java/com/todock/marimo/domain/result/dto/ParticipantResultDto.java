@@ -16,8 +16,5 @@ public class ParticipantResultDto {
 
     private String userName; // 참가자 id
 
-    public ParticipantResultDto(String userName, String avatarUrl) {
-        this.userName = userName;
-    }
 }
 

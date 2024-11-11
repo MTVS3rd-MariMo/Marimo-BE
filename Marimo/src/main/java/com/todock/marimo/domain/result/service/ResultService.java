@@ -1,6 +1,5 @@
 package com.todock.marimo.domain.result.service;
 
-import com.todock.marimo.domain.lesson.dto.ParticipantDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
@@ -12,6 +11,7 @@ import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialReposito
 import com.todock.marimo.domain.result.dto.*;
 import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -82,6 +82,34 @@ public class ResultService {
 
 
     /**
+     * 선생님이 참가한 모든 수업 조회 (lessonId, 책 제목, 참가자 리스트, 생성 날짜)
+     */
+    public List<TeacherResultDto> findAllLessons(Long userId) {
+
+        return lessonRepository.findAllByParticipantListUserId(userId)
+                .stream()
+                .map(lesson -> new TeacherResultDto(
+                                lesson.getLessonId(),
+                                lessonMaterialRepository
+                                        .findById(lesson.getLessonId())
+                                        .orElseThrow(() ->
+                                                new EntityNotFoundException
+                                                        ("lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
+                                        .getBookTitle(),
+
+                                lesson.getParticipantList()
+                                        .stream()
+                                        .map(participant -> new ParticipantResultDto(
+                                                participant.getParticipantName()
+                                        ))
+                                        .toList(),
+                                lesson.getCreatedAt()
+                        )
+                ).toList();
+    }
+
+
+    /**
      * 선생님이 참가한 수업 상세 조회
      */
     public LessonResultDto lessonDetail(Long lessonId) {
@@ -98,6 +126,7 @@ public class ResultService {
         LessonResultDto lessonResultDto = new LessonResultDto(
                 lessonMaterial.getBookTitle(),
                 lessonMaterial.getBookContents(),
+                lesson.getCreatedAt(),
                 lesson.getPhotoUrl()
         );
 
@@ -149,7 +178,7 @@ public class ResultService {
                 .collect(Collectors.toList());
         lessonResultDto.setQuizzes(quizzes); // 퀴즈 리스트 설정
 
-// 역할 설정과 아바타 이미지 설정을 통합
+        // 역할 설정과 아바타 이미지 설정을 통합
         List<LessonRoleResultDto> roles = lesson.getAvatarList().stream()
                 .map(role -> {
                     // 해당 역할에 매칭되는 아바타 찾기
@@ -175,6 +204,5 @@ public class ResultService {
 
         return lessonResultDto;
     }
-
 
 }

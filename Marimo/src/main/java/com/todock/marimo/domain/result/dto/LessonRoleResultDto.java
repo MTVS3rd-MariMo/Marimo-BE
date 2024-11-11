@@ -16,9 +16,4 @@ public class LessonRoleResultDto {
     private String character;
 
     private String avatarUrl;
-
-    public LessonRoleResultDto(String character, String avatarUrl) {
-        this.character = character;
-        this.avatarUrl = avatarUrl;
-    }
 }

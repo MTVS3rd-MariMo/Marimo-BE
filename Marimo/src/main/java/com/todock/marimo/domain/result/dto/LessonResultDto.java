@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class LessonResultDto {
 
     // 책 내용
     private String bookContents;
+
+    // 수업 생성 시간
+    private LocalDateTime createdAt;
 
     // 참가자
     private List<ParticipantResultDto> participants = new ArrayList<>();
@@ -45,9 +49,10 @@ public class LessonResultDto {
     // 사진
     private String photoUrl;
 
-    public LessonResultDto(String bookTitle, String bookContents, String photoUrl) {
+    public LessonResultDto(String bookTitle, String bookContents, LocalDateTime createdAt, String photoUrl) {
         this.bookTitle = bookTitle;
         this.bookContents = bookContents;
+        this.createdAt = createdAt;
         this.photoUrl = photoUrl;
     }
 }

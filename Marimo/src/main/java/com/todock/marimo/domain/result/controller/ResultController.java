@@ -35,28 +35,15 @@ public class ResultController {
 
 
     /**
-     * 학생이 참가한 수업 사진 조회 - photo 반환
-     */
-    /*
-    @GetMapping("/{lessonId}")
-    public ResponseEntity<String> getPhoto(@PathVariable("lessonId") Long lessonId) {
-
-        return ResponseEntity.ok(resultService.findPhotoByLessonId(lessonId));
-
-    }*/
-
-
-    /**
      * 선생님이 참가한 모든 수업 조회 ( 참가자 이름?)
      */
-    /*
-    @GetMapping
+    @GetMapping("/teacher")
     public ResponseEntity<List<TeacherResultDto>> getLessonList(
             @RequestHeader("userId") Long userId) {
 
         return ResponseEntity.ok().body(resultService.findAllLessons(userId));
     }
-    */
+
 
 
     /**

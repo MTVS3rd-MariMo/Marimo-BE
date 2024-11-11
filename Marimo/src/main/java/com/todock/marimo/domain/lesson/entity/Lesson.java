@@ -6,6 +6,7 @@ import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,13 @@ public class Lesson {
     @Column(name = "photo_background_url")
     private String photoBackgroundUrl; // 단체사진 배경
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt; // 수업 생성 날짜
+
     public Lesson(Long lessonMaterialId) {
+
+        this.createdAt = LocalDateTime.now(); // 생성 시 현재 날짜 표시
         this.lessonMaterialId = lessonMaterialId;
+        
     }
 }
