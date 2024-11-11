@@ -86,7 +86,7 @@ public class ResultService {
      */
     public List<TeacherResultDto> findAllLessons(Long userId) {
 
-        return lessonRepository.findAllByParticipantListUserId(userId)
+        return lessonRepository.findAllByUserId(userId)
                 .stream()
                 .map(lesson -> new TeacherResultDto(
                                 lesson.getLessonId(),
