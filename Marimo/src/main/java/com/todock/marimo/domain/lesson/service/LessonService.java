@@ -2,6 +2,7 @@ package com.todock.marimo.domain.lesson.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.todock.marimo.domain.lesson.dto.BackgroundRequestDto;
 import com.todock.marimo.domain.lesson.dto.ParticipantListDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.Participant;
@@ -18,11 +19,15 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +42,7 @@ public class LessonService {
     private final LessonMaterialRepository lessonMaterialRepository;
     private final ResultRepository resultRepository;
     private final RestTemplate restTemplate;
+
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
     private String serverHost = "211.250.74.75";
@@ -48,26 +54,32 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final UserRepository userRepository;
 
+    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png");
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final String PHOTO_DIR = "data/photo"; // zip 파일 저장 경로
+    private static final String BACKGROUND_DIR = "data/background"; // 단체사진 배경 저장 경로
 
     @Autowired
     public LessonService(LessonMaterialRepository lessonMaterialRepository
             , ParticipantRepository participantRepository
+            , ResultRepository resultRepository
             , LessonRepository lessonRepository
-            , UserRepository userRepository, ResultRepository resultRepository, RestTemplate restTemplate) {
+            , UserRepository userRepository
+            , RestTemplate restTemplate) {
+        this.lessonMaterialRepository = lessonMaterialRepository;
         this.participantRepository = participantRepository;
+        this.resultRepository = resultRepository;
         this.lessonRepository = lessonRepository;
         this.userRepository = userRepository;
-        initDirectories();
-        this.lessonMaterialRepository = lessonMaterialRepository;
-        this.resultRepository = resultRepository;
         this.restTemplate = restTemplate;
+        initDirectories();
     }
 
     // 필요한 디렉토리를 초기화 하는 메서드
     public void initDirectories() {
         try { // 디렉토리 생성
             Files.createDirectories(Paths.get(PHOTO_DIR)); // PHOTO 파일 저장 경로
+            Files.createDirectories(Paths.get(BACKGROUND_DIR)); // PHOTO 파일 저장 경로
 
         } catch (IOException e) {
             throw new RuntimeException("디렉토리 생성 실패", e);
@@ -169,51 +181,64 @@ public class LessonService {
 
 
     /**
-     * 파일 경로를 URL 형식으로 변환
-     */
-    private String createFileUrl(String filePath) {
-        // 파일 경로에서 중복된 루트 디렉토리를 제거
-        String relativePath = filePath.replace("\\", "/");
-        return "http://" + serverHost + ":" + serverPort + "/data/photo/" + relativePath;
-    }
-
-    /**
      * 사진관에서 사용할 배경 생성 요청
      */
     public void createBackground(Long lessonId) {
-
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다. lessonId : " + lessonId));
 
-        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId())
-                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."));
+        // AI 서버로 보낼 책 내용 추출
+        BackgroundRequestDto backgroundDto = new BackgroundRequestDto(
+                lessonMaterialRepository.findById(lesson.getLessonMaterialId())
+                        .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다. : " + lesson.getLessonMaterialId())).getBookContents()
+        );
 
-        String AIRequest = lessonMaterial.getBookContents();
-
+        // AI 통신
         try {
-            // 1. AI 서버 URI 설정
-            String AIServerUrI = "AI_SERVER_URI";
 
-            // 2. HttpHeaders 설정
-            HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            String AIServerURI = "http://metaai2.iptime.org:7994/marimobackground";
 
-            // 요청에 사용될 HttpEntity 생성
-            HttpEntity<String> requestEntity = new HttpEntity<>(AIRequest, headers);
+            HttpHeaders headers = new HttpHeaders(); // 헤더 설정
+            headers.setContentType(MediaType.APPLICATION_JSON); // JSON으로 설정
 
-            // AI 서버로 POST 요청 전송
-            ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, requestEntity, String.class);
-            if (response.getStatusCode() == HttpStatus.OK) {
-                log.info("AI 서버로 파일 전송 성공: {}", response.getBody());
-                saveAIResponse(response.getBody());
-            } else {
-                throw new RuntimeException("AI 서버로 파일 전송 실패 - 상태 코드: " + response.getStatusCode());
+            HttpEntity<BackgroundRequestDto> requestEntity = new HttpEntity<>(backgroundDto, headers);
+
+            // AI 서버 응답
+            ResponseEntity<byte[]> AIResponse = restTemplate.exchange(
+                    AIServerURI, HttpMethod.POST, requestEntity, byte[].class);
+
+            if (AIResponse.getStatusCode() != HttpStatus.OK) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST
+                        , "AI 서버에서 이미지를 가져오는 데 실패함. Status: " + AIResponse.getStatusCode());
             }
-        } catch (Exception e) {
-            log.error("AI 서버로 파일 전송 중 예외 발생", e);
-            throw new RuntimeException("AI 서버로 파일 전송 중 오류 발생", e);
-        }
 
+            byte[] backgroundFileBytes = AIResponse.getBody();
+            String fileName = UUID.randomUUID().toString() + ".png";
+            Path zipPath = Paths.get(BACKGROUND_DIR, fileName).normalize();
+
+            if (!zipPath.startsWith(Paths.get(BACKGROUND_DIR))) {
+                throw new SecurityException("Invalid file path detected.");
+            }
+
+            Files.write(zipPath, backgroundFileBytes);
+            lesson.setPhotoBackgroundUrl(createFileUrl(fileName));
+            lessonRepository.save(lesson);
+
+        } catch (Exception e) {
+            log.error("Exception while sending file to AI server", e);
+            throw new RuntimeException("Error occurred while processing AI server request", e);
+        }
+    }
+
+
+    /**
+     * 배경사진 호출
+     */
+    public String getPhotoBackgroundUrl(Long lessonId) {
+
+        return lessonRepository.findById(lessonId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("lessonId로 수업을 조회할 수 없습니다.")).getPhotoBackgroundUrl();
     }
 
     /**
@@ -222,4 +247,15 @@ public class LessonService {
     private void saveAIResponse(String responseBody) {
 
     }
+
+
+    /**
+     * 파일 경로를 URL 형식으로 변환
+     */
+    private String createFileUrl(String filePath) {
+        // 파일 경로에서 중복된 루트 디렉토리를 제거
+        String relativePath = filePath.replace("\\", "/");
+        return "http://" + serverHost + ":" + serverPort + "/data/photo/" + relativePath;
+    }
+
 }

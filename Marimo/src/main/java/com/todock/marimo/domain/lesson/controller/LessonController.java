@@ -168,7 +168,7 @@ public class LessonController {
     /**
      * 배경사진 제작 요청 - AI서버에 pdf 텍스트를 보내서 단체사진 배경 제작 요청
      */
-    @PutMapping("/backGround/{lessonId}")
+    @PutMapping("/photo/background/{lessonId}")
     public ResponseEntity<String> getBackGround(
             @PathVariable("lessonId") Long lessonId) {
 
@@ -176,7 +176,18 @@ public class LessonController {
 
         lessonService.createBackground(lessonId);
 
-        return ResponseEntity.ok("사진관 배경 요청을 보냈습니다.");
+        return ResponseEntity.ok("사진관 배경을 생성했습니다.");
+    }
+
+
+    /**
+     * 배경사진 호출
+     */
+    @GetMapping("/photo/background/{lessonId}")
+    public ResponseEntity<String> getPhotoBackground(
+            @PathVariable("lessonId") Long lessonId) {
+
+        return ResponseEntity.ok().body(lessonService.getPhotoBackgroundUrl(lessonId));
     }
 
     /**

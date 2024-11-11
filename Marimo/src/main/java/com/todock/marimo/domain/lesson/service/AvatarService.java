@@ -117,6 +117,7 @@ public class AvatarService {
             ResponseEntity<byte[]> AIResponse = restTemplate.postForEntity(
                     AIServerUrI, request, byte[].class);
 
+
             // 고유한 zip 파일명 생성
             String zipFileName = UUID.randomUUID().toString() + ".zip";
 

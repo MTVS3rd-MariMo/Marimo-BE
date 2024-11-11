@@ -1,6 +1,7 @@
 package com.todock.marimo.domain.lesson.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
@@ -51,6 +52,7 @@ public class Lesson {
     private String photoBackgroundUrl; // 단체사진 배경
 
     @Column(name = "created_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 hh시 mm분")
     private LocalDateTime createdAt; // 수업 생성 날짜
 
     public Lesson(Long createdUserId, Long lessonMaterialId) {
@@ -61,8 +63,4 @@ public class Lesson {
         
     }
 
-    public String getFormattedCreatedAt() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 hh시 mm분");
-        return this.createdAt.format(formatter);
-    }
 }
