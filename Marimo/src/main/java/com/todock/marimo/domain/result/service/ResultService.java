@@ -150,11 +150,11 @@ public class ResultService {
         lessonResultDto.setQuizzes(quizzes); // 퀴즈 리스트 설정
 
 // 역할 설정과 아바타 이미지 설정을 통합
-        List<LessonRoleResultDto> roles = lessonMaterial.getLessonRoleList().stream()
+        List<LessonRoleResultDto> roles = lesson.getAvatarList().stream()
                 .map(role -> {
                     // 해당 역할에 매칭되는 아바타 찾기
                     Avatar avatar = lesson.getAvatarList().stream()
-                            .filter(a -> a.getCharacter() != null && a.getCharacter().equals(role.getRoleName()))
+                            .filter(a -> a.getCharacter() != null && a.getCharacter().equals(role.getCharacter()))
                             .findFirst()
                             .orElse(null);
 
@@ -164,7 +164,7 @@ public class ResultService {
                             .orElse("Unknown User") : "Unknown User";
 
                     return new LessonRoleResultDto(
-                            role.getRoleName(), // 역할 이름
+                            role.getCharacter(), // 역할 이름
                             avatarUrl, // 아바타 이미지 URL
                             userName
                     );
