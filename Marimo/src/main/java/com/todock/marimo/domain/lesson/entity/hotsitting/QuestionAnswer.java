@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lesson.entity.hotsitting;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class QuestionAnswer {
     private Long questionAnswerId;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "self_introduce_id")
     private SelfIntroduce selfIntroduce; // 핫시팅에 연결된 질문-답변
 

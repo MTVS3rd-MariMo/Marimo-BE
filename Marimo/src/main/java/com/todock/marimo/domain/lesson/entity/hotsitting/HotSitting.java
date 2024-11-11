@@ -1,5 +1,7 @@
 package com.todock.marimo.domain.lesson.entity.hotsitting;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,13 +22,15 @@ public class HotSitting {
     private Long hotSittingId; // 핫시팅 id
 
     @OneToOne
+    @JsonBackReference
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
-    @OneToMany(mappedBy = "hotSitting", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    @OneToMany(mappedBy = "hotSitting", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<SelfIntroduce> selfIntroduces = new ArrayList<>();
 
-//    public HotSitting(Lesson lesson) {
-//        this.lesson = lesson;
-//    }
+    public HotSitting(List<SelfIntroduce> selfIntroduces) {
+        this.selfIntroduces = selfIntroduces;
+    }
 }

@@ -1,12 +1,15 @@
 package com.todock.marimo.domain.lesson.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
+import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,13 +27,18 @@ public class Lesson {
     @Column(name = "lesson_id")
     private Long lessonId; // 수업 id
 
+    @Column(name="created_user_id")
+    private Long createdUserId;
+
     @Column(name = "lesson_material_id")
     private Long lessonMaterialId; // 사용한 수업 자료
 
-    @OneToMany(mappedBy = "lesson")
+    @JsonManagedReference
+    @OneToMany(mappedBy = "lesson", fetch = FetchType.LAZY)
     private List<Participant> participantList = new ArrayList<>(); // 참가자 목록
 
-    @OneToMany(mappedBy = "lesson")
+    @JsonManagedReference
+    @OneToMany(mappedBy = "lesson", fetch = FetchType.LAZY)
     private List<Avatar> avatarList = new ArrayList<>(); // 아바타 목록
 
     @OneToOne(mappedBy = "lesson")
@@ -45,10 +53,16 @@ public class Lesson {
     @Column(name = "created_at")
     private LocalDateTime createdAt; // 수업 생성 날짜
 
-    public Lesson(Long lessonMaterialId) {
+    public Lesson(Long createdUserId, Long lessonMaterialId) {
 
         this.createdAt = LocalDateTime.now(); // 생성 시 현재 날짜 표시
+        this.createdUserId = createdUserId;
         this.lessonMaterialId = lessonMaterialId;
         
+    }
+
+    public String getFormattedCreatedAt() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 hh시 mm분");
+        return this.createdAt.format(formatter);
     }
 }

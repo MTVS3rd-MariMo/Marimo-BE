@@ -82,6 +82,7 @@ public class LessonService {
 
         // Lesson 생성 및 설정
         Lesson newlesson = new Lesson(// 수업에 lessonMaterial 넣어서 수업으로 찾을 수 있게 함
+                userId,
                 lessonMaterialId
         );
 

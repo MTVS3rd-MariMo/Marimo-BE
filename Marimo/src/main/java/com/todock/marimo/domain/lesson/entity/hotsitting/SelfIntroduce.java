@@ -1,5 +1,7 @@
 package com.todock.marimo.domain.lesson.entity.hotsitting;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,10 +30,12 @@ public class SelfIntroduce {
     private String contents;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "hot_sitting_id")
     private HotSitting hotSitting;
 
     // 여러 개의 질문/답변을 포함하는 일대다 관계 설정
+    @JsonManagedReference
     @OneToMany(mappedBy = "selfIntroduce", cascade = CascadeType.ALL)
     private List<QuestionAnswer> questionAnswers = new ArrayList<>();
 
@@ -39,5 +43,11 @@ public class SelfIntroduce {
         this.hotSitting = hotSitting;
         this.contents = contents;
         this.selfIntNum = selfIntNum;
+    }
+
+    public SelfIntroduce(Long selfIntNum, String contents, List<QuestionAnswer> questionAnswers) {
+        this.selfIntNum = selfIntNum;
+        this.contents = contents;
+        this.questionAnswers = questionAnswers;
     }
 }

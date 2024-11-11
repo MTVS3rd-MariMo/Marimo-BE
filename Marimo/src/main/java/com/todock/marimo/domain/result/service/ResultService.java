@@ -3,7 +3,6 @@ package com.todock.marimo.domain.result.service;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
-import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
@@ -25,17 +24,17 @@ public class ResultService {
     private final ParticipantRepository participantRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
     private final UserRepository userRepository;
-    private final AvatarRepository avatarRepository;
 
     @Autowired
     public ResultService(
             LessonRepository lessonRepository
-            , ParticipantRepository participantRepository, LessonMaterialRepository lessonMaterialRepository, UserRepository userRepository, AvatarRepository avatarRepository) {
+            , ParticipantRepository participantRepository,
+            LessonMaterialRepository lessonMaterialRepository,
+            UserRepository userRepository) {
         this.lessonRepository = lessonRepository;
         this.participantRepository = participantRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
         this.userRepository = userRepository;
-        this.avatarRepository = avatarRepository;
     }
 
 
@@ -86,15 +85,16 @@ public class ResultService {
      */
     public List<TeacherResultDto> findAllLessons(Long userId) {
 
-        return lessonRepository.findAllByUserId(userId)
+        return lessonRepository.findAllByCreatedUserId(userId)
                 .stream()
                 .map(lesson -> new TeacherResultDto(
-                                lesson.getLessonId(),
+                                lesson.getLessonMaterialId(),
                                 lessonMaterialRepository
-                                        .findById(lesson.getLessonId())
+                                        .findById(lesson.getLessonMaterialId())
                                         .orElseThrow(() ->
                                                 new EntityNotFoundException
-                                                        ("lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
+                                                        ("lesson.getLessonId : " + lesson.getLessonId()
+                                                                + "의 lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
                                         .getBookTitle(),
 
                                 lesson.getParticipantList()

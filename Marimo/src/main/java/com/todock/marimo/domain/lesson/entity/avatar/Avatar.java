@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lesson.entity.avatar;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import jakarta.persistence.*;
@@ -21,6 +22,7 @@ public class Avatar {
     private Long avatarId;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "lesson_id") // 수업 id
     private Lesson lesson;
 
@@ -35,7 +37,7 @@ public class Avatar {
 
     // 한 아바타에 애니메이션 두개
     @JsonManagedReference
-    @OneToMany(mappedBy = "avatar", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "avatar", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Animation> animations = new ArrayList<>();
 
     public Avatar(Long userId, String avatarImg, List<Animation> animations) {
