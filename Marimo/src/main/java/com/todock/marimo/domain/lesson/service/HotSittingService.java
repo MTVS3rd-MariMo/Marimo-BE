@@ -53,9 +53,11 @@ public class HotSittingService {
         Long selfIntNum = wavDto.getSelfIntNum();
         log.info("Received selfIntNum: {}, lessonId: {}", selfIntNum, lessonId);
 
+        // 아바타에 캐릭터명 저장
         Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
                 .orElseThrow(() -> new EntityNotFoundException("lessonId와 userId로 아바타를 찾을 수 없습니다."));
-        if(avatar.getCharacter() != null) { // 만약 캐릭터명이 있다면 추가
+        // 아바타가 존재하지 않을 경우 전달받은 캐릭터 이름으로 업데이트
+        if(avatar.getCharacter() == null) {
             avatar.setCharacter(wavDto.getCharacter());
         }
 
