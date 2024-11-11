@@ -43,6 +43,7 @@ public class AvatarController {
     public ResponseEntity<List<AvatarResponseDto>> getAvatar(Long lessonId) {
 
         List<AvatarResponseDto> avatarList = avatarService.findByLessonId(lessonId);
+        log.info("AvatarController avatarList: {}", avatarList);
 
         return ResponseEntity.ok(avatarList);
     }
@@ -127,13 +128,12 @@ public class AvatarController {
             } catch (IOException e) {
                 log.error("이미지 파일 검증 중 오류 발생", e);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                        .body("이미지 파일 검증 중 오류가 발생했습니다.");
                         .body(null);
             }
 
             // 5. 서비스 호출
             AvatarResponseDto avatarResponseDto = avatarService.sendImgToAiServer(userId, lessonId, img);
-
+            log.info("avatarResponseDto : {}", avatarResponseDto);
             return ResponseEntity.status(HttpStatus.OK)
                     //.body("Img 파일 " + originalFilename + "이 성공적으로 업로드되었습니다.");
                     .body(avatarResponseDto);
@@ -153,9 +153,11 @@ public class AvatarController {
     @GetMapping("/participant/{lessonId}/{userId}")
     public ResponseEntity<AvatarResponseDto> getAvatarForParticipant(@PathVariable("lessonId") Long lessonId, @PathVariable("userId") Long userId) {
 
-        log.info("lessonId : {}, userId: {}", lessonId, userId);
+        log.info("AvatarController lessonId : {}, userId: {}", lessonId, userId);
 
         AvatarResponseDto avatarResponseDto = avatarService.findByUserId(lessonId, userId);
+
+        log.info("avatarResponseDto : {}", avatarResponseDto);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(avatarResponseDto);

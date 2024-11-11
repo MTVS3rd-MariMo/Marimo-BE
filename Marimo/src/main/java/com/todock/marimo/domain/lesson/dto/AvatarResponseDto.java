@@ -8,6 +8,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 public class AvatarResponseDto {
 

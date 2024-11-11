@@ -175,7 +175,8 @@ public class AvatarService {
 
         // 유저 ID로 아바타 조회
         Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저와 수업이 공통으로 있는 아바타를 찾을 수 없습니다: " + userId));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("userId와 lessonId가 공통으로 있는 아바타를 찾을 수 없습니다"));
 
         // 애니메이션 목록 생성
         List<Animation> animations = avatar.getAnimations().stream()
@@ -213,22 +214,36 @@ public class AvatarService {
      * zip 파일을 압축 해제하고 압축 해제된 파일들의 경로 목록을 반환
      */
     private List<String> unzipFile(String zipFilePath, String destDirectory) throws IOException {
+
+        // 압축 해제된 파일들의 경로를 저장할 리스트 생성
         List<String> filePaths = new ArrayList<>();
+
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFilePath))) {
-            ZipEntry zipEntry;
+
+            ZipEntry zipEntry; // zip 파일 관리 클래스
+
+            // normalize()를 통해 경로를 표준화하고, destDirectory로 시작하는지 확인
             while ((zipEntry = zis.getNextEntry()) != null) {
                 Path destPath = Paths.get(destDirectory, zipEntry.getName()); // avatar 폴더에 압축 해제
+
                 if (!destPath.normalize().startsWith(Paths.get(destDirectory))) {
                     throw new SecurityException("잘못된 zip 파일 경로입니다.");
                 }
+
+                // 엔트리가 디렉토리가 아닌 경우에만 파일을 처리한다
                 if (!zipEntry.isDirectory()) {
                     Files.createDirectories(destPath.getParent());
                     Files.copy(zis, destPath, StandardCopyOption.REPLACE_EXISTING);
                     filePaths.add(destPath.toString());
                 }
             }
+
+            return filePaths;
+
+        } catch (Exception e) {
+
+            throw new IOException("파일 처리 중 오류 발생(" + zipFilePath + ")", e);
         }
-        return filePaths;
     }
 
 
