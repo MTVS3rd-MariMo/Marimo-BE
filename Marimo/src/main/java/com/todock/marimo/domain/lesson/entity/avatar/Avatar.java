@@ -30,6 +30,9 @@ public class Avatar {
     @Column(name = "avatar_img") // 아바타 이미지
     private String avatarImg;
 
+    @Column(name = "charcter") // 아바타의 역할
+    private String character;
+
     // 한 아바타에 애니메이션 두개
     @JsonManagedReference
     @OneToMany(mappedBy = "avatar", cascade = CascadeType.ALL)

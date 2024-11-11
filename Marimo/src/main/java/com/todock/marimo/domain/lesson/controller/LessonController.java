@@ -8,6 +8,7 @@ import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -164,13 +165,19 @@ public class LessonController {
         }
     }
 
-
     /**
-     * 유저 Id로 모든 단체 사진 조회
+     * 배경사진 제작 요청 - AI서버에 pdf 텍스트를 보내서 단체사진 배경 제작 요청
      */
-//    @GetMapping("/")
-//    public ResponseEntity<StudentLessonMaterialDto> getStudentLessonMaterial() {}
+    @PutMapping("/backGround/{lessonId}")
+    public ResponseEntity<String> getBackGround(
+            @PathVariable("lessonId") Long lessonId) {
 
+        log.info("요청한 수업 번호: {}", lessonId);
+
+        lessonService.createBackground(lessonId);
+
+        return ResponseEntity.ok("사진관 배경 요청을 보냈습니다.");
+    }
 
     /**
      * 파일 확장자 추출

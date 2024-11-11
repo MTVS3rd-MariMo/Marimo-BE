@@ -46,6 +46,7 @@ public class HotSittingController {
      */
     @PostMapping(value = "/wav-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> hotSittingWavFile(
+            @RequestHeader("userId") Long userId,
             @RequestParam("lessonId") Long lessonId,
             @RequestParam("userName") String userName,
             @RequestParam("character") String character,
@@ -104,7 +105,7 @@ public class HotSittingController {
 
         log.info("Controller Received DTO: {}", wavDto);
 
-        hotSittingService.sendWavToAiServer(wavDto);
+        hotSittingService.sendWavToAiServer(userId, wavDto);
 
         return ResponseEntity.ok().body("정상적으로 전송되었습니다.");
     }

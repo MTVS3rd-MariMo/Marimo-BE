@@ -158,19 +158,6 @@ public class AvatarService {
             // 8. 저장된 아바타와 애니메이션 정보로 AvatarResponseDto 생성
             avatar = avatarRepository.save(avatar);
 
-//            // 수업 결과에 저장
-//            Result result = resultRepository.findByLessonId(lessonId);
-//            result.getParticipants().add(
-//                    new ParticipantResult(
-//                            userId,
-//                            userRepository.findById(userId)
-//                                    .orElseThrow(() -> new EntityNotFoundException("userId로 유저를 찾을 수 없습니다."))
-//                                    .getName(),
-//                            avatar.getAvatarImg()
-//                    )
-//            );
-//            resultRepository.save(result);
-
             // 유저에게 반환
             return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
 

@@ -1,6 +1,7 @@
 package com.todock.marimo.domain.lesson.service;
 
-import com.todock.marimo.domain.lesson.dto.LessonOpenQuestionRequestDto;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todock.marimo.domain.lesson.dto.ParticipantListDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.Participant;
@@ -8,13 +9,14 @@ import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
-import com.todock.marimo.domain.result.entity.Result;
 import com.todock.marimo.domain.result.repository.ResultRepository;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -34,6 +36,7 @@ public class LessonService {
 
     private final LessonMaterialRepository lessonMaterialRepository;
     private final ResultRepository resultRepository;
+    private final RestTemplate restTemplate;
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
     private String serverHost = "211.250.74.75";
@@ -51,13 +54,14 @@ public class LessonService {
     public LessonService(LessonMaterialRepository lessonMaterialRepository
             , ParticipantRepository participantRepository
             , LessonRepository lessonRepository
-            , UserRepository userRepository, ResultRepository resultRepository) {
+            , UserRepository userRepository, ResultRepository resultRepository, RestTemplate restTemplate) {
         this.participantRepository = participantRepository;
         this.lessonRepository = lessonRepository;
         this.userRepository = userRepository;
         initDirectories();
         this.lessonMaterialRepository = lessonMaterialRepository;
         this.resultRepository = resultRepository;
+        this.restTemplate = restTemplate;
     }
 
     // 필요한 디렉토리를 초기화 하는 메서드
@@ -85,18 +89,6 @@ public class LessonService {
         Long lessonId = newlesson.getLessonId(); // lessonId 추출
         log.info("\n\n생성된 lessonId : {}\n\n", lessonId);
         log.info("\n\n적용된 lessonMaterialId : {}\n\n", newlesson.getLessonMaterialId());
-
-        // 수업 결과에 역할, 책 내용, 책 제목 저장, lessonId 저장
-//
-//        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
-//                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업자료를 조회할 수 없습니다."));
-//
-//        Result result = new Result(
-//                lessonId,
-//                lessonMaterial.getBookTitle(),
-//                lessonMaterial.getBookContents()
-//        );
-//        resultRepository.save(result);
 
         return lessonId;
     }
@@ -184,4 +176,49 @@ public class LessonService {
         return "http://" + serverHost + ":" + serverPort + "/data/photo/" + relativePath;
     }
 
+    /**
+     * 사진관에서 사용할 배경 생성 요청
+     */
+    public void createBackground(Long lessonId) {
+
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId())
+                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."));
+
+        String AIRequest = lessonMaterial.getBookContents();
+
+        try {
+            // 1. AI 서버 URI 설정
+            String AIServerUrI = "AI_SERVER_URI";
+
+            // 2. HttpHeaders 설정
+            HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // 요청에 사용될 HttpEntity 생성
+            HttpEntity<String> requestEntity = new HttpEntity<>(AIRequest, headers);
+
+            // AI 서버로 POST 요청 전송
+            ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, requestEntity, String.class);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                log.info("AI 서버로 파일 전송 성공: {}", response.getBody());
+                saveAIResponse(response.getBody());
+            } else {
+                throw new RuntimeException("AI 서버로 파일 전송 실패 - 상태 코드: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            log.error("AI 서버로 파일 전송 중 예외 발생", e);
+            throw new RuntimeException("AI 서버로 파일 전송 중 오류 발생", e);
+        }
+
+    }
+
+    /**
+     * AI 서버 응답을 처리하고 저장하는 메서드
+     */
+    private void saveAIResponse(String responseBody) {
+
+    }
 }

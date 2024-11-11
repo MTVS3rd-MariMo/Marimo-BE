@@ -2,6 +2,7 @@ package com.todock.marimo.domain.result.service;
 
 import com.todock.marimo.domain.lesson.dto.ParticipantDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
+import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
 import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
@@ -9,6 +10,7 @@ import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
 import com.todock.marimo.domain.result.dto.*;
+import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -101,11 +103,19 @@ public class ResultService {
 
         // 참가자 목록 설정
         List<ParticipantResultDto> participants = lesson.getParticipantList().stream()
-                .map(participant -> new ParticipantResultDto(
-                        userRepository.findNameByUserId(participant.getUserId()),
-                        null, // avatarUrl은 이 단계에서 설정되지 않음
-                        null  // character는 이 단계에서 설정되지 않음
-                ))
+                .map(participant -> {
+                    User user = userRepository.findById(participant.getUserId())
+                            .orElseThrow(() -> new IllegalArgumentException("userId로 유저를 찾을 수 없습니다."));
+                    Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lesson.getLessonId(), participant.getUserId())
+                            .orElse(null);
+                    String avatarUrl = (avatar != null) ? avatar.getAvatarImg() : "defaultAvatarUrl";
+                    String character = (avatar != null) ? avatar.getCharacter() : "defaultCharacter";
+                    return new ParticipantResultDto(
+                            user.getName(), // userName
+                            avatarUrl, // avatarUrl 설정
+                            character  // character 설정
+                    );
+                })
                 .collect(Collectors.toList());
         lessonResultDto.setParticipants(participants); // 참가자 리스트 설정
 
@@ -117,11 +127,16 @@ public class ResultService {
 
         // 아바타 이미지 설정
         List<AvatarResultDto> avatars = lesson.getAvatarList().stream()
-                .map(avatar -> new AvatarResultDto(
-                        userRepository.findNameByUserId(avatar.getUserId()), // userName 설정
-                        null, // lessonRole은 이 단계에서 설정되지 않음
-                        avatar.getAvatarImg() // avatar 이미지 URL 설정
-                ))
+                .map(avatar -> {
+                    User user = userRepository.findById(avatar.getUserId())
+                            .orElseThrow(() -> new IllegalArgumentException("userId로 유저를 찾을 수 없습니다."));
+                    String lessonRole = avatar.getCharacter() != null ? avatar.getCharacter() : "defaultLessonRole";
+                    return new AvatarResultDto(
+                            user.getName(), // userName 설정
+                            lessonRole, // lessonRole 설정
+                            avatar.getAvatarImg() // avatar 이미지 URL 설정
+                    );
+                })
                 .collect(Collectors.toList());
         lessonResultDto.setAvatars(avatars); // 아바타 리스트 설정
 
@@ -130,9 +145,13 @@ public class ResultService {
                 .map(question -> new OpenQuestionResultDto(
                         question.getQuestion(),
                         question.getOpenQuestionAnswerList().stream()
-                                .map(answer -> new ResultAnswerDto(
-                                        userRepository.findNameByUserId(answer.getUserId()),
-                                        answer.getAnswer()))
+                                .map(answer -> {
+                                    User user = userRepository.findById(answer.getUserId())
+                                            .orElseThrow(() -> new IllegalArgumentException("userId로 유저를 찾을 수 없습니다."));
+                                    return new ResultAnswerDto(
+                                            user.getName(),
+                                            answer.getAnswer());
+                                })
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
         lessonResultDto.setOpenQuestions(openQuestions); // 열린 질문 리스트 설정
@@ -161,5 +180,6 @@ public class ResultService {
 
         return lessonResultDto;
     }
+
 
 }

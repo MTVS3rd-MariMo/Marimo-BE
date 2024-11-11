@@ -23,11 +23,6 @@ public class LessonRole {
     @JoinColumn(name = "lesson_material_id")
     private LessonMaterial lessonMaterial;
 
-    // 나중에 유저 ID 삽입
-    @Setter
-    @Column(name = "user_id") // 선택한 유저
-    private Long userId;
-
     @Column(name = "lesson_role_name", nullable = false) // 역할 이름
     private String roleName;
 

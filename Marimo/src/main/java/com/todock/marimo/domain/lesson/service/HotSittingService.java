@@ -6,9 +6,11 @@ import com.todock.marimo.domain.lesson.dto.SelfIntroduceRequestDto;
 import com.todock.marimo.domain.lesson.dto.WavFileClientToServerRequestDto;
 import com.todock.marimo.domain.lesson.dto.WavFileServerToAIRequestDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
+import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
 import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
 import com.todock.marimo.domain.lesson.entity.hotsitting.SelfIntroduce;
+import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.SelfIntroduceRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,29 +27,37 @@ public class HotSittingService {
     private final SelfIntroduceRepository selfIntroduceRepository;
     private final RestTemplate restTemplate;
     private final LessonRepository lessonRepository;
+    private final AvatarRepository avatarRepository;
 
     @Autowired
     public HotSittingService(
             SelfIntroduceRepository selfIntroduceRepository
-            , RestTemplate restTemplate, LessonRepository lessonRepository) {
+            , RestTemplate restTemplate, LessonRepository lessonRepository, AvatarRepository avatarRepository) {
         this.selfIntroduceRepository = selfIntroduceRepository;
         this.restTemplate = restTemplate;
         this.lessonRepository = lessonRepository;
+        this.avatarRepository = avatarRepository;
     }
 
     /**
      * 핫시팅 wavFile을 AI 서버로 전송하고 SelfIntroduceId를 포함합니다.
      */
-    public void sendWavToAiServer(WavFileClientToServerRequestDto wavDto) {
+    public void sendWavToAiServer(Long userId, WavFileClientToServerRequestDto wavDto) {
+
+        // userId와 character 연결하기, 수업을 lessonId로 찾기
+        Lesson lesson = lessonRepository.findById(wavDto.getLessonId())
+                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
 
         // 전달받은 lessonId와 selfIntNum 로 로그 출력
         Long lessonId = wavDto.getLessonId();
         Long selfIntNum = wavDto.getSelfIntNum();
         log.info("Received selfIntNum: {}, lessonId: {}", selfIntNum, lessonId);
 
-        // 수업을 lessonId로 찾기
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+        Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
+                .orElseThrow(() -> new EntityNotFoundException("lessonId와 userId로 아바타를 찾을 수 없습니다."));
+        if(avatar.getCharacter() != null) { // 만약 캐릭터명이 있다면 추가
+            avatar.setCharacter(wavDto.getCharacter());
+        }
 
         // lesson에서 HotSitting 찾기
         HotSitting hotSitting = lesson.getHotSitting();
@@ -73,9 +83,6 @@ public class HotSittingService {
         wavServerToAIDto.setCharacter(wavDto.getCharacter());
         wavServerToAIDto.setWavFile(wavDto.getWavFile());
 
-        // 필드 설정 후 wavDto에 저장된 데이터 확인
-        // log.info("AI로 보내기 전 최종 DTO 확인 : " + wavServerToAIDto.toString());
-
         // 필수 필드 null 체크
         if (wavDto.getLessonId() == null || wavDto.getSelfIntroductionId() == null ||
                 wavDto.getName() == null || wavDto.getCharacter() == null ||
@@ -98,7 +105,7 @@ public class HotSittingService {
             ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, requestEntity, String.class);
             if (response.getStatusCode() == HttpStatus.OK) {
                 log.info("AI 서버로 파일 전송 성공: {}", response.getBody());
-                handleAIResponse(response.getBody());
+                saveAIResponse(response.getBody());
             } else {
                 throw new RuntimeException("AI 서버로 파일 전송 실패 - 상태 코드: " + response.getStatusCode());
             }
@@ -106,14 +113,14 @@ public class HotSittingService {
             log.error("AI 서버로 파일 전송 중 예외 발생", e);
             throw new RuntimeException("AI 서버로 파일 전송 중 오류 발생", e);
         }
-        
+
     }
 
 
     /**
      * AI 서버 응답을 처리하고 저장하는 메서드
      */
-    private void handleAIResponse(String responseBody) {
+    private void saveAIResponse(String responseBody) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             // JSON 응답 파싱

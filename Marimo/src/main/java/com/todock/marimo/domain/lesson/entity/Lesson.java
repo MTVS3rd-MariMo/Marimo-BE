@@ -25,7 +25,7 @@ public class Lesson {
 
     @Column(name = "lesson_material_id")
     private Long lessonMaterialId; // 사용한 수업 자료
-    
+
     @OneToMany(mappedBy = "lesson")
     private List<Participant> participantList = new ArrayList<>(); // 참가자 목록
 
@@ -35,8 +35,11 @@ public class Lesson {
     @OneToOne(mappedBy = "lesson")
     private HotSitting hotSitting; // 핫시팅 활동
 
-    @Column(name="photo_url")
-    private String photoUrl; // 단체 사진
+    @Column(name = "photo_url")
+    private String photoUrl; // 단체사진
+
+    @Column(name = "photo_background_url")
+    private String photoBackgroundUrl; // 단체사진 배경
 
     public Lesson(Long lessonMaterialId) {
         this.lessonMaterialId = lessonMaterialId;
