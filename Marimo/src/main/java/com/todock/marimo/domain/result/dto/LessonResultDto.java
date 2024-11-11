@@ -33,9 +33,6 @@ public class LessonResultDto {
     // 역할
     private List<LessonRoleResultDto> Roles = new ArrayList<>();
 
-    // 아바타 이미지
-    private List<AvatarResultDto> avatars = new ArrayList<>();
-
     // 열린 질문
     private List<OpenQuestionResultDto> openQuestions = new ArrayList<>();
 

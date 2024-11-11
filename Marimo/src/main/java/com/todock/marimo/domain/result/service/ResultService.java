@@ -106,39 +106,10 @@ public class ResultService {
                 .map(participant -> {
                     User user = userRepository.findById(participant.getUserId())
                             .orElseThrow(() -> new IllegalArgumentException("userId로 유저를 찾을 수 없습니다."));
-                    Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lesson.getLessonId(), participant.getUserId())
-                            .orElse(null);
-                    String avatarUrl = (avatar != null) ? avatar.getAvatarImg() : "defaultAvatarUrl";
-                    String character = (avatar != null) ? avatar.getCharacter() : "defaultCharacter";
-                    return new ParticipantResultDto(
-                            user.getName(), // userName
-                            avatarUrl, // avatarUrl 설정
-                            character  // character 설정
-                    );
+                    return new ParticipantResultDto(user.getName());
                 })
                 .collect(Collectors.toList());
         lessonResultDto.setParticipants(participants); // 참가자 리스트 설정
-
-        // 역할 설정
-        List<LessonRoleResultDto> roles = lessonMaterial.getLessonRoleList().stream()
-                .map(role -> new LessonRoleResultDto(role.getRoleName()))
-                .collect(Collectors.toList());
-        lessonResultDto.setRoles(roles); // 역할 리스트 설정
-
-        // 아바타 이미지 설정
-        List<AvatarResultDto> avatars = lesson.getAvatarList().stream()
-                .map(avatar -> {
-                    User user = userRepository.findById(avatar.getUserId())
-                            .orElseThrow(() -> new IllegalArgumentException("userId로 유저를 찾을 수 없습니다."));
-                    String lessonRole = avatar.getCharacter() != null ? avatar.getCharacter() : "defaultLessonRole";
-                    return new AvatarResultDto(
-                            user.getName(), // userName 설정
-                            lessonRole, // lessonRole 설정
-                            avatar.getAvatarImg() // avatar 이미지 URL 설정
-                    );
-                })
-                .collect(Collectors.toList());
-        lessonResultDto.setAvatars(avatars); // 아바타 리스트 설정
 
         // 열린 질문 설정
         List<OpenQuestionResultDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
@@ -177,6 +148,30 @@ public class ResultService {
                         quiz.getChoices4()))
                 .collect(Collectors.toList());
         lessonResultDto.setQuizzes(quizzes); // 퀴즈 리스트 설정
+
+// 역할 설정과 아바타 이미지 설정을 통합
+        List<LessonRoleResultDto> roles = lessonMaterial.getLessonRoleList().stream()
+                .map(role -> {
+                    // 해당 역할에 매칭되는 아바타 찾기
+                    Avatar avatar = lesson.getAvatarList().stream()
+                            .filter(a -> a.getCharacter() != null && a.getCharacter().equals(role.getRoleName()))
+                            .findFirst()
+                            .orElse(null);
+
+                    String avatarUrl = (avatar != null) ? avatar.getAvatarImg() : "defaultAvatarUrl";
+                    String userName = (avatar != null) ? userRepository.findById(avatar.getUserId())
+                            .map(User::getName)
+                            .orElse("Unknown User") : "Unknown User";
+
+                    return new LessonRoleResultDto(
+                            role.getRoleName(), // 역할 이름
+                            avatarUrl, // 아바타 이미지 URL
+                            userName
+                    );
+                })
+                .collect(Collectors.toList());
+
+        lessonResultDto.setRoles(roles); // 역할 리스트 설정
 
         return lessonResultDto;
     }
