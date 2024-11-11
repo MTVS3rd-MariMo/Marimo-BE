@@ -26,7 +26,7 @@ public class HotSitting {
     @OneToMany(mappedBy = "hotSitting", cascade = CascadeType.ALL)
     private List<SelfIntroduce> selfIntroduces = new ArrayList<>();
 
-    public HotSitting(Lesson lesson) {
-        this.lesson = lesson;
-    }
+//    public HotSitting(Lesson lesson) {
+//        this.lesson = lesson;
+//    }
 }

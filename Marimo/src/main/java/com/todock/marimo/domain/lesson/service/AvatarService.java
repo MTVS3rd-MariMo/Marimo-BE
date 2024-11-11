@@ -54,7 +54,6 @@ public class AvatarService {
 
     private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
-    private final ResultRepository resultRepository;
     private final RestTemplate restTemplate;
 
     private static final String DATA_DIR = "data"; // 파일 저장 경로
@@ -65,12 +64,10 @@ public class AvatarService {
     public AvatarService(
             LessonRepository lessonRepository
             , AvatarRepository avatarRepository
-            , ResultRepository resultRepository
             , RestTemplate restTemplate, UserRepository userRepository) {
 
         this.lessonRepository = lessonRepository;
         this.avatarRepository = avatarRepository;
-        this.resultRepository = resultRepository;
         this.restTemplate = restTemplate;
         initDirectories();
         this.userRepository = userRepository;

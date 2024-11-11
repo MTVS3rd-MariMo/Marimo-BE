@@ -13,6 +13,8 @@ public class AvatarResultDto {
 
     private String userName;
 
+    private String lessonRole;
+
     private String avatar;
 
     public AvatarResultDto(String avatar) {

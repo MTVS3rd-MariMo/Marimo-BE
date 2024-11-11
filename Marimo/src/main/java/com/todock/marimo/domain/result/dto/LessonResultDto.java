@@ -28,7 +28,7 @@ public class LessonResultDto {
     private String bookContents;
 
     // 참가자
-    private List<ParticipantDto> participants = new ArrayList<>();
+    private List<ParticipantResultDto> participants = new ArrayList<>();
 
     // 역할
     private List<LessonRoleResultDto> Roles = new ArrayList<>();

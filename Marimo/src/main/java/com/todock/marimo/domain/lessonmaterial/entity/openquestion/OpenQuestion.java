@@ -38,32 +38,10 @@ public class OpenQuestion {
     // 생성자
     public OpenQuestion(LessonMaterial lessonMaterial, String question) {
 
-        validateOpenQuestionTitle(question); // 답변 검증
-
         this.lessonMaterial = lessonMaterial;
         this.question = question;
     }
 
-    // 동화 제목 검증
-    private void validateOpenQuestionTitle(String questionTitle) {
-        if (questionTitle == null || questionTitle.isEmpty()) {
-            throw new IllegalArgumentException("질문이 없습니다.");
-        }
-    }
-
-    // 질문 제목 검증
-    private void validateOpenQuestionUserId(Long userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("유저 ID가 없습니다.");
-        }
-    }
-
-    // 답변 검증
-    private void validateOpenQuestionAnswer(OpenQuestionAnswer openQuestionAnswer) {
-        if (openQuestionAnswer == null) {
-            throw new IllegalArgumentException("답변은 null일 수 없습니다.");
-        }
-    }
 
     @Override
     public String toString() {

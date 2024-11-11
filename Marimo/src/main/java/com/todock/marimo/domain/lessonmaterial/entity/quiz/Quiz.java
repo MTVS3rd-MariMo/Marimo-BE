@@ -42,11 +42,13 @@ public class Quiz {
     @JoinColumn(name = "lesson_material_id")
     private LessonMaterial lessonMaterial;
 
+
     // 생성자
     public Quiz(LessonMaterial lessonMaterial, String question, int answer,
                 String choice1, String choice2,
                 String choice3, String choice4) {
 
+        this.lessonMaterial = lessonMaterial;
         this.question = question;
         this.answer = answer;
         this.choices1 = choice1;
@@ -54,6 +56,7 @@ public class Quiz {
         this.choices3 = choice3;
         this.choices4 = choice4;
     }
+
 
     @Override
     public String toString() {

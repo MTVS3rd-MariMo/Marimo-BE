@@ -3,6 +3,7 @@ package com.todock.marimo.domain.result.service;
 import com.todock.marimo.domain.lesson.dto.ParticipantDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
+import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
@@ -22,15 +23,17 @@ public class ResultService {
     private final ParticipantRepository participantRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
     private final UserRepository userRepository;
+    private final AvatarRepository avatarRepository;
 
     @Autowired
     public ResultService(
             LessonRepository lessonRepository
-            , ParticipantRepository participantRepository, LessonMaterialRepository lessonMaterialRepository, UserRepository userRepository) {
+            , ParticipantRepository participantRepository, LessonMaterialRepository lessonMaterialRepository, UserRepository userRepository, AvatarRepository avatarRepository) {
         this.lessonRepository = lessonRepository;
         this.participantRepository = participantRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
         this.userRepository = userRepository;
+        this.avatarRepository = avatarRepository;
     }
 
 
@@ -79,9 +82,6 @@ public class ResultService {
     /**
      * 선생님이 참가한 수업 상세 조회
      */
-    /**
-     * 선생님이 참가한 수업 상세 조회
-     */
     public LessonResultDto lessonDetail(Long lessonId) {
 
         // lessonId로 Lesson을 조회
@@ -100,8 +100,12 @@ public class ResultService {
         );
 
         // 참가자 목록 설정
-        List<ParticipantDto> participants = lesson.getParticipantList().stream()
-                .map(participant -> new ParticipantDto(userRepository.findNameByUserId(participant.getUserId())))
+        List<ParticipantResultDto> participants = lesson.getParticipantList().stream()
+                .map(participant -> new ParticipantResultDto(
+                        userRepository.findNameByUserId(participant.getUserId()),
+                        null, // avatarUrl은 이 단계에서 설정되지 않음
+                        null  // character는 이 단계에서 설정되지 않음
+                ))
                 .collect(Collectors.toList());
         lessonResultDto.setParticipants(participants); // 참가자 리스트 설정
 
@@ -113,7 +117,11 @@ public class ResultService {
 
         // 아바타 이미지 설정
         List<AvatarResultDto> avatars = lesson.getAvatarList().stream()
-                .map(avatar -> new AvatarResultDto(avatar.getAvatarImg()))
+                .map(avatar -> new AvatarResultDto(
+                        userRepository.findNameByUserId(avatar.getUserId()), // userName 설정
+                        null, // lessonRole은 이 단계에서 설정되지 않음
+                        avatar.getAvatarImg() // avatar 이미지 URL 설정
+                ))
                 .collect(Collectors.toList());
         lessonResultDto.setAvatars(avatars); // 아바타 리스트 설정
 
@@ -153,4 +161,5 @@ public class ResultService {
 
         return lessonResultDto;
     }
+
 }

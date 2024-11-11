@@ -33,13 +33,10 @@ import java.util.Optional;
 public class LessonMaterialController {
 
     private final LessonMaterialService lessonMaterialService;
-    private final LessonService lessonService;
-    private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 매핑용 ObjectMapper
 
     @Autowired
-    public LessonMaterialController(LessonMaterialService lessonMaterialService, LessonService lessonService) {
+    public LessonMaterialController(LessonMaterialService lessonMaterialService) {
         this.lessonMaterialService = lessonMaterialService;
-        this.lessonService = lessonService;
     }
 
 
@@ -176,9 +173,9 @@ public class LessonMaterialController {
     public ResponseEntity<Optional<LessonMaterial>> getLessonMaterialByLessonMaterialId(
             @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
-
         return ResponseEntity.ok(lessonMaterialService.findById(lessonMaterialId));
     }
+
 
     /**
      * userId로 lessonMaterial 전체 조회
@@ -194,6 +191,7 @@ public class LessonMaterialController {
 
         return ResponseEntity.ok(responseDto);
     }
+
 
     /**
      * 수업자료 id로 수업자료 삭제
