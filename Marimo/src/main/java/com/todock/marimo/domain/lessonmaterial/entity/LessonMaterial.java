@@ -1,11 +1,13 @@
 package com.todock.marimo.domain.lessonmaterial.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.entity.quiz.Quiz;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +48,10 @@ public class LessonMaterial {
             cascade = CascadeType.ALL)
     private List<LessonRole> lessonRoleList = new ArrayList<>();
 
+    @Column(name = "created_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 hh시 mm분")
+    private LocalDateTime createdAt; // 생성 날짜
+
 
     public LessonMaterial(Long userId, String bookTitle, String bookContents) {
         this.bookTitle = bookTitle;
@@ -56,8 +62,7 @@ public class LessonMaterial {
 
     public LessonMaterial(Long teacherId, String bookTitle, String bookContents,
                           List<OpenQuestion> openQuestionList,
-                          List<Quiz> quizList
-                          ) {
+                          List<Quiz> quizList) {
         this.userId = teacherId;
         this.bookTitle = bookTitle;
         this.bookContents = bookContents;

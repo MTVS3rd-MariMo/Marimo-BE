@@ -163,6 +163,7 @@ public class AvatarService {
             return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
 
         } catch (Exception e) {
+
             log.error("파일 처리 중 오류 발생", e);
             throw new RuntimeException("파일 처리 실패", e);
         }

@@ -170,7 +170,7 @@ public class LessonService {
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
 
-            lesson.setPhotoUrl(createFileUrl(photoName)); // photoUrl 추가
+            lesson.setPhotoUrl(createPhotoFileUrl(photoName)); // photoUrl 추가
 
             lessonRepository.save(lesson);
 
@@ -221,7 +221,7 @@ public class LessonService {
             }
 
             Files.write(zipPath, backgroundFileBytes);
-            lesson.setPhotoBackgroundUrl(createFileUrl(fileName));
+            lesson.setPhotoBackgroundUrl(createBackgroundFileUrl(fileName));
             lessonRepository.save(lesson);
 
         } catch (Exception e) {
@@ -241,21 +241,25 @@ public class LessonService {
                         new EntityNotFoundException("lessonId로 수업을 조회할 수 없습니다.")).getPhotoBackgroundUrl();
     }
 
-    /**
-     * AI 서버 응답을 처리하고 저장하는 메서드
-     */
-    private void saveAIResponse(String responseBody) {
-
-    }
-
 
     /**
-     * 파일 경로를 URL 형식으로 변환
+     * 단체사진 파일 경로를 URL 형식으로 변환
      */
-    private String createFileUrl(String filePath) {
+    private String createPhotoFileUrl(String filePath) {
         // 파일 경로에서 중복된 루트 디렉토리를 제거
         String relativePath = filePath.replace("\\", "/");
         return "http://" + serverHost + ":" + serverPort + "/data/photo/" + relativePath;
     }
+
+
+    /**
+     * 배경사진 파일 경로를 URL 형식으로 변환
+     */
+    private String createBackgroundFileUrl(String filePath) {
+        // 파일 경로에서 중복된 루트 디렉토리를 제거
+        String relativePath = filePath.replace("\\", "/");
+        return "http://" + serverHost + ":" + serverPort + "/data/background/" + relativePath;
+    }
+
 
 }

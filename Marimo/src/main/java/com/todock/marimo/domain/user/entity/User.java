@@ -1,7 +1,10 @@
 package com.todock.marimo.domain.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -39,6 +42,10 @@ public class User {
 
     @Column(name = "password") // 비밀번호
     private String password;
+
+    @Column(name = "created_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 hh시 mm분")
+    private LocalDateTime createdAt; // 생성 날짜
 
     // 생성자
     public User(Role role, String school, Integer grade, Integer classRoom,

@@ -24,5 +24,12 @@ public class WebConfig implements WebMvcConfigurer {
                         "file:C:/Dev/Project/Mtvs/Marimo-BE/Marimo/data/photo/", // 단체사진 - 노트북
                         "file:C:/Dev/mtvs/Marimo-BE/Marimo/data/photo/" // 단체사진 - 집
                 );
+
+        registry.addResourceHandler("/data/background/**")
+                .addResourceLocations(
+                        "file:C:/Lecture/project/Marimo-BE/Marimo/data/background/", // 단체사진 - 메타버스
+                        "file:C:/Dev/Project/Mtvs/Marimo-BE/Marimo/data/background/", // 단체사진 - 노트북
+                        "file:C:/Dev/mtvs/Marimo-BE/Marimo/data/background/" // 단체사진 - 집
+                );
     }
 }

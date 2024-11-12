@@ -87,6 +87,7 @@ public class LessonController {
             @Parameter(description = "조회하려는 수업 ID", example = "10", required = true) @PathVariable("lessonId") Long lessonId) {
 
         ParticipantListDto participantListDto = lessonService.findParticipantByLessonId(lessonId);
+        log.info("참가자 Id = {}", participantListDto);
 
         return ResponseEntity.ok(participantListDto);
     }
