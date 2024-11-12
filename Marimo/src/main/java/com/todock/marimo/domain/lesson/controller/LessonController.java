@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/lesson")
-@Slf4j
 @Tag(name = "Lesson API", description = "수업 관련 API")
 public class LessonController {
 
@@ -46,8 +46,8 @@ public class LessonController {
     @Operation(summary = "수업 생성", description = "userId와 lessonMaterialId를 받고 수업 생성 후 LessonId 반환합니다.")
     @PostMapping("/{lessonMaterialId}")
     public ResponseEntity<Long> createLesson(
-            @Parameter(description = "선생님의 사용자 ID", example = "3", required = true) @RequestHeader(value = "userId", required = false) Long userId,
-            @Parameter(description = "수업 자료 ID", example = "1", required = true) @PathVariable("lessonMaterialId") Long lessonMaterialId) {
+            @RequestHeader(value = "userId", required = false) Long userId
+            , @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
         log.info("수업에 진행할 lessonMaterialId: {}", lessonMaterialId);
 
@@ -60,11 +60,11 @@ public class LessonController {
     /**
      * LessonId로 participant 목록에 userId, userName 추가하기
      */
-    @Operation(summary = "수업에 참가", description = "주어진 LessonId로 유저를 수업에 참가시킵니다.")
+    @Operation(summary = "수업 참가자 목록에 유저 추가", description = "userId와 lessonMaterialId를 받고 수업 생성 후 LessonId 반환합니다.")
     @PutMapping("/enter/{lessonId}")
     public ResponseEntity<String> enter(
-            @Parameter(description = "참가하려는 사용자 ID", example = "1", required = true) @RequestHeader(value = "userId", required = false) Long userId,
-            @Parameter(description = "참가하려는 수업 ID", example = "101", required = true) @PathVariable("lessonId") Long lessonId) {
+            @RequestHeader(value = "userId", required = false) Long userId
+            , @PathVariable("lessonId") Long lessonId) {
 
         if (userId == null) {
             return ResponseEntity.badRequest().body("userId 헤더가 필요합니다.");
@@ -84,7 +84,7 @@ public class LessonController {
     @Operation(summary = "수업 참가자 목록 조회", description = "주어진 LessonId의 참가자 목록을 조회합니다.")
     @GetMapping("/participant/{lessonId}")
     public ResponseEntity<ParticipantListDto> getStudentLessonMaterial(
-            @Parameter(description = "조회하려는 수업 ID", example = "10", required = true) @PathVariable("lessonId") Long lessonId) {
+            @PathVariable("lessonId") Long lessonId) {
 
         ParticipantListDto participantListDto = lessonService.findParticipantByLessonId(lessonId);
         log.info("참가자 Id = {}", participantListDto);
@@ -96,7 +96,7 @@ public class LessonController {
     /**
      * 수업 중  lessonId로 수업용 수업자료 상세 조회
      */
-    @Operation(summary = "학생용 수업 자료 조회", description = "수업 중 학생이 조회할 수업 자료의 상세 정보를 반환합니다.")
+    @Operation(summary = "참가자 수업 자료 조회", description = "수업 중 참가자가 사용할 수업 자료의 상세 정보를 반환합니다.")
     @GetMapping("/{lessonId}")
     public ResponseEntity<ParticipantLessonMaterialDto> getLessonMaterial(
             @Parameter(description = "조회하려는 수업 자료 ID", example = "101", required = true) @PathVariable("lessonId") Long lessonId) {
@@ -112,6 +112,7 @@ public class LessonController {
     /**
      * 단체사진 저장
      */
+    @Operation(summary = "단체사진 저장")
     @PostMapping("/photo/{lessonId}")
     public ResponseEntity<String> updatePhoto(
             @PathVariable("lessonId") Long lessonId
@@ -166,10 +167,12 @@ public class LessonController {
         }
     }
 
+
     /**
      * 배경사진 제작 요청 - AI서버에 pdf 텍스트를 보내서 단체사진 배경 제작 요청
      */
-    @PutMapping("/photo/background/{lessonId}")
+    @Operation(summary = "배경사진 제작 요청")
+    @PostMapping("/photo/background/{lessonId}")
     public ResponseEntity<String> getBackGround(
             @PathVariable("lessonId") Long lessonId) {
 

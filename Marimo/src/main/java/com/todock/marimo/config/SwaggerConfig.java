@@ -15,20 +15,20 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
 
         return new OpenAPI()
-                .info(new Info().title("Avatar API") // API 제목 설정
-                        .description("Avatar management API documentation")
-                        .version("v1.0.0")
+                .info(new Info().title("MARIMO API") // API 제목 설정
+                        .description("MARIMO management API documentation") // API 설명
+                        .version("v1.0.0") // API 버전
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")))
                 .externalDocs(new ExternalDocumentation()
-                        .description("Avatar Project Documentation")
-                        .url("https://example.com/docs"));
+                        .description("MARIMO Project GitHub Documentation")
+                        .url("https://github.com/MTVS3rd-MariMo"));
     }
 
     @Bean
     public GroupedOpenApi avatarGroup() {
         return GroupedOpenApi.builder()
-                .group("avatar")
-                .pathsToMatch("/api/avatar/**")
+                .group("MARIMO API") // 그룹 이름 설정
+                .pathsToMatch("/api/**")
                 .build();
     }
 }
