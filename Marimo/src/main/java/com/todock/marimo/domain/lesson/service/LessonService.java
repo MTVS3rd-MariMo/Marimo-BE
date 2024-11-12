@@ -15,6 +15,7 @@ import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialReposito
 import com.todock.marimo.domain.result.repository.ResultRepository;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -94,6 +95,7 @@ public class LessonService {
     /**
      * 수업 생성 - lessonMaterialId를 받고 수업 자료와 LessonId 반환
      */
+    @Transactional
     public Long createLesson(Long userId, Long lessonMaterialId) {
 
         // Lesson 생성 및 설정
@@ -121,9 +123,12 @@ public class LessonService {
         return lessonId;
 
     }
+
+
     /**
      * LessonId로 참가자 목록에 유저Id, 유저 이름 추가하기
      */
+    @Transactional
     public void updateUserByLessonId(Long userId, Long lessonId) {
 
         // 수업 찾기
@@ -169,6 +174,7 @@ public class LessonService {
     /**
      * 단체 사진 저장
      */
+    @Transactional
     public void savePhoto(Long lessonId, MultipartFile photo) {
 
         try {
@@ -274,6 +280,5 @@ public class LessonService {
         String relativePath = filePath.replace("\\", "/");
         return "http://" + serverHost + ":" + serverPort + "/data/background/" + relativePath;
     }
-
 
 }

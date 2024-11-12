@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 학생용 수업 자료 호출
+ * 참가자 수업 자료 호출
  */
 
 @Setter

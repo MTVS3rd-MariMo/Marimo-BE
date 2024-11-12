@@ -122,82 +122,6 @@ public class LessonMaterialService {
 
 
     /**
-     * AI 반환 Json 파싱 메서드
-     */
-    private LessonMaterialResponseDto parseLessonMaterialJson(Long userId, String jsonResponse, String pdfName) {
-
-        JsonNode root = null;
-        try {
-            root = objectMapper.readTree(jsonResponse);
-
-            // LessonMaterial 객체 생성
-            LessonMaterial lessonMaterial = new LessonMaterial(
-                    userId,
-                    pdfName,
-                    root.path("pdftext").asText("")
-            );
-
-
-            // 역할 생성 및 추가
-            List<LessonRole> roles = new ArrayList<>();
-            JsonNode charactersNode = root.path("characters");
-            if (!charactersNode.isMissingNode()) { // 노드가 존재할 때만 진행
-                charactersNode.forEach(characterNode -> {
-                    roles.add(new LessonRole(lessonMaterial, characterNode.asText("")));
-                });
-            }
-            lessonMaterial.setLessonRoleList(roles);
-
-            // LessonMaterial 저장 (열린 질문, 퀴즈는 저장하지 않음)
-            lessonMaterialRepository.save(lessonMaterial);
-            log.info("생성된 lessonMaterialId() : {}", lessonMaterial.getLessonMaterialId());
-
-            // 열린 질문을 OpenQuestionDto로 변환하여 클라이언트에 보낼 준비
-            List<OpenQuestionResponseDto> openQuestionDtos = new ArrayList<>();
-
-            JsonNode openQuestionsNode = root.path("open_questions"); //  라는 JSON에서 open_questions 노드 찾기
-
-            // 열린 질문 파싱
-            if (!openQuestionsNode.isMissingNode()) { // 있으면
-                openQuestionsNode.forEach(questionNode -> {
-                    String questionText = questionNode.path("question").asText(""); // question 노드 찾아서 추출
-                    if (!questionText.isEmpty()) {  // 빈 문자열 체크 추가
-                        OpenQuestionResponseDto openQuestionResponseDto = new OpenQuestionResponseDto(
-                                questionText
-                        );
-
-                        openQuestionDtos.add(openQuestionResponseDto);
-                    }
-                });
-            }
-
-            // 퀴즈를 QuizDto로 변환하여 클라이언트에 보낼 준비
-            List<QuizDto> quizDtos = new ArrayList<>();
-            JsonNode quizNode = root.path("quiz");
-            if (!quizNode.isMissingNode()) {
-                final AtomicLong quizIdCounter = new AtomicLong(1); // quizId를 1부터 시작하도록 설정
-                quizNode.forEach(qNode -> {
-                    quizDtos.add(new QuizDto(
-                            quizIdCounter.getAndIncrement(),
-                            qNode.path("question").asText(""),
-                            qNode.path("answer").asInt(),
-                            qNode.path("choices1").asText(""),
-                            qNode.path("choices2").asText(""),
-                            qNode.path("choices3").asText(""),
-                            qNode.path("choices4").asText("")
-                    ));
-                });
-            }
-
-            // 클라이언트에 반환할 LessonMaterialResponseDto 생성
-            return new LessonMaterialResponseDto(lessonMaterial.getLessonMaterialId(), quizDtos, openQuestionDtos);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("json 변형이 잘못되었습니다.");
-        }
-    }
-
-
-    /**
      * pdf에서 바로 받은 후 열린질문, 퀴즈 2개 선택해서 수정 - 기본 수정도 포함
      */
     @Transactional
@@ -280,7 +204,7 @@ public class LessonMaterialService {
 
 
     /**
-     * 수업 lessonId로 수업용 수업 상세 자료 조회
+     * 수참가자가 lessonId로 수업자료 조회
      */
     public ParticipantLessonMaterialDto getLessonMaterialById(Long lessonId) {
 
@@ -326,11 +250,6 @@ public class LessonMaterialService {
 
 
     /**
-     * 수업 자료를 수업자료 id로 수정 (수정 페이지에서 수정하고 요청)
-     */
-
-
-    /**
      * 수업 자료 id로 수업 자료 삭제
      */
     @Transactional
@@ -340,6 +259,82 @@ public class LessonMaterialService {
 
         lessonMaterial.setUserId(null); // 유저 Id를 없애서 매칭 안되도록 함
         log.info("lessonMaterial.userId : {}", lessonMaterial.getUserId());
+    }
+
+
+    /**
+     * AI 반환 Json 파싱 메서드
+     */
+    private LessonMaterialResponseDto parseLessonMaterialJson(Long userId, String jsonResponse, String pdfName) {
+
+        JsonNode root = null;
+        try {
+            root = objectMapper.readTree(jsonResponse);
+
+            // LessonMaterial 객체 생성
+            LessonMaterial lessonMaterial = new LessonMaterial(
+                    userId,
+                    pdfName,
+                    root.path("pdftext").asText("")
+            );
+
+
+            // 역할 생성 및 추가
+            List<LessonRole> roles = new ArrayList<>();
+            JsonNode charactersNode = root.path("characters");
+            if (!charactersNode.isMissingNode()) { // 노드가 존재할 때만 진행
+                charactersNode.forEach(characterNode -> {
+                    roles.add(new LessonRole(lessonMaterial, characterNode.asText("")));
+                });
+            }
+            lessonMaterial.setLessonRoleList(roles);
+
+            // LessonMaterial 저장 (열린 질문, 퀴즈는 저장하지 않음)
+            lessonMaterialRepository.save(lessonMaterial);
+            log.info("생성된 lessonMaterialId() : {}", lessonMaterial.getLessonMaterialId());
+
+            // 열린 질문을 OpenQuestionDto로 변환하여 클라이언트에 보낼 준비
+            List<OpenQuestionResponseDto> openQuestionDtos = new ArrayList<>();
+
+            JsonNode openQuestionsNode = root.path("open_questions"); //  라는 JSON에서 open_questions 노드 찾기
+
+            // 열린 질문 파싱
+            if (!openQuestionsNode.isMissingNode()) { // 있으면
+                openQuestionsNode.forEach(questionNode -> {
+                    String questionText = questionNode.path("question").asText(""); // question 노드 찾아서 추출
+                    if (!questionText.isEmpty()) {  // 빈 문자열 체크 추가
+                        OpenQuestionResponseDto openQuestionResponseDto = new OpenQuestionResponseDto(
+                                questionText
+                        );
+
+                        openQuestionDtos.add(openQuestionResponseDto);
+                    }
+                });
+            }
+
+            // 퀴즈를 QuizDto로 변환하여 클라이언트에 보낼 준비
+            List<QuizDto> quizDtos = new ArrayList<>();
+            JsonNode quizNode = root.path("quiz");
+            if (!quizNode.isMissingNode()) {
+                final AtomicLong quizIdCounter = new AtomicLong(1); // quizId를 1부터 시작하도록 설정
+                quizNode.forEach(qNode -> {
+                    quizDtos.add(new QuizDto(
+                            quizIdCounter.getAndIncrement(),
+                            qNode.path("question").asText(""),
+                            qNode.path("answer").asInt(),
+                            qNode.path("choices1").asText(""),
+                            qNode.path("choices2").asText(""),
+                            qNode.path("choices3").asText(""),
+                            qNode.path("choices4").asText("")
+                    ));
+                });
+            }
+
+            // 클라이언트에 반환할 LessonMaterialResponseDto 생성
+            return new LessonMaterialResponseDto(lessonMaterial.getLessonMaterialId(), quizDtos, openQuestionDtos);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("json 변형이 잘못되었습니다.");
+        }
     }
 
 

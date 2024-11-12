@@ -15,6 +15,7 @@ import com.todock.marimo.domain.lesson.repository.HotSittingRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.SelfIntroduceRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -26,9 +27,9 @@ import org.springframework.web.client.RestTemplate;
 public class HotSittingService {
 
     private final SelfIntroduceRepository selfIntroduceRepository;
+    private final HotSittingRepository hotSittingRepository;
     private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
-    private final HotSittingRepository hotSittingRepository;
     private final RestTemplate restTemplate;
 
     @Autowired
@@ -48,6 +49,7 @@ public class HotSittingService {
     /**
      * 핫시팅 wavFile을 AI 서버로 전송하고 SelfIntroduceId를 포함합니다.
      */
+    @Transactional
     public void sendWavToAiServer(Long userId, WavFileClientToServerRequestDto wavDto) {
 
         log.info("userId : {}, wavDto : {}", userId, wavDto);
@@ -128,6 +130,36 @@ public class HotSittingService {
 
 
     /**
+     * 핫시팅 자기소개 저장
+     */
+    public void saveAIRequest(SelfIntroduceRequestDto selfIntroduceDto) {
+
+        // 수업 찾기
+        Lesson lesson = lessonRepository.findById(selfIntroduceDto.getLessonId())
+                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+
+        // 핫시팅 찾기
+        HotSitting hotSitting = lesson.getHotSitting();
+
+        // 핫시팅에 자기소개 추가
+        SelfIntroduce selfIntroduce = new SelfIntroduce(
+                hotSitting,
+                selfIntroduceDto.getSelfIntNum(),
+                selfIntroduceDto.getSelfIntroduce()
+        );
+
+        // 핫시팅에 자기소개 추가
+        hotSitting.getSelfIntroduces().add(selfIntroduce);
+
+        // 변경된 hotSitting 엔티티를 다시 저장
+        selfIntroduceRepository.save(selfIntroduce);
+
+        // 변경된 핫시팅을 다시 저장하여 관계 갱신
+        hotSittingRepository.save(hotSitting);
+    }
+
+
+    /**
      * AI 서버 응답을 처리하고 저장하는 메서드
      */
     private void saveAIResponse(String responseBody) {
@@ -168,36 +200,5 @@ public class HotSittingService {
         selfIntroduceRepository.save(selfIntroduce);
 
     }
-
-
-    /**
-     * 핫시팅 자기소개 저장
-     */
-    public void saveAIRequest(SelfIntroduceRequestDto selfIntroduceDto) {
-
-        // 수업 찾기
-        Lesson lesson = lessonRepository.findById(selfIntroduceDto.getLessonId())
-                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
-
-        // 핫시팅 찾기
-        HotSitting hotSitting = lesson.getHotSitting();
-
-        // 핫시팅에 자기소개 추가
-        SelfIntroduce selfIntroduce = new SelfIntroduce(
-                hotSitting,
-                selfIntroduceDto.getSelfIntNum(),
-                selfIntroduceDto.getSelfIntroduce()
-        );
-
-        // 핫시팅에 자기소개 추가
-        hotSitting.getSelfIntroduces().add(selfIntroduce);
-
-        // 변경된 hotSitting 엔티티를 다시 저장
-        selfIntroduceRepository.save(selfIntroduce);
-
-        // 변경된 핫시팅을 다시 저장하여 관계 갱신
-        hotSittingRepository.save(hotSitting);
-    }
-
 
 }

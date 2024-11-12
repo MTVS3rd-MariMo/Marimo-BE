@@ -7,6 +7,7 @@ import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestionA
 import com.todock.marimo.domain.result.entity.Result;
 import com.todock.marimo.domain.result.repository.ResultRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +23,11 @@ public class OpenQuestionService {
         this.resultRepository = resultRepository;
     }
 
+
     /**
      * 열린 질문 저장
      */
+    @Transactional
     public void saveAnswer(Long userId, AnswerRequestDto answerDto) {
 
         OpenQuestion openQuestion = openQuestionRepository.findById(answerDto.getQuestionId())
