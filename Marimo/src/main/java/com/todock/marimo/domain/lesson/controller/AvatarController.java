@@ -136,7 +136,9 @@ public class AvatarController {
 
             // 5. 서비스 호출
             AvatarResponseDto avatarResponseDto = avatarService.sendImgToAiServer(userId, lessonId, img);
+
             log.info("avatarResponseDto : {}", avatarResponseDto);
+
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
@@ -157,7 +159,9 @@ public class AvatarController {
      * 다른 유저의 아바타 이미지, 애니메이션 받기
      */
     @GetMapping("/participant/{lessonId}/{userId}")
-    public ResponseEntity<AvatarResponseDto> getAvatarForParticipant(@PathVariable("lessonId") Long lessonId, @PathVariable("userId") Long userId) {
+    public ResponseEntity<AvatarResponseDto> getAvatarForParticipant(
+            @PathVariable("lessonId") Long lessonId
+            , @PathVariable("userId") Long userId) {
 
         log.info("AvatarController lessonId : {}, userId: {}", lessonId, userId);
 

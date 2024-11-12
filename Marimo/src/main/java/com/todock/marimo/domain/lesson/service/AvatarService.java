@@ -90,29 +90,35 @@ public class AvatarService {
     @Transactional
     public AvatarResponseDto sendImgToAiServer(Long userId, Long lessonId, MultipartFile img) {
 
-        // 테스트용 userId : 1 ~ 5, lessonId : 9 고정
+        log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
+
+        Avatar avatar1 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 1L)
+                .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+
+        Avatar avatar2 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 2L)
+                .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+
+        Avatar avatar3 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 3L)
+                .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+
+        Avatar avatar4 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 4L)
+                .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+
+        Avatar avatar5 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 5L)
+                .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+
         if (userId == 1L) {
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
-                    .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
-        } else if(userId == 2L) {
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
-                    .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
-        } else if(userId == 3L) {
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
-                    .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
-        } else if(userId == 4L) {
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
-                    .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
-        } else if(userId == 5L) {
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
-                    .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+            return new AvatarResponseDto(avatar1.getUserId(), avatar1.getAvatarImg(), avatar1.getAnimations());
+        } else if (userId == 2L) {
+            return new AvatarResponseDto(avatar2.getUserId(), avatar2.getAvatarImg(), avatar2.getAnimations());
+        } else if (userId == 3L) {
+            return new AvatarResponseDto(avatar3.getUserId(), avatar3.getAvatarImg(), avatar3.getAnimations());
+        } else if (userId == 4L) {
+            return new AvatarResponseDto(avatar4.getUserId(), avatar4.getAvatarImg(), avatar4.getAnimations());
+        } else if (userId == 5L) {
+            return new AvatarResponseDto(avatar5.getUserId(), avatar5.getAvatarImg(), avatar5.getAnimations());
         }
-        return new AvatarResponseDto(null, null,null);
+        return new AvatarResponseDto(null, null, null);
   /*      try {
 
             // 1. AI 서버 URI 설정
