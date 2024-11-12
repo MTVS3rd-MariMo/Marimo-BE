@@ -50,6 +50,8 @@ public class HotSittingService {
      */
     public void sendWavToAiServer(Long userId, WavFileClientToServerRequestDto wavDto) {
 
+        log.info("userId : {}, wavDto : {}", userId, wavDto);
+
         // userId와 character 연결하기, 수업을 lessonId로 찾기
         Lesson lesson = lessonRepository.findById(wavDto.getLessonId())
                 .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
