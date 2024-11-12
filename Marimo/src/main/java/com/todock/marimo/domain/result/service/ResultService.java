@@ -130,20 +130,17 @@ public class ResultService {
         // 반환할 LessonResultDto 생성 및 초기 설정
         LessonResultDto lessonResultDto = new LessonResultDto(
                 lessonMaterial.getBookTitle(),
-                lessonMaterial.getBookContents(),
                 lesson.getCreatedAt(),
                 lesson.getPhotoUrl()
         );
 
-        // 참가자 목록 설정
-        List<ParticipantResultDto> participants = lesson.getParticipantList().stream()
-                .map(participant -> {
-                    User user = userRepository.findById(participant.getUserId())
-                            .orElseThrow(() -> new IllegalArgumentException("userId로 유저를 찾을 수 없습니다."));
-                    return new ParticipantResultDto(user.getName());
-                })
+        // 참가자 목록을 String 형태로 설정
+        List<String> participants = lesson.getParticipantList().stream()
+                .map(participant -> userRepository.findById(participant.getUserId())
+                        .map(User::getName)
+                        .orElse("Unknown User"))
                 .collect(Collectors.toList());
-        lessonResultDto.setParticipants(participants); // 참가자 리스트 설정
+        lessonResultDto.setParticipants(participants);
 
         // 열린 질문 설정
         List<OpenQuestionResultDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
@@ -170,18 +167,6 @@ public class ResultService {
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
         lessonResultDto.setHotSittings(hotSittings); // 핫시팅 리스트 설정
-
-        // 퀴즈 설정
-        List<QuizResultDto> quizzes = lessonMaterial.getQuizList().stream()
-                .map(quiz -> new QuizResultDto(
-                        quiz.getQuestion(),
-                        quiz.getAnswer(),
-                        quiz.getChoices1(),
-                        quiz.getChoices2(),
-                        quiz.getChoices3(),
-                        quiz.getChoices4()))
-                .collect(Collectors.toList());
-        lessonResultDto.setQuizzes(quizzes); // 퀴즈 리스트 설정
 
         // 역할 설정과 아바타 이미지 설정을 통합
         List<LessonRoleResultDto> roles = lesson.getAvatarList().stream()
