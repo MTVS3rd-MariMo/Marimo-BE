@@ -31,7 +31,8 @@ public class HotSittingController {
      * 자기소개 저장
      */
     @PutMapping("/self-introduce")
-    public ResponseEntity<String> hotSittingRecord(@RequestBody SelfIntroduceRequestDto selfIntroduceDto) {
+    public ResponseEntity<String> hotSittingRecord(
+            @RequestBody SelfIntroduceRequestDto selfIntroduceDto) {
 
         log.info("Received Request DTO: {}", selfIntroduceDto);
 

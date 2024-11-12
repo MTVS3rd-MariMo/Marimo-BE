@@ -55,7 +55,6 @@ public class Lesson {
     private String createdAt; // 포맷팅된 문자열로 저장된 수업 생성 날짜
 
     public Lesson(Long createdUserId, Long lessonMaterialId) {
-        this.hotSitting = new HotSitting();
         this.createdUserId = createdUserId;
         this.lessonMaterialId = lessonMaterialId;
 

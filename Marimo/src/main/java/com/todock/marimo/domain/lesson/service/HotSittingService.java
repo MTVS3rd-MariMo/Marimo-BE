@@ -11,6 +11,7 @@ import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
 import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
 import com.todock.marimo.domain.lesson.entity.hotsitting.SelfIntroduce;
 import com.todock.marimo.domain.lesson.repository.AvatarRepository;
+import com.todock.marimo.domain.lesson.repository.HotSittingRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.SelfIntroduceRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,18 +26,23 @@ import org.springframework.web.client.RestTemplate;
 public class HotSittingService {
 
     private final SelfIntroduceRepository selfIntroduceRepository;
-    private final RestTemplate restTemplate;
     private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
+    private final HotSittingRepository hotSittingRepository;
+    private final RestTemplate restTemplate;
 
     @Autowired
     public HotSittingService(
             SelfIntroduceRepository selfIntroduceRepository
-            , RestTemplate restTemplate, LessonRepository lessonRepository, AvatarRepository avatarRepository) {
+            , HotSittingRepository hotSittingRepository
+            , LessonRepository lessonRepository
+            , AvatarRepository avatarRepository
+            , RestTemplate restTemplate) {
         this.selfIntroduceRepository = selfIntroduceRepository;
-        this.restTemplate = restTemplate;
+        this.hotSittingRepository = hotSittingRepository;
         this.lessonRepository = lessonRepository;
         this.avatarRepository = avatarRepository;
+        this.restTemplate = restTemplate;
     }
 
     /**
@@ -57,7 +63,7 @@ public class HotSittingService {
         Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
                 .orElseThrow(() -> new EntityNotFoundException("lessonId와 userId로 아바타를 찾을 수 없습니다."));
         // 아바타가 존재하지 않을 경우 전달받은 캐릭터 이름으로 업데이트
-        if(avatar.getCharacter() == null) {
+        if (avatar.getCharacter() == null) {
             avatar.setCharacter(wavDto.getCharacter());
         }
 
@@ -188,7 +194,7 @@ public class HotSittingService {
         selfIntroduceRepository.save(selfIntroduce);
 
         // 변경된 핫시팅을 다시 저장하여 관계 갱신
-        // hotSittingRepository.save(hotSitting);
+        hotSittingRepository.save(hotSitting);
     }
 
 

@@ -6,6 +6,8 @@ import com.todock.marimo.domain.lesson.dto.BackgroundRequestDto;
 import com.todock.marimo.domain.lesson.dto.ParticipantListDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.Participant;
+import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
+import com.todock.marimo.domain.lesson.repository.HotSittingRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
@@ -42,6 +44,7 @@ public class LessonService {
     private final LessonMaterialRepository lessonMaterialRepository;
     private final ResultRepository resultRepository;
     private final RestTemplate restTemplate;
+    private final HotSittingRepository hotSittingRepository;
 
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
@@ -65,7 +68,7 @@ public class LessonService {
             , ResultRepository resultRepository
             , LessonRepository lessonRepository
             , UserRepository userRepository
-            , RestTemplate restTemplate) {
+            , RestTemplate restTemplate, HotSittingRepository hotSittingRepository) {
         this.lessonMaterialRepository = lessonMaterialRepository;
         this.participantRepository = participantRepository;
         this.resultRepository = resultRepository;
@@ -73,6 +76,7 @@ public class LessonService {
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
         initDirectories();
+        this.hotSittingRepository = hotSittingRepository;
     }
 
     // 필요한 디렉토리를 초기화 하는 메서드
@@ -93,20 +97,30 @@ public class LessonService {
     public Long createLesson(Long userId, Long lessonMaterialId) {
 
         // Lesson 생성 및 설정
-        Lesson newlesson = new Lesson(// 수업에 lessonMaterial 넣어서 수업으로 찾을 수 있게 함
-                userId,
-                lessonMaterialId
-        );
+        Lesson newLesson = new Lesson(userId, lessonMaterialId);
 
-        lessonRepository.save(newlesson); // 저장 후 ID가 생성됨
-        Long lessonId = newlesson.getLessonId(); // lessonId 추출
+        // Lesson을 먼저 저장하여 ID를 생성합니다.
+        lessonRepository.save(newLesson);
+
+        // HotSitting 생성 후 Lesson과 연결
+        HotSitting newHotSitting = new HotSitting();
+        newHotSitting.setLesson(newLesson);
+
+        // HotSitting 저장
+        hotSittingRepository.save(newHotSitting);
+
+        // Lesson에 HotSitting 설정 후 다시 저장
+        newLesson.setHotSitting(newHotSitting);
+        lessonRepository.save(newLesson);
+
+        Long lessonId = newLesson.getLessonId(); // lessonId 추출
+
         log.info("\n\n생성된 lessonId : {}\n\n", lessonId);
-        log.info("\n\n적용된 lessonMaterialId : {}\n\n", newlesson.getLessonMaterialId());
+        log.info("\n\n적용된 lessonMaterialId : {}\n\n", newLesson.getLessonMaterialId());
 
         return lessonId;
+
     }
-
-
     /**
      * LessonId로 참가자 목록에 유저Id, 유저 이름 추가하기
      */
