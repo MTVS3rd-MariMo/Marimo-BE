@@ -42,15 +42,18 @@ public class ResultService {
     /**
      * 학생이 참가한 모든 수업 리스트 조회 (사진 리스트로 보여줌) - LessonId, photoList 반환
      */
-    public List<StudentResultDto> findAllPhotos(Long userId) {
+    public StudentResultResponseDto findAllPhotos(Long userId) {
 
-        return participantRepository.findAllByUserId(userId)
+        List<StudentResultDto> photos = participantRepository.findAllByUserId(userId)
                 .stream()
                 .map(participant -> new StudentResultDto(
                         lessonMaterialRepository.findById(participant.getLesson().getLessonMaterialId())
-                                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다.")).getBookTitle(),
+                                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
+                                .getBookTitle(),
                         participant.getLesson().getPhotoUrl()))
                 .collect(Collectors.toList());
+
+        return new StudentResultResponseDto(photos); // photos를 studentResults에 할당
     }
 
 
@@ -85,27 +88,29 @@ public class ResultService {
     /**
      * 선생님이 참가한 모든 수업 조회 (lessonId, 책 제목, 참가자 리스트, 생성 날짜)
      */
-    public List<TeacherResultDto> findAllLessons(Long userId) {
+    public TeacherResultResponseDto findAllLessons(Long userId) {
 
-        return lessonRepository.findAllByCreatedUserId(userId)
+        List<TeacherResultDto> results = lessonRepository.findAllByCreatedUserId(userId)
                 .stream()
                 .map(lesson -> new TeacherResultDto(
-                                lesson.getLessonMaterialId(),
-                                lessonMaterialRepository
-                                        .findById(lesson.getLessonMaterialId())
-                                        .orElseThrow(() ->
-                                                new EntityNotFoundException
-                                                        ("lesson.getLessonId : " + lesson.getLessonId()
-                                                                + "의 lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
-                                        .getBookTitle(),
-
+                        lesson.getLessonId(),
+                        lessonMaterialRepository
+                                .findById(lesson.getLessonMaterialId())
+                                .orElseThrow(() -> new EntityNotFoundException(
+                                        "lesson.getLessonId : " + lesson.getLessonId()
+                                                + "의 lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
+                                .getBookTitle(),
                         lesson.getParticipantList()
                                 .stream()
                                 .map(Participant::getParticipantName)
                                 .collect(Collectors.toList()),
-                                lesson.getCreatedAt().toString()
-                        )
-                ).toList();
+                        lesson.getCreatedAt() != null
+                                ? lesson.getCreatedAt().toString() // 포맷팅 없이 문자열 반환
+                                : "생성일시 없음" // 기본값 또는 null인 경우 처리
+                ))
+                .collect(Collectors.toList());
+
+        return new TeacherResultResponseDto(results); // teacherResults에 List<TeacherResultDto> 할당
     }
 
 

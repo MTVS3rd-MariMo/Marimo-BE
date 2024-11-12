@@ -28,7 +28,7 @@ public class Lesson {
     @Column(name = "lesson_id")
     private Long lessonId; // 수업 id
 
-    @Column(name="created_user_id")
+    @Column(name = "created_user_id")
     private Long createdUserId;
 
     @Column(name = "lesson_material_id")
@@ -52,15 +52,15 @@ public class Lesson {
     private String photoBackgroundUrl; // 단체사진 배경
 
     @Column(name = "created_at")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 hh시 mm분")
-    private LocalDateTime createdAt; // 수업 생성 날짜
+    private String createdAt; // 포맷팅된 문자열로 저장된 수업 생성 날짜
 
     public Lesson(Long createdUserId, Long lessonMaterialId) {
-
-        this.createdAt = LocalDateTime.now(); // 생성 시 현재 날짜 표시
         this.createdUserId = createdUserId;
         this.lessonMaterialId = lessonMaterialId;
-        
+
+        // 현재 날짜와 시간을 포맷팅하여 문자열로 저장
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분");
+        this.createdAt = LocalDateTime.now().format(formatter);
     }
 
 }

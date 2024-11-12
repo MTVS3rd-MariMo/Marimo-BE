@@ -1,8 +1,6 @@
 package com.todock.marimo.domain.result.controller;
 
-import com.todock.marimo.domain.result.dto.LessonResultDto;
-import com.todock.marimo.domain.result.dto.StudentResultDto;
-import com.todock.marimo.domain.result.dto.TeacherResultDto;
+import com.todock.marimo.domain.result.dto.*;
 import com.todock.marimo.domain.result.service.ResultService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +26,7 @@ public class ResultController {
      * 학생이 참가한 모든 수업 리스트 조회 (사진 리스트로 보여줌) - LessonId, photoList 반환
      */
     @GetMapping("/student")
-    public ResponseEntity<List<StudentResultDto>> getPhotoList(@RequestHeader("userId") Long userId) {
+    public ResponseEntity<StudentResultResponseDto> getPhotoList(@RequestHeader("userId") Long userId) {
 
         return ResponseEntity.ok().body(resultService.findAllPhotos(userId));
     }
@@ -38,12 +36,11 @@ public class ResultController {
      * 선생님이 참가한 모든 수업 조회 ( 참가자 이름?)
      */
     @GetMapping("/teacher")
-    public ResponseEntity<List<TeacherResultDto>> getLessonList(
+    public ResponseEntity<TeacherResultResponseDto> getLessonList(
             @RequestHeader("userId") Long userId) {
 
         return ResponseEntity.ok().body(resultService.findAllLessons(userId));
     }
-
 
 
     /**
