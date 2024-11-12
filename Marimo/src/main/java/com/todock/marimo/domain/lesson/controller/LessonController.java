@@ -191,6 +191,7 @@ public class LessonController {
         return ResponseEntity.ok().body(lessonService.getPhotoBackgroundUrl(lessonId));
     }
 
+
     /**
      * 파일 확장자 추출
      */

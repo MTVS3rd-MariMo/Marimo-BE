@@ -1,6 +1,7 @@
 package com.todock.marimo.domain.result.service;
 
 import com.todock.marimo.domain.lesson.entity.Lesson;
+import com.todock.marimo.domain.lesson.entity.Participant;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
@@ -46,7 +47,8 @@ public class ResultService {
         return participantRepository.findAllByUserId(userId)
                 .stream()
                 .map(participant -> new StudentResultDto(
-                        participant.getLesson().getLessonId(),
+                        lessonMaterialRepository.findById(participant.getLesson().getLessonMaterialId())
+                                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다.")).getBookTitle(),
                         participant.getLesson().getPhotoUrl()))
                 .collect(Collectors.toList());
     }
@@ -97,13 +99,11 @@ public class ResultService {
                                                                 + "의 lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
                                         .getBookTitle(),
 
-                                lesson.getParticipantList()
-                                        .stream()
-                                        .map(participant -> new ParticipantResultDto(
-                                                participant.getParticipantName()
-                                        ))
-                                        .toList(),
-                                lesson.getCreatedAt()
+                        lesson.getParticipantList()
+                                .stream()
+                                .map(Participant::getParticipantName)
+                                .collect(Collectors.toList()),
+                                lesson.getCreatedAt().toString()
                         )
                 ).toList();
     }

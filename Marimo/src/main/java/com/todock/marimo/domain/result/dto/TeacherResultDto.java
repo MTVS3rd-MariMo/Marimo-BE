@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -18,7 +19,7 @@ public class TeacherResultDto {
 
     private String bookTitle; // 책 제목
 
-    private List<ParticipantResultDto> participantList; // 참가자 명단
+    private List<String> participantList = new ArrayList<>(); // 참가자 명단
 
-    private LocalDateTime createdAt; // 수업 생성 시간
+    private String createdAt; // 수업 생성 시간
 }

@@ -5,14 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentResultDto {
+public class StudentResultResponseDto {
 
-    private String bookTitle;
-
-    private String photo;
-
+    private List<StudentResultDto> studentResults = new ArrayList<>();
 }
