@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("/api/lesson-material")
+@Tag(name = "LessonMaterial API", description = "수업 자료 관련 API")
 public class LessonMaterialController {
 
     private final LessonMaterialService lessonMaterialService;
@@ -82,8 +84,7 @@ public class LessonMaterialController {
     @PostMapping("/upload-pdf")
     public ResponseEntity<LessonMaterialResponseDto> sendPdfToAiServer(
             @RequestHeader("userId") Long userId,
-            @RequestParam("pdf") MultipartFile pdfFile
-    ) {
+            @RequestParam("pdf") MultipartFile pdfFile) {
 
         if (pdfFile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -180,6 +181,7 @@ public class LessonMaterialController {
     /**
      * userId로 lessonMaterial 전체 조회
      */
+    @Operation(summary = "userId로 수업 자료 전체 조회")
     @GetMapping
     public ResponseEntity<LessonMaterialNamesRequestDto> getLessonMaterialNames(
             @RequestHeader("userId") Long userId) {
@@ -196,7 +198,7 @@ public class LessonMaterialController {
     /**
      * 수업자료 id로 수업자료 삭제
      */
-    @Operation(summary = "수업 자료 삭제", description = "수업 자료를 삭제합니다.")
+    @Operation(summary = "lessonMaterialId로 수업 자료 삭제", description = "수업 자료를 삭제합니다.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",

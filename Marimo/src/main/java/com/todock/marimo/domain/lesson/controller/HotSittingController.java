@@ -3,6 +3,8 @@ package com.todock.marimo.domain.lesson.controller;
 import com.todock.marimo.domain.lesson.dto.SelfIntroduceRequestDto;
 import com.todock.marimo.domain.lesson.dto.WavFileClientToServerRequestDto;
 import com.todock.marimo.domain.lesson.service.HotSittingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import java.util.Base64;
 @Slf4j
 @RestController
 @RequestMapping("/api/hot-sitting")
+@Tag(name = "HotSitting API", description = "핫시팅 활동 관련 API")
 public class HotSittingController {
 
     private final HotSittingService hotSittingService;
@@ -30,6 +33,7 @@ public class HotSittingController {
     /**
      * 자기소개 저장
      */
+    @Operation(summary = "자기소개 저장")
     @PutMapping("/self-introduce")
     public ResponseEntity<String> hotSittingRecord(
             @RequestBody SelfIntroduceRequestDto selfIntroduceDto) {
@@ -45,6 +49,7 @@ public class HotSittingController {
     /**
      * 핫시팅 wavFile AI서버로 전달 - introduceId 추가해서 전달
      */
+    @Operation(summary = "핫시팅 QnA AI 서버로 전달")
     @PostMapping(value = "/wav-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> hotSittingWavFile(
             @RequestHeader("userId") Long userId,

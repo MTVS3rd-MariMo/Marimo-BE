@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.HttpEncodingAutoConfiguration;
@@ -25,6 +26,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/avatar")
+@Tag(name = "Avatar API", description = "아바타 관련 API")
 public class AvatarController {
 
     private final AvatarService avatarService;
@@ -42,6 +44,7 @@ public class AvatarController {
      * 모든 유저의 아바타와 이미지를 한번에 List<dto>로 전달 - 선생님용?
      * 수업 id로 아바타를 전부 저장
      */
+    @Operation(summary = "lessonId로 모든 유저의 아바타와 애니메이션 다운")
     @GetMapping
     public ResponseEntity<List<AvatarResponseDto>> getAvatar(Long lessonId) {
 
@@ -158,6 +161,7 @@ public class AvatarController {
     /**
      * 다른 유저의 아바타 이미지, 애니메이션 받기
      */
+    @Operation(summary = "다른 유저의 아바타 다운")
     @GetMapping("/participant/{lessonId}/{userId}")
     public ResponseEntity<AvatarResponseDto> getAvatarForParticipant(
             @PathVariable("lessonId") Long lessonId

@@ -186,6 +186,7 @@ public class LessonController {
     /**
      * 배경사진 호출
      */
+    @Operation(summary = "배경사진 호출")
     @GetMapping("/photo/background/{lessonId}")
     public ResponseEntity<String> getPhotoBackground(
             @PathVariable("lessonId") Long lessonId) {
