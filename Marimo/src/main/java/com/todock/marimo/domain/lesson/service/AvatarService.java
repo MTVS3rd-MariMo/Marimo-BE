@@ -90,7 +90,30 @@ public class AvatarService {
     @Transactional
     public AvatarResponseDto sendImgToAiServer(Long userId, Long lessonId, MultipartFile img) {
 
-        try {
+        // 테스트용 userId : 1 ~ 5, lessonId : 9 고정
+        if (userId == 1L) {
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
+                    .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+        } else if(userId == 2L) {
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
+                    .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+        } else if(userId == 3L) {
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
+                    .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+        } else if(userId == 4L) {
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
+                    .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+        } else if(userId == 5L) {
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
+                    .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+        }
+        return new AvatarResponseDto(null, null,null);
+  /*      try {
 
             // 1. AI 서버 URI 설정
             String AIServerUrI = "http://metaai2.iptime.org:64987/animation/";
@@ -166,7 +189,7 @@ public class AvatarService {
 
             log.error("파일 처리 중 오류 발생", e);
             throw new RuntimeException("파일 처리 실패", e);
-        }
+        }*/
     }
 
     /**

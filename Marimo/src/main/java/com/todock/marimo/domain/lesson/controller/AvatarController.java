@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.servlet.HttpEncodingAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,12 @@ public class AvatarController {
     private final AvatarService avatarService;
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png");
+    private final HttpEncodingAutoConfiguration httpEncodingAutoConfiguration;
 
     @Autowired
-    public AvatarController(AvatarService avatarService) {
+    public AvatarController(AvatarService avatarService, HttpEncodingAutoConfiguration httpEncodingAutoConfiguration) {
         this.avatarService = avatarService;
+        this.httpEncodingAutoConfiguration = httpEncodingAutoConfiguration;
     }
 
     /**
@@ -134,6 +137,9 @@ public class AvatarController {
             // 5. 서비스 호출
             AvatarResponseDto avatarResponseDto = avatarService.sendImgToAiServer(userId, lessonId, img);
             log.info("avatarResponseDto : {}", avatarResponseDto);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
             return ResponseEntity.status(HttpStatus.OK)
                     //.body("Img 파일 " + originalFilename + "이 성공적으로 업로드되었습니다.");
                     .body(avatarResponseDto);
