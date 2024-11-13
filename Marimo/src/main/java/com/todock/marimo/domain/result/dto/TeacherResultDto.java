@@ -22,4 +22,5 @@ public class TeacherResultDto {
     private List<String> participantList = new ArrayList<>(); // 참가자 명단
 
     private String createdAt; // 수업 생성 시간
+
 }

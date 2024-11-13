@@ -61,8 +61,6 @@ public class LessonService {
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
 
-    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png");
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final String PHOTO_DIR = "data/photo"; // zip 파일 저장 경로
     private static final String BACKGROUND_DIR = "data/background"; // 단체사진 배경 저장 경로
 

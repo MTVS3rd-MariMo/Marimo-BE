@@ -51,6 +51,7 @@ public class HotSittingService {
         this.restTemplate = restTemplate;
     }
 
+
     /**
      * 핫시팅 wavFile을 AI 서버로 전송하고 SelfIntroduceId를 포함합니다.
      */

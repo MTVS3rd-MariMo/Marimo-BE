@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,8 +50,7 @@ public class LessonMaterial {
     private List<LessonRole> lessonRoleList = new ArrayList<>();
 
     @Column(name = "created_at")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 hh시 mm분")
-    private LocalDateTime createdAt; // 생성 날짜
+    private String createdAt; // 생성 날짜
 
 
     public LessonMaterial(Long userId, String bookTitle, String bookContents) {
@@ -58,6 +58,11 @@ public class LessonMaterial {
         this.bookContents = bookContents;
         this.lessonRoleList = lessonRoleList;
         this.userId = userId;
+
+        // 현재 날짜와 시간을 포맷팅하여 문자열로 저장
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분");
+        this.createdAt = LocalDateTime.now().format(formatter);
+
     }
 
     public LessonMaterial(Long teacherId, String bookTitle, String bookContents,
@@ -68,6 +73,11 @@ public class LessonMaterial {
         this.bookContents = bookContents;
         this.openQuestionList = openQuestionList;
         this.quizList = quizList;
+
+        // 현재 날짜와 시간을 포맷팅하여 문자열로 저장
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분");
+        this.createdAt = LocalDateTime.now().format(formatter);
+
     }
 
     @Override

@@ -155,9 +155,9 @@ public class ResultService {
                             .orElse("Unknown User") : "Unknown User";
 
                     return new LessonRoleResultDto(
+                            userName,
                             role.getCharacter(), // 역할 이름
-                            avatarUrl, // 아바타 이미지 URL
-                            userName
+                            avatarUrl // 아바타 이미지 URL
                     );
                 })
                 .collect(Collectors.toList());
