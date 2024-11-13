@@ -18,6 +18,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -31,6 +32,10 @@ public class HotSittingService {
     private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
     private final RestTemplate restTemplate;
+
+    @Value("${external.api.hot-sitting-server-url}")
+    private String AIServerURL;
+
 
     @Autowired
     public HotSittingService(
@@ -105,8 +110,6 @@ public class HotSittingService {
         // AI 서버로 전송
         try {
 
-            String AIServerUrI = "http://metaai2.iptime.org:61987/hotseating";
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -114,7 +117,7 @@ public class HotSittingService {
             HttpEntity<WavFileServerToAIRequestDto> requestEntity = new HttpEntity<>(wavServerToAIDto, headers);
 
             // AI 서버로 POST 요청 전송
-            ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, requestEntity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(AIServerURL, requestEntity, String.class);
             if (response.getStatusCode() == HttpStatus.OK) {
                 log.info("AI 서버로 파일 전송 성공: {}", response.getBody());
                 saveAIResponse(response.getBody());

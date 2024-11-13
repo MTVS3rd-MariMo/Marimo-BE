@@ -25,6 +25,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -47,10 +48,14 @@ import java.util.stream.Collectors;
 @Service
 public class LessonMaterialService {
 
+    @Value("${external.api.lesson-material-server-url}")
+    private String AIServerURL;
+
     private final RestTemplate restTemplate;
     private final UserRepository userRepository;
     private final LessonRepository lessonRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
+
     private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 파싱용 ObjectMapper 추가
 
     @Autowired

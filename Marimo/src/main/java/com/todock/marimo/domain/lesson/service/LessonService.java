@@ -18,6 +18,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -42,10 +43,8 @@ import java.util.UUID;
 @Service
 public class LessonService {
 
-    private final LessonMaterialRepository lessonMaterialRepository;
-    private final ResultRepository resultRepository;
-    private final RestTemplate restTemplate;
-    private final HotSittingRepository hotSittingRepository;
+    @Value("${external.api.background-server-url}")
+    private String AIServerURL;
 
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
@@ -54,9 +53,13 @@ public class LessonService {
     //@Value("${server.port}")
     private String serverPort = "8202";
 
+    private final LessonMaterialRepository lessonMaterialRepository;
     private final ParticipantRepository participantRepository;
+    private final HotSittingRepository hotSittingRepository;
     private final LessonRepository lessonRepository;
+    private final ResultRepository resultRepository;
     private final UserRepository userRepository;
+    private final RestTemplate restTemplate;
 
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png");
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -66,18 +69,19 @@ public class LessonService {
     @Autowired
     public LessonService(LessonMaterialRepository lessonMaterialRepository
             , ParticipantRepository participantRepository
-            , ResultRepository resultRepository
+            , HotSittingRepository hotSittingRepository
             , LessonRepository lessonRepository
+            , ResultRepository resultRepository
             , UserRepository userRepository
-            , RestTemplate restTemplate, HotSittingRepository hotSittingRepository) {
+            , RestTemplate restTemplate) {
         this.lessonMaterialRepository = lessonMaterialRepository;
         this.participantRepository = participantRepository;
-        this.resultRepository = resultRepository;
+        this.hotSittingRepository = hotSittingRepository;
         this.lessonRepository = lessonRepository;
+        this.resultRepository = resultRepository;
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
         initDirectories();
-        this.hotSittingRepository = hotSittingRepository;
     }
 
     // 필요한 디렉토리를 초기화 하는 메서드
@@ -216,8 +220,6 @@ public class LessonService {
         // AI 통신
         try {
 
-            String AIServerURI = "http://metaai2.iptime.org:7994/marimobackground";
-
             HttpHeaders headers = new HttpHeaders(); // 헤더 설정
             headers.setContentType(MediaType.APPLICATION_JSON); // JSON으로 설정
 
@@ -225,7 +227,7 @@ public class LessonService {
 
             // AI 서버 응답
             ResponseEntity<byte[]> AIResponse = restTemplate.exchange(
-                    AIServerURI, HttpMethod.POST, requestEntity, byte[].class);
+                    AIServerURL, HttpMethod.POST, requestEntity, byte[].class);
 
             if (AIResponse.getStatusCode() != HttpStatus.OK) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST

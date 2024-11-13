@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -41,8 +42,9 @@ import java.util.zip.ZipInputStream;
 @Service
 public class AvatarService {
 
+    @Value("${external.api.avatar-server-url}")
+    private String AIServerURL;
 
-    private final UserRepository userRepository;
     // 클래스 내부에서 주입된 값을 사용하기 위해 추가
     //@Value("${server.host}")
     private String serverHost = "211.250.74.75";
@@ -52,6 +54,7 @@ public class AvatarService {
 
     private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
+    private final UserRepository userRepository;
     private final RestTemplate restTemplate;
 
     private static final String DATA_DIR = "data"; // 파일 저장 경로
@@ -121,17 +124,14 @@ public class AvatarService {
         return new AvatarResponseDto(null, null, null);
   /*      try {
 
-            // 1. AI 서버 URI 설정
-            String AIServerUrI = "http://metaai2.iptime.org:64987/animation/";
-
-            // 2. HttpHeaders 설정
+            // 1. HttpHeaders 설정
             HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
             headers.setContentType(MediaType.MULTIPART_FORM_DATA); // 컨텐츠 타입을 multipart/form-data 로 설정
 
-            // 3. Img 파일을 멀티파트 형식으로 Wrapping
+            // 2. Img 파일을 멀티파트 형식으로 Wrapping
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
-            // 이미지 파일을 ByteArrayResource로 변환하여 요청 바디에 추가
+            // 3. 이미지 파일을 ByteArrayResource로 변환하여 요청 바디에 추가
             body.add("img", new ByteArrayResource(img.getBytes()) {
                 @Override
                 public String getFilename() {
@@ -139,12 +139,12 @@ public class AvatarService {
                 }
             });
 
-            // HTTP 요청 엔티티 생성 (헤더와 바디 포함)
+            // 4. HTTP 요청 엔티티 생성 (헤더와 바디 포함)
             HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
             // 5. AI 서버로 POST 요청을 보내고 응답을 받음
             ResponseEntity<byte[]> AIResponse = restTemplate.postForEntity(
-                    AIServerUrI, request, byte[].class);
+                    AIServerURL, request, byte[].class);
 
 
             // 고유한 zip 파일명 생성
@@ -238,6 +238,7 @@ public class AvatarService {
                 ))
                 .collect(Collectors.toList());
     }
+
 
     /**
      * ===============================================================
