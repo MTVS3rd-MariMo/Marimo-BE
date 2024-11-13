@@ -48,7 +48,7 @@ public class LessonController {
             @RequestHeader(value = "userId", required = false) Long userId
             , @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
-        log.info("수업에 진행할 lessonMaterialId: {}", lessonMaterialId);
+        log.info("createLesson 수업에 진행할 lessonMaterialId: {}", lessonMaterialId);
 
         Long lessonId = lessonService.createLesson(userId, lessonMaterialId);
 
@@ -69,7 +69,7 @@ public class LessonController {
             return ResponseEntity.badRequest().body("userId 헤더가 필요합니다.");
         }
 
-        log.info("userId = {}, lessonId = {}", userId, lessonId);
+        log.info("enter userId = {}, lessonId = {}", userId, lessonId);
 
         lessonService.updateUserByLessonId(userId, lessonId);
 
@@ -83,8 +83,10 @@ public class LessonController {
     @Operation(summary = "수업 참가자 목록 조회", description = "주어진 LessonId의 참가자 목록을 조회합니다.")
     @GetMapping("/participant/{lessonId}")
     public ResponseEntity<ParticipantListDto> getStudentLessonMaterial(
-            @PathVariable("lessonId") Long lessonId) {
+            //@RequestHeader("userId") Long userId
+             @PathVariable("lessonId") Long lessonId) {
 
+        log.info(" 가 lessonId : {} 의 참가자 목록을 요청",  lessonId);
         ParticipantListDto participantListDto = lessonService.findParticipantByLessonId(lessonId);
         log.info("참가자 Id = {}", participantListDto);
 
@@ -98,9 +100,9 @@ public class LessonController {
     @Operation(summary = "참가자 수업 자료 조회", description = "수업 중 참가자가 사용할 수업 자료의 상세 정보를 반환합니다.")
     @GetMapping("/{lessonId}")
     public ResponseEntity<ParticipantLessonMaterialDto> getLessonMaterial(
-            @Parameter(description = "조회하려는 수업 자료 ID", example = "101", required = true) @PathVariable("lessonId") Long lessonId) {
+            @PathVariable("lessonId") Long lessonId) {
 
-        log.info("getLessonId: {}", lessonId);
+        log.info("getLessonMaterial 클라이언트가 요청한 lessonId: {}", lessonId);
 
         ParticipantLessonMaterialDto participantLessonMaterialDto = lessonMaterialService.getLessonMaterialById(lessonId);
 

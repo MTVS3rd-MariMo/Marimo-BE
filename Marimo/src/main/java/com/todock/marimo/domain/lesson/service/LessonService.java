@@ -46,12 +46,11 @@ public class LessonService {
     @Value("${external.api.background-server-url}")
     private String AIServerURL;
 
-    // 클래스 내부에서 주입된 값을 사용하기 위해 추가
-    //@Value("${server.host}")
-    private String serverHost = "211.250.74.75";
-    // 125.132.216.190:8202
-    //@Value("${server.port}")
-    private String serverPort = "8202";
+    @Value("${external.port.server-host}")
+    private String serverHost;
+
+    @Value("${external.port.external-port}")
+    private String serverPort;
 
     private final LessonMaterialRepository lessonMaterialRepository;
     private final ParticipantRepository participantRepository;

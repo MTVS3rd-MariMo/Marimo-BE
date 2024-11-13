@@ -28,3 +28,6 @@ external:
     avatar-server-url: ${AI_AVATAR_SERVER_URL}
     background-server-url: ${AI_BACKGROUND_SERVER_URL}
     lesson-material-server-url: ${AI_LESSON_MATERIAL_SERVER_URL}
+  port:
+    server-host: ${SERVER_HOST}
+    external-port: ${EXTERNAL_PORT}

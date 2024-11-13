@@ -45,12 +45,11 @@ public class AvatarService {
     @Value("${external.api.avatar-server-url}")
     private String AIServerURL;
 
-    // 클래스 내부에서 주입된 값을 사용하기 위해 추가
-    //@Value("${server.host}")
-    private String serverHost = "211.250.74.75";
-    // 125.132.216.190:8202
-    //@Value("${server.port}")
-    private String serverPort = "8202";
+    @Value("${external.port.server-host}")
+    private String serverHost;
+
+    @Value("${external.port.external-port}")
+    private String serverPort;
 
     private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
@@ -74,6 +73,7 @@ public class AvatarService {
         this.userRepository = userRepository;
     }
 
+
     // 필요한 디렉토리를 초기화 하는 메서드
     public void initDirectories() {
         try { // 디렉토리 생성
@@ -94,25 +94,30 @@ public class AvatarService {
     public AvatarResponseDto sendImgToAiServer(Long userId, Long lessonId, MultipartFile img) {
 
         log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
+/*
 
         Avatar avatar1 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 1L)
                 .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
 
-        Avatar avatar2 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 2L)
+        Avatar avatar2 = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, 2L)
                 .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
 
-        Avatar avatar3 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 3L)
+        Avatar avatar3 = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, 3L)
                 .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
 
-        Avatar avatar4 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 4L)
+        Avatar avatar4 = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, 4L)
                 .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
 
-        Avatar avatar5 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 5L)
+        Avatar avatar5 = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, 5L)
                 .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
 
-        if (userId == 1L) {
+        */
+/*if (userId == 1L) {
             return new AvatarResponseDto(avatar1.getUserId(), avatar1.getAvatarImg(), avatar1.getAnimations());
-        } else if (userId == 2L) {
+        } else *//*
+
+
+        if (userId == 2L) {
             return new AvatarResponseDto(avatar2.getUserId(), avatar2.getAvatarImg(), avatar2.getAnimations());
         } else if (userId == 3L) {
             return new AvatarResponseDto(avatar3.getUserId(), avatar3.getAvatarImg(), avatar3.getAnimations());
@@ -121,8 +126,10 @@ public class AvatarService {
         } else if (userId == 5L) {
             return new AvatarResponseDto(avatar5.getUserId(), avatar5.getAvatarImg(), avatar5.getAnimations());
         }
-        return new AvatarResponseDto(null, null, null);
-  /*      try {
+        // return new AvatarResponseDto(null, null, null);
+*/
+
+        try {
 
             // 1. HttpHeaders 설정
             HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
@@ -169,6 +176,7 @@ public class AvatarService {
             avatar.setUserId(userId);
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+            avatar.setLesson(lesson);
 
             // 애니메이션 엔티티 연결
             List<Animation> animations = new ArrayList<>();
@@ -195,8 +203,9 @@ public class AvatarService {
 
             log.error("파일 처리 중 오류 발생", e);
             throw new RuntimeException("파일 처리 실패", e);
-        }*/
+        }
     }
+
 
     /**
      * 유저 Id로 아바타 조회(이미지, 애니메이션)
@@ -344,6 +353,5 @@ public class AvatarService {
         relativePath = relativePath.replaceFirst("^data/avatar/", ""); // "data/avatar/" 제거
         return "http://" + serverHost + ":" + serverPort + "/data/avatar/" + relativePath;
     }
-
 
 }
