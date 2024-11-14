@@ -87,7 +87,7 @@ public class LessonController {
             @PathVariable("lessonId") Long lessonId) {
 
         log.info("참가자가 lessonId : {}로 수업의 참가자 목록을 요청", lessonId);
-        
+
         ParticipantListDto participantListDto = lessonService.findParticipantByLessonId(lessonId);
         log.info("참가자 Id = {}", participantListDto);
 
@@ -101,7 +101,7 @@ public class LessonController {
     @Operation(summary = "참가자 수업 자료 조회", description = "수업 중 참가자가 사용할 수업 자료의 상세 정보를 반환합니다.")
     @GetMapping("/{lessonId}")
     public ResponseEntity<ParticipantLessonMaterialDto> getLessonMaterial(
-            @PathVariable("lessonId") Long lessonId) {
+            @PathVariable(name = "lessonId") Long lessonId) {
 
         log.info("참가자가 lessonId: {}로 수업에 사용하는 수업자료 조회", lessonId);
 

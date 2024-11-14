@@ -67,7 +67,7 @@ public class HotSittingService {
         // 전달받은 lessonId와 selfIntNum 로 로그 출력
         Long lessonId = wavDto.getLessonId();
         Long selfIntNum = wavDto.getSelfIntNum();
-        log.info("Received selfIntNum: {}, lessonId: {}", selfIntNum, lessonId);
+        log.info("wavDto - selfIntNum: {}, lessonId: {}", selfIntNum, lessonId);
 
         // 아바타에 캐릭터명 저장
         Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
@@ -79,16 +79,22 @@ public class HotSittingService {
 
         // lesson에서 HotSitting 찾기
         HotSitting hotSitting = lesson.getHotSitting();
+
         if (hotSitting == null) {
             throw new EntityNotFoundException("HotSitting 엔티티를 찾을 수 없습니다.");
         }
 
-        // SelfIntroduce 엔티티를 hotSittingId와 selfIntNum으로 찾기
+        log.info("hotSittingId : {},selfIntNum : {}", hotSitting.getHotSittingId(), selfIntNum);
+
+        // SelfIntroduce 엔티티를 lessonId로
         SelfIntroduce selfIntroduce = selfIntroduceRepository
-                .findByHotSitting_HotSittingIdAndSelfIntNum(hotSitting.getHotSittingId(), selfIntNum);
+                .findByHotSitting_hotSittingIdAndSelfIntNum(hotSitting.getHotSittingId(), selfIntNum);
         if (selfIntroduce == null) {
-            throw new EntityNotFoundException("selfIntroduce를 찾을 수 없습니다.");
+            throw new EntityNotFoundException("HotSittingId와 selfIntNum으로 자기소개를 찾을 수 없습니다.");
         }
+
+        // 자기소개 유저 저장
+        selfIntroduce.setUserId(userId);
 
         // wavDto에 selfIntroduceId 추가
         wavDto.setSelfIntroductionId(selfIntroduce.getSelfIntroduceId());
@@ -136,7 +142,7 @@ public class HotSittingService {
     /**
      * 핫시팅 자기소개 저장
      */
-    public void saveAIRequest(Long userId, SelfIntroduceRequestDto selfIntroduceDto) {
+    public void saveAIRequest(SelfIntroduceRequestDto selfIntroduceDto) {
 
         // 수업 찾기
         Lesson lesson = lessonRepository.findById(selfIntroduceDto.getLessonId())
@@ -147,7 +153,6 @@ public class HotSittingService {
 
         // 핫시팅에 자기소개 추가
         SelfIntroduce selfIntroduce = new SelfIntroduce(
-                userId,
                 hotSitting,
                 selfIntroduceDto.getSelfIntNum(),
                 selfIntroduceDto.getSelfIntroduce()

@@ -42,7 +42,7 @@ public class SelfIntroduce {
     @OneToMany(mappedBy = "selfIntroduce", cascade = CascadeType.ALL)
     private List<QuestionAnswer> questionAnswers = new ArrayList<>();
 
-    public SelfIntroduce(Long userId, HotSitting hotSitting, Long selfIntNum, String contents) {
+    public SelfIntroduce(HotSitting hotSitting, Long selfIntNum, String contents) {
         this.userId = userId;
         this.hotSitting = hotSitting;
         this.contents = contents;

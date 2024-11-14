@@ -97,9 +97,9 @@ public class AvatarController {
     })
     @PostMapping(value = "/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AvatarResponseDto> sendImgToAiServer(
-            @RequestHeader("userId") Long userId
-            , @RequestParam("lessonId") Long lessonId
-            , @RequestParam("img") MultipartFile img) {
+            @RequestHeader(name = "userId") Long userId
+            , @RequestParam(name = "lessonId") Long lessonId
+            , @RequestParam(name = "img") MultipartFile img) {
 
         log.info("userId: {}가, lessonId: {}로, img: {}를 요청했습니다.", userId, lessonId, img);
 
