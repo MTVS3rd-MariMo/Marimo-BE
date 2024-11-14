@@ -23,6 +23,9 @@ public class SelfIntroduce {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long selfIntroduceId;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @Column(name = "self_int_num") // 자기소개 식별 번호
     private Long selfIntNum;
 
@@ -39,7 +42,8 @@ public class SelfIntroduce {
     @OneToMany(mappedBy = "selfIntroduce", cascade = CascadeType.ALL)
     private List<QuestionAnswer> questionAnswers = new ArrayList<>();
 
-    public SelfIntroduce(HotSitting hotSitting, Long selfIntNum, String contents) {
+    public SelfIntroduce(Long userId, HotSitting hotSitting, Long selfIntNum, String contents) {
+        this.userId = userId;
         this.hotSitting = hotSitting;
         this.contents = contents;
         this.selfIntNum = selfIntNum;

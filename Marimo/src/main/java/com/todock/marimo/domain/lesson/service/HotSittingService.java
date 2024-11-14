@@ -136,7 +136,7 @@ public class HotSittingService {
     /**
      * 핫시팅 자기소개 저장
      */
-    public void saveAIRequest(SelfIntroduceRequestDto selfIntroduceDto) {
+    public void saveAIRequest(Long userId, SelfIntroduceRequestDto selfIntroduceDto) {
 
         // 수업 찾기
         Lesson lesson = lessonRepository.findById(selfIntroduceDto.getLessonId())
@@ -147,6 +147,7 @@ public class HotSittingService {
 
         // 핫시팅에 자기소개 추가
         SelfIntroduce selfIntroduce = new SelfIntroduce(
+                userId,
                 hotSitting,
                 selfIntroduceDto.getSelfIntNum(),
                 selfIntroduceDto.getSelfIntroduce()

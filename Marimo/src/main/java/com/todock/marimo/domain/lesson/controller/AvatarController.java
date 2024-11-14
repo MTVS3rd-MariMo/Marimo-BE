@@ -48,6 +48,7 @@ public class AvatarController {
     @GetMapping
     public ResponseEntity<List<AvatarResponseDto>> getAvatar(Long lessonId) {
 
+        log.info("모든 유저의 아바타를 lessonId {} : 로 받습니다.", lessonId);
         List<AvatarResponseDto> avatarList = avatarService.findByLessonId(lessonId);
         log.info("AvatarController avatarList: {}", avatarList);
 
@@ -99,6 +100,9 @@ public class AvatarController {
             @RequestHeader("userId") Long userId
             , @RequestParam("lessonId") Long lessonId
             , @RequestParam("img") MultipartFile img) {
+
+        log.info("userId: {}가, lessonId: {}로, img: {}를 요청했습니다.", userId, lessonId, img);
+
         try {
             // 1. 파일 존재 여부 검증
             if (img == null || img.isEmpty()) {
@@ -167,7 +171,7 @@ public class AvatarController {
             @PathVariable("lessonId") Long lessonId
             , @PathVariable("userId") Long userId) {
 
-        log.info("AvatarController lessonId : {}, userId: {}", lessonId, userId);
+        log.info("lessonId : {}의 다른 유저 userId: {}의 아바타를 요청합니다.", lessonId, userId);
 
         AvatarResponseDto avatarResponseDto = avatarService.findByUserId(lessonId, userId);
 

@@ -1,17 +1,17 @@
 package com.todock.marimo.domain.lesson.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 @Setter
 @Getter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class AnswerRequestDto {
 
-    private Long LessonId;
+    @JsonProperty("lessnId") // 구조체때문에 o뺌
+    private Long lessonId;
 
     private Long questionId;
 

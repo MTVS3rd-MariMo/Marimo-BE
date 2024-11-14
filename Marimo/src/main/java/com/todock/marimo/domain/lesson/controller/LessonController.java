@@ -48,7 +48,7 @@ public class LessonController {
             @RequestHeader(value = "userId", required = false) Long userId
             , @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
-        log.info("createLesson 수업에 진행할 lessonMaterialId: {}", lessonMaterialId);
+        log.info("수업에 사용할 수업자료를 lessonMaterialId: {}로 전달 후 수업 생성", lessonMaterialId);
 
         Long lessonId = lessonService.createLesson(userId, lessonMaterialId);
 
@@ -65,11 +65,11 @@ public class LessonController {
             @RequestHeader(value = "userId", required = false) Long userId
             , @PathVariable("lessonId") Long lessonId) {
 
+        log.info("수업 참가자가 수업 참가자 목록에 lessonId: {}로 조회 후 추가", lessonId);
+
         if (userId == null) {
             return ResponseEntity.badRequest().body("userId 헤더가 필요합니다.");
         }
-
-        log.info("enter userId = {}, lessonId = {}", userId, lessonId);
 
         lessonService.updateUserByLessonId(userId, lessonId);
 
@@ -84,9 +84,10 @@ public class LessonController {
     @GetMapping("/participant/{lessonId}")
     public ResponseEntity<ParticipantListDto> getStudentLessonMaterial(
             //@RequestHeader("userId") Long userId
-             @PathVariable("lessonId") Long lessonId) {
+            @PathVariable("lessonId") Long lessonId) {
 
-        log.info(" 가 lessonId : {} 의 참가자 목록을 요청",  lessonId);
+        log.info("참가자가 lessonId : {}로 수업의 참가자 목록을 요청", lessonId);
+        
         ParticipantListDto participantListDto = lessonService.findParticipantByLessonId(lessonId);
         log.info("참가자 Id = {}", participantListDto);
 
@@ -102,7 +103,7 @@ public class LessonController {
     public ResponseEntity<ParticipantLessonMaterialDto> getLessonMaterial(
             @PathVariable("lessonId") Long lessonId) {
 
-        log.info("getLessonMaterial 클라이언트가 요청한 lessonId: {}", lessonId);
+        log.info("참가자가 lessonId: {}로 수업에 사용하는 수업자료 조회", lessonId);
 
         ParticipantLessonMaterialDto participantLessonMaterialDto = lessonMaterialService.getLessonMaterialById(lessonId);
 
@@ -118,6 +119,9 @@ public class LessonController {
     public ResponseEntity<String> updatePhoto(
             @PathVariable("lessonId") Long lessonId
             , @RequestParam("img") MultipartFile photo) {
+
+        log.info("단체사진 저장할 수업의 lessonId : {} 와 img: {}", lessonId, photo);
+
         try {
             // 1. 파일 존재 여부 검증
             if (photo == null || photo.isEmpty()) {
@@ -177,7 +181,7 @@ public class LessonController {
     public ResponseEntity<String> getBackGround(
             @PathVariable("lessonId") Long lessonId) {
 
-        log.info("요청한 수업 번호: {}", lessonId);
+        log.info("배경사진 제작 요청 할 수업의 lessonId: {}", lessonId);
 
         lessonService.createBackground(lessonId);
 
@@ -192,6 +196,8 @@ public class LessonController {
     @GetMapping("/photo/background/{lessonId}")
     public ResponseEntity<String> getPhotoBackground(
             @PathVariable("lessonId") Long lessonId) {
+
+        log.info("배경 사진을 가져오기 위한 현재 lessonId: {}", lessonId);
 
         return ResponseEntity.ok().body(lessonService.getPhotoBackgroundUrl(lessonId));
     }

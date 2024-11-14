@@ -4,6 +4,7 @@ import com.todock.marimo.domain.result.dto.*;
 import com.todock.marimo.domain.result.service.ResultService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
+@Slf4j
 @RestController
 @RequestMapping("/api/result")
 @Tag(name = "Result API", description = "수업결과 관련 API")
 public class ResultController {
-
 
     private final ResultService resultService;
 
@@ -32,6 +33,8 @@ public class ResultController {
     @GetMapping("/student")
     public ResponseEntity<StudentResultResponseDto> getPhotoList(@RequestHeader("userId") Long userId) {
 
+        log.info("학생이 userId: {}로 참가한 수업 리스트 조회", userId);
+        
         return ResponseEntity.ok().body(resultService.findAllPhotos(userId));
     }
 
@@ -43,6 +46,8 @@ public class ResultController {
     @GetMapping("/teacher")
     public ResponseEntity<TeacherResultResponseDto> getLessonList(
             @RequestHeader("userId") Long userId) {
+        
+        log.info("선생님이 userId: {}로 참가한 수업 리스트 조회", userId);
 
         return ResponseEntity.ok().body(resultService.findAllLessons(userId));
     }
@@ -55,6 +60,8 @@ public class ResultController {
     @GetMapping("/teacher/{lessonId}")
     public ResponseEntity<LessonResultDto> getLesson(@PathVariable("lessonId") Long lessonId) {
 
+        log.info("선생님이 lessonId: {}로 수업결과 상세 조회", lessonId);
+        
         return ResponseEntity.ok().body(resultService.lessonDetail(lessonId));
     }
 

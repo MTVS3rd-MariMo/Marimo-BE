@@ -32,7 +32,7 @@ public class openQuestionController {
             @RequestHeader("userId") Long userId
             , @RequestBody AnswerRequestDto answerDto) {
 
-        log.info("user: {}, lessonId: {}, answer: {}", userId, answerDto.getLessonId(), answerDto.getQuestionId());
+        log.info("열린 질문에 대한 답변 을저장 하는 유저의 userId : {}와 Dto : {}", userId, answerDto);
 
         openQuestionService.saveAnswer(userId, answerDto);
 

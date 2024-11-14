@@ -1,17 +1,13 @@
 package com.todock.marimo.domain.lesson.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class SelfIntroduceRequestDto {
-
-    private Long userId;
 
     private Long lessonId;
 

@@ -36,13 +36,14 @@ public class HotSittingController {
     @Operation(summary = "자기소개 저장")
     @PutMapping("/self-introduce")
     public ResponseEntity<String> hotSittingRecord(
+            @RequestHeader Long userId,
             @RequestBody SelfIntroduceRequestDto selfIntroduceDto) {
 
-        log.info("Received Request DTO: {}", selfIntroduceDto);
+        log.info("자기소개 저장 Dto : {} ", selfIntroduceDto);
 
-        hotSittingService.saveAIRequest(selfIntroduceDto);
+        hotSittingService.saveAIRequest(userId,selfIntroduceDto);
 
-        return ResponseEntity.ok().body("저장 성공했습니다.");
+        return ResponseEntity.ok().body("저장에 성공했습니다.");
     }
 
 
@@ -59,7 +60,7 @@ public class HotSittingController {
             @RequestParam("selfIntNum") Long selfIntNum,
             @RequestPart("wavFile") MultipartFile wavFile) {
 
-        log.info("Received Content-Type: {}", wavFile.getContentType());
+        log.info("핫시팅 음성 폼데이터 : {}", wavFile.getContentType());
         log.info("lessonId: {}", lessonId);
         log.info("userName: {}", userName);
         log.info("character: {}", character);

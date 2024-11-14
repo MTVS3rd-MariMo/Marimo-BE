@@ -86,6 +86,8 @@ public class LessonMaterialController {
             @RequestHeader("userId") Long userId,
             @RequestParam("pdf") MultipartFile pdfFile) {
 
+        log.info("수업 자료 생성 요청 보내는 유저의 userId : {}와 pdf : {}", userId, pdfFile);
+
         if (pdfFile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } // 파일 용량 null 확인
@@ -127,10 +129,9 @@ public class LessonMaterialController {
     public ResponseEntity<String> updateLessonMaterial(
             @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto) {
 
-        log.info("받은 JSON 데이터: {}", lessonMaterialRequestDto); // JSON 데이터 로깅
+        log.info("수업 자료 생성 후 수정한 열린 질문, 퀴즈 2개가 있는 DTO : {} ", lessonMaterialRequestDto); // JSON 데이터 로깅
 
         try {
-
             log.info("수업 자료 ID: {}", lessonMaterialRequestDto.getLessonMaterialId());
 
             // 열린 질문 리스트 확인 및 출력
@@ -174,6 +175,8 @@ public class LessonMaterialController {
     public ResponseEntity<Optional<LessonMaterial>> getLessonMaterialByLessonMaterialId(
             @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
+        log.info("상세 조회할 수업 자료의 lessonMaterialId: {}", lessonMaterialId);
+
         return ResponseEntity.ok(lessonMaterialService.findById(lessonMaterialId));
     }
 
@@ -186,6 +189,8 @@ public class LessonMaterialController {
     public ResponseEntity<LessonMaterialNamesRequestDto> getLessonMaterialNames(
             @RequestHeader("userId") Long userId) {
 
+        log.info("유저의 userId : {}로 가지고 있는 수업 자료 리스트 조회", userId);
+        
         List<LessonMaterialNameResponseDto> lessonMaterialNameResponseDtos
                 = lessonMaterialService.getLessonMaterialByUserId(userId);
 
