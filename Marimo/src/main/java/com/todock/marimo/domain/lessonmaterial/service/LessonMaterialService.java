@@ -209,14 +209,14 @@ public class LessonMaterialService {
 
 
     /**
-     * 수참가자가 lessonId로 수업자료 조회
+     * 수업 참가자가 lessonId로 수업자료 조회
      */
-    public ParticipantLessonMaterialDto getLessonMaterialById(Long lessonId) {
+    public ParticipantLessonMaterialDto getLessonMaterialById(Long lessonMaterialId) {
 
-        Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
+        Lesson lesson = lessonRepository.findById(lessonMaterialId).orElse(null);
         // lessonMaterial 조회
-        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId())
-                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + lessonId));
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
+                .orElseThrow(() -> new EntityNotFoundException("수업자료 not found with id: " + lessonMaterialId));
 
         // openQuestions 변환
         List<OpenQuestionForLessonResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()

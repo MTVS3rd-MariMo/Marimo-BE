@@ -96,16 +96,16 @@ public class LessonController {
 
 
     /**
-     * 수업 중  lessonId로 수업용 수업자료 상세 조회
+     * 수업 중  lessonMaterialId 수업용 수업자료 상세 조회
      */
     @Operation(summary = "참가자 수업 자료 조회", description = "수업 중 참가자가 사용할 수업 자료의 상세 정보를 반환합니다.")
-    @GetMapping("/{lessonId}")
+    @GetMapping("/{lessonMaterialId}")
     public ResponseEntity<ParticipantLessonMaterialDto> getLessonMaterial(
-            @PathVariable(name = "lessonId") Long lessonId) {
+            @PathVariable(name = "lessonMaterialId") Long lessonMaterialId) {
 
-        log.info("참가자가 lessonId: {}로 수업에 사용하는 수업자료 조회", lessonId);
+        log.info("참가자가 lessonMaterialId: {}로 수업에 사용하는 수업자료 조회", lessonMaterialId);
 
-        ParticipantLessonMaterialDto participantLessonMaterialDto = lessonMaterialService.getLessonMaterialById(lessonId);
+        ParticipantLessonMaterialDto participantLessonMaterialDto = lessonMaterialService.getLessonMaterialById(lessonMaterialId);
 
         return ResponseEntity.ok(participantLessonMaterialDto);
     }

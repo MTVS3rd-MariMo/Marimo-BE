@@ -50,11 +50,8 @@ public class UserController {
 
         LoginUserResponseDto loginDto = userService.login(loginUserRequestDto); // 로그인 후 userId 반환
 
-        if (loginDto != null) {
-            return ResponseEntity.ok(loginDto);
-        } else {
-            return ResponseEntity.status(401).body(loginDto);
-        }
+
+        return ResponseEntity.ok(loginDto);
     }
 
     /**

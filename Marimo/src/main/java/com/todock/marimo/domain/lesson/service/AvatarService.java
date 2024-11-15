@@ -42,8 +42,11 @@ import java.util.zip.ZipInputStream;
 @Service
 public class AvatarService {
 
-    @Value("${external.api.avatar-server-url}")
-    private String AIServerURL;
+    @Value("${external.api.odd-avatar-server-url}")
+    private String AIOddAvatarServerURL;
+
+    @Value("${external.api.even-avatar-server-url}")
+    private String AIEvenAvatarServerURL;
 
     @Value("${external.port.server-host}")
     private String serverHost;
@@ -94,40 +97,54 @@ public class AvatarService {
     public AvatarResponseDto sendImgToAiServer(Long userId, Long lessonId, MultipartFile img) {
 
         log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
-/*
 
-        Avatar avatar1 = avatarRepository.findByLesson_LessonIdAndUserId(9L, 1L)
-                .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+        // 시연용 더미 코드
+        /*
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+        if (userId == 1L) { // 빨간모자
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 1L)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 1로 빨간모자 아바타를 찾을 수 없습니다."));
+            lesson.getAvatarList().add(avatar);
+            avatar.setUserId(userId);
+            avatar.setLesson(lesson);
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
 
-        Avatar avatar2 = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, 2L)
-                .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+        } else if (userId == 2L) { // 할머니
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 2L)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 할머니 아바타를 찾을 수 없습니다."));
+            lesson.getAvatarList().add(avatar);
+            avatar.setUserId(userId);
+            avatar.setLesson(lesson);
 
-        Avatar avatar3 = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, 3L)
-                .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
 
-        Avatar avatar4 = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, 4L)
-                .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+        } else if (userId == 3L) { // 늑대
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 3L)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 3로 늑대 아바타를 찾을 수 없습니다."));
+            lesson.getAvatarList().add(avatar);
+            avatar.setUserId(userId);
+            avatar.setLesson(lesson);
+            avatarRepository.save(avatar);
+            lessonRepository.save(lesson);
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
 
-        Avatar avatar5 = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, 5L)
-                .orElseThrow(() -> new EntityNotFoundException("userId와 lessonId로 아바타를 찾을 수 없습니다."));
+        } else if (userId == 4L) { // 사냥꾼
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 4L)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 사냥꾼 아바타를 찾을 수 없습니다."));
+            lesson.getAvatarList().add(avatar);
+            avatar.setUserId(userId);
+            avatar.setLesson(lesson);
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
 
-        */
-/*if (userId == 1L) {
-            return new AvatarResponseDto(avatar1.getUserId(), avatar1.getAvatarImg(), avatar1.getAnimations());
-        } else *//*
-
-
-        if (userId == 2L) {
-            return new AvatarResponseDto(avatar2.getUserId(), avatar2.getAvatarImg(), avatar2.getAnimations());
-        } else if (userId == 3L) {
-            return new AvatarResponseDto(avatar3.getUserId(), avatar3.getAvatarImg(), avatar3.getAnimations());
-        } else if (userId == 4L) {
-            return new AvatarResponseDto(avatar4.getUserId(), avatar4.getAvatarImg(), avatar4.getAnimations());
-        } else if (userId == 5L) {
-            return new AvatarResponseDto(avatar5.getUserId(), avatar5.getAvatarImg(), avatar5.getAnimations());
-        }
-        // return new AvatarResponseDto(null, null, null);
-*/
+        } else if (userId == 5L) {// 선생님
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 5L)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 선생님 아바타를 찾을 수 없습니다."));
+            lesson.getAvatarList().add(avatar);
+            avatar.setUserId(userId);
+            avatar.setLesson(lesson);
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+        }*/
 
         try {
 
@@ -149,10 +166,17 @@ public class AvatarService {
             // 4. HTTP 요청 엔티티 생성 (헤더와 바디 포함)
             HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
-            // 5. AI 서버로 POST 요청을 보내고 응답을 받음
-            ResponseEntity<byte[]> AIResponse = restTemplate.postForEntity(
-                    AIServerURL, request, byte[].class);
-
+            ResponseEntity<byte[]> AIResponse;
+            // 5. AI 서버로 POST 요청을 보내고 응답을 받음 - 유저Id를 홀수, 짝수 일때 나눠서 AI서버로 요청 보냄
+            if (userId % 2 != 0) {
+                log.info("userId : {}는 홀수라서 {}로 보냈습니다.", userId, AIOddAvatarServerURL);
+                AIResponse = restTemplate.postForEntity(
+                        AIOddAvatarServerURL, request, byte[].class);
+            } else {
+                log.info("userId : {}는 짝수라서 {}로 보냈습니다.", userId, AIEvenAvatarServerURL);
+                AIResponse = restTemplate.postForEntity(
+                        AIEvenAvatarServerURL, request, byte[].class);
+            }
 
             // 고유한 zip 파일명 생성
             String zipFileName = UUID.randomUUID().toString() + ".zip";
@@ -173,9 +197,10 @@ public class AvatarService {
 
             // 아바타 엔티티 생성 및 파일 저장
             Avatar avatar = new Avatar();
-            avatar.setUserId(userId);
+            // 나머지 아바타들도 통신할대는 Lesson 타입 지정할 것
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+            avatar.setUserId(userId);
             avatar.setLesson(lesson);
 
             // 애니메이션 엔티티 연결
@@ -200,10 +225,11 @@ public class AvatarService {
             return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
 
         } catch (Exception e) {
-
             log.error("파일 처리 중 오류 발생", e);
             throw new RuntimeException("파일 처리 실패", e);
         }
+        log.error("뭔가 문제임");
+        return null;
     }
 
 

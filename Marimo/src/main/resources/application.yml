@@ -24,9 +24,10 @@ spring:
 
 external:
   api:
-    hot-sitting-server-url: ${AI_HOT_SITTING_SERVER_URL}
-    avatar-server-url: ${AI_AVATAR_SERVER_URL}
+    odd-avatar-server-url: ${AI_ODD_AVATAR_SERVER_URL}
+    even-avatar-server-url: ${AI_EVEN_AVATAR_SERVER_URL}
     background-server-url: ${AI_BACKGROUND_SERVER_URL}
+    hot-sitting-server-url: ${AI_HOT_SITTING_SERVER_URL}
     lesson-material-server-url: ${AI_LESSON_MATERIAL_SERVER_URL}
   port:
     server-host: ${SERVER_HOST}
