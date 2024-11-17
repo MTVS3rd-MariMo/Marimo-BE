@@ -99,7 +99,6 @@ public class AvatarService {
         log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
 
         // 시연용 더미 코드
-        /*
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
         if (userId == 1L) { // 빨간모자
@@ -144,9 +143,9 @@ public class AvatarService {
             avatar.setUserId(userId);
             avatar.setLesson(lesson);
             return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
-        }*/
+        }
 
-        try {
+       /* try {
 
             // 1. HttpHeaders 설정
             HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
@@ -227,8 +226,7 @@ public class AvatarService {
         } catch (Exception e) {
             log.error("파일 처리 중 오류 발생", e);
             throw new RuntimeException("파일 처리 실패", e);
-        }
-        log.error("뭔가 문제임");
+        }*/
         return null;
     }
 
@@ -280,6 +278,7 @@ public class AvatarService {
      *                              검증, 변환
      * ===============================================================
      */
+
 
     /**
      * zip 파일을 압축 해제하고 압축 해제된 파일들의 경로 목록을 반환

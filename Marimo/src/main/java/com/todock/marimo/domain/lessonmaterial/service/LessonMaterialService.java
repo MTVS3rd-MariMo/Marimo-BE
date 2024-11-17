@@ -77,11 +77,24 @@ public class LessonMaterialService {
      */
     @Transactional
     public LessonMaterialResponseDto sendPdfToAiServer(MultipartFile pdf, Long userId) {
+
+        validateUserRole(userId);
+
+        List<LessonMaterial> lessonMaterials = lessonMaterialRepository.findByUserId(userId)
+                .stream()
+                .toList();
+        if (lessonMaterials.size() >= 3) {
+
+            log.info("더이상 수업 자료를 만들 수 없습니다.");
+
+            return null;
+        }
+
+
         try {
 
             // 1. AI 서버 URI 설정
-            String AIServerUrI = "http://metaai2.iptime.org:7993/pdfupload";
-            log.info("AI 서버 URI 설정: {}", AIServerUrI);
+            log.info("AI 서버 URI 설정: {}", AIServerURL);
 
             // 2. HttpHeaders 설정(멀티파트 형식 지정)
             HttpHeaders headers = new HttpHeaders();
@@ -103,7 +116,7 @@ public class LessonMaterialService {
             log.info("HttpEntity 생성 완료 - Request: {}", request);
 
             // 5. AI 서버로 요청 전송
-            ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, request, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(AIServerURL, request, String.class);
             log.info("AI 서버 응답 수신 - Status: {}, Body: {}", response.getStatusCode(), response.getBody());  // 응답 로그
 
             // 확인용 응답 로그
@@ -120,6 +133,7 @@ public class LessonMaterialService {
             return parseLessonMaterialJson(userId, response.getBody(), pdfName); // 수정된 파일 이름 사용
 
         } catch (Exception e) { // 예외 처리 로직 추가
+
             log.error("파일 전송 중 오류 발생: {}", e.getMessage(), e);
             throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
         }

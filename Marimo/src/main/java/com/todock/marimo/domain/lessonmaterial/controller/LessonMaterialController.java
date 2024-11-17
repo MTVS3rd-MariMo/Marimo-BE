@@ -94,6 +94,7 @@ public class LessonMaterialController {
 
         LessonMaterialResponseDto lessonMaterialResponseDto
                 = lessonMaterialService.sendPdfToAiServer(pdfFile, userId);
+
         log.info("수정한 값: {}", lessonMaterialResponseDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(lessonMaterialResponseDto);
