@@ -25,11 +25,14 @@ public class LessonMaterial {
     private Long lessonMaterialId; // 수업 자료 id
 
     @Setter
-    @Column(name = "user_id", nullable = false) // 만든 선생님 id
+    @Column(name = "user_id") // 만든 선생님 id
     private Long userId;
 
     @Column(name = "book_title") // 책 제목
     private String bookTitle;
+
+    @Column(name = "author") // 저자
+    private String author;
 
     @Lob
     @Column(name = "book_contents", columnDefinition = "LONGTEXT")
@@ -49,15 +52,19 @@ public class LessonMaterial {
             cascade = CascadeType.ALL)
     private List<LessonRole> lessonRoleList = new ArrayList<>();
 
+    @Setter
+    @Column(name = "background_url") // 단체사진 배경
+    private String backgroundUrl;
+
     @Column(name = "created_at")
     private String createdAt; // 생성 날짜
 
 
-    public LessonMaterial(Long userId, String bookTitle, String bookContents) {
+    public LessonMaterial(Long userId, String bookTitle, String bookContents, String author) {
         this.bookTitle = bookTitle;
         this.bookContents = bookContents;
-        this.lessonRoleList = lessonRoleList;
         this.userId = userId;
+        this.author = author;
 
         // 현재 날짜와 시간을 포맷팅하여 문자열로 저장
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분");

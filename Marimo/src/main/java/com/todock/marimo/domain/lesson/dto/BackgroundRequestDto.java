@@ -11,5 +11,5 @@ public class BackgroundRequestDto {
 
     private String pdf_text;
 
-    private Long lessonId;
+    private Long lessonMaterialId;
 }

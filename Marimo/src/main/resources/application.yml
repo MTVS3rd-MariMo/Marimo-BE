@@ -24,11 +24,11 @@ spring:
 
 external:
   api:
-    odd-avatar-server-url: ${AI_ODD_AVATAR_SERVER_URL}
-    even-avatar-server-url: ${AI_EVEN_AVATAR_SERVER_URL}
-    background-server-url: ${AI_BACKGROUND_SERVER_URL}
-    hot-sitting-server-url: ${AI_HOT_SITTING_SERVER_URL}
-    lesson-material-server-url: ${AI_LESSON_MATERIAL_SERVER_URL}
+    odd-avatar-server-url: ${AI_ODD_AVATAR_SERVER_URL} # 아바타 홀수 유저 URL
+    background-server-url: ${AI_BACKGROUND_SERVER_URL} # 배경 URL
+    even-avatar-server-url: ${AI_EVEN_AVATAR_SERVER_URL} # 아바타 짝수 유저 URL
+    hot-sitting-server-url: ${AI_HOT_SITTING_SERVER_URL} # 핫시팅 URL
+    lesson-material-server-url: ${AI_LESSON_MATERIAL_SERVER_URL} # 수업 자료 URL
   port:
-    server-host: ${SERVER_HOST}
-    external-port: ${EXTERNAL_PORT}
+    server-host: ${SERVER_HOST} # 외부 IP
+    external-port: ${EXTERNAL_PORT} # 외부 Port

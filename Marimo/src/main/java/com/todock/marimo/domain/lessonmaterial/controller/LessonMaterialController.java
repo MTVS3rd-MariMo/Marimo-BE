@@ -1,14 +1,12 @@
 package com.todock.marimo.domain.lessonmaterial.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.todock.marimo.domain.lesson.service.LessonService;
 import com.todock.marimo.domain.lessonmaterial.dto.QuizDto;
+import com.todock.marimo.domain.lessonmaterial.dto.DetailLessonMaterialDto;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialNameResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialNamesRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
-import com.todock.marimo.domain.lessonmaterial.dto.request.QuizRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,8 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -84,7 +80,9 @@ public class LessonMaterialController {
     @PostMapping("/upload-pdf")
     public ResponseEntity<LessonMaterialResponseDto> sendPdfToAiServer(
             @RequestHeader("userId") Long userId,
-            @RequestParam("pdf") MultipartFile pdfFile) {
+            @RequestPart("pdf") MultipartFile pdfFile,
+            @RequestParam("bookTitle") String bookTitle,
+            @RequestParam("author") String author) {
 
         log.info("수업 자료 생성 요청 보내는 유저의 userId : {}와 pdf : {}", userId, pdfFile);
 
@@ -93,7 +91,7 @@ public class LessonMaterialController {
         } // 파일 용량 null 확인
 
         LessonMaterialResponseDto lessonMaterialResponseDto
-                = lessonMaterialService.sendPdfToAiServer(pdfFile, userId);
+                = lessonMaterialService.sendPdfToAiServer(pdfFile, userId, bookTitle, author);
 
         log.info("수정한 값: {}", lessonMaterialResponseDto);
 
@@ -157,7 +155,7 @@ public class LessonMaterialController {
 
 
     /**
-     * lessonMaterialId로 수업 자료 내용 상세 조회
+     * lessonMaterialId로 수업 자료 내용 상세 조회 선택한 퀴즈 2개, 열린 질문 2개
      */
     @Operation(summary = "수업 자료 상세 조회", description = "수업 자료 ID로 상세 내용을 조회합니다.")
     @ApiResponses({
@@ -172,13 +170,15 @@ public class LessonMaterialController {
                     content = @Content(schema = @Schema(implementation = String.class))
             )
     })
-    @GetMapping("/{lessonMaterialId}/detail")
-    public ResponseEntity<Optional<LessonMaterial>> getLessonMaterialByLessonMaterialId(
+    @GetMapping("detail/{lessonMaterialId}")
+    public ResponseEntity<DetailLessonMaterialDto> getLessonMaterialByLessonMaterialId(
             @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
         log.info("상세 조회할 수업 자료의 lessonMaterialId: {}", lessonMaterialId);
 
-        return ResponseEntity.ok(lessonMaterialService.findById(lessonMaterialId));
+        DetailLessonMaterialDto updateLessonMaterialDto = lessonMaterialService.findById(lessonMaterialId);
+
+        return ResponseEntity.ok(updateLessonMaterialDto);
     }
 
 
@@ -191,7 +191,7 @@ public class LessonMaterialController {
             @RequestHeader("userId") Long userId) {
 
         log.info("유저의 userId : {}로 가지고 있는 수업 자료 리스트 조회", userId);
-        
+
         List<LessonMaterialNameResponseDto> lessonMaterialNameResponseDtos
                 = lessonMaterialService.getLessonMaterialByUserId(userId);
 

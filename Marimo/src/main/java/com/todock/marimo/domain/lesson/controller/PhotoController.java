@@ -27,18 +27,63 @@ public class PhotoController {
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png");
 
-
     @Autowired
     public PhotoController(PhotoService photoService) {
         this.photoService = photoService;
     }
 
+
+    /**
+     * 배경사진 제작 요청 - AI서버에 pdf 텍스트를 보내서 단체사진 배경 제작 요청
+     */
+    @Operation(summary = "배경사진 제작 요청")
+    @PostMapping("/background/{lessonMaterialId}")
+    public ResponseEntity<String> getBackGround(
+            @PathVariable("lessonMaterialId") Long lessonMaterialId) {
+
+        log.info("배경사진 제작 요청 할 lessonMaterialId: {}", lessonMaterialId);
+
+        photoService.createBackground(lessonMaterialId);
+
+        return ResponseEntity.ok("사진관 배경을 생성했습니다.");
+    }
+
+
+    /**
+     * AI에서 서버에 배경사진 저장
+     */
+    @Operation(summary = "배경사진 저장")
+    @PostMapping("/background/ai/{lessonMaterialId}")
+    public ResponseEntity<String> saveBackgroundImg(
+            @PathVariable("lessonMaterialId") Long lessonMaterialId,
+            @RequestParam MultipartFile img) {
+
+        log.info("배경 사진을 가져오기 위한 현재 lessonMaterialId: {}", lessonMaterialId);
+
+        return ResponseEntity.ok().body(photoService.saveBackground(lessonMaterialId, img));
+    }
+
+
+    /**
+     * 배경사진 호출
+     */
+    @Operation(summary = "배경사진 호출")
+    @GetMapping("/background/{lessonId}")
+    public ResponseEntity<String> getPhotoBackground(
+            @PathVariable("lessonId") Long lessonId) {
+
+        log.info("배경 사진을 가져오기 위한 현재 lessonId: {}", lessonId);
+
+        return ResponseEntity.ok().body(photoService.getPhotoBackgroundUrl(lessonId));
+    }
+
+
     /**
      * 단체사진 저장
      */
     @Operation(summary = "단체사진 저장")
-    @PostMapping("/photo/{lessonId}")
-    public ResponseEntity<String> updatePhoto(
+    @PostMapping("/{lessonId}")
+    public ResponseEntity<String> saveGroupPhoto(
             @PathVariable("lessonId") Long lessonId
             , @RequestParam("img") MultipartFile photo) {
 
@@ -95,50 +140,6 @@ public class PhotoController {
     }
 
 
-    /**
-     * 배경사진 제작 요청 - AI서버에 pdf 텍스트를 보내서 단체사진 배경 제작 요청
-     */
-    @Operation(summary = "배경사진 제작 요청")
-    @PostMapping("/background/{lessonId}")
-    public ResponseEntity<String> getBackGround(
-            @PathVariable("lessonId") Long lessonId) {
-
-        log.info("배경사진 제작 요청 할 수업의 lessonId: {}", lessonId);
-
-        photoService.createBackground(lessonId);
-
-        return ResponseEntity.ok("사진관 배경을 생성했습니다.");
-    }
-
-
-    /**
-     * 배경사진 호출
-     */
-    @Operation(summary = "배경사진 호출")
-    @GetMapping("/photo/background/{lessonId}")
-    public ResponseEntity<String> getPhotoBackground(
-            @PathVariable("lessonId") Long lessonId) {
-
-        log.info("배경 사진을 가져오기 위한 현재 lessonId: {}", lessonId);
-
-        return ResponseEntity.ok().body(photoService.getPhotoBackgroundUrl(lessonId));
-    }
-
-
-    /**
-     * 배경사진 저장
-     */
-    @Operation(summary = "배경사진 저장")
-    @PutMapping("/photo/background/{lessonId}")
-    public ResponseEntity<String> savePhotoBackground(
-            @PathVariable("lessonId") Long lessonId) {
-
-        log.info("배경 사진을 가져오기 위한 현재 lessonId: {}", lessonId);
-
-        return ResponseEntity.ok().body(photoService.savePhotoBackgroundUrl(lessonId));
-    }
-    
-    
     /**
      * 파일 확장자 추출
      */

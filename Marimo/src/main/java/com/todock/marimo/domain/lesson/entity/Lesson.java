@@ -48,9 +48,6 @@ public class Lesson {
     @Column(name = "photo_url")
     private String photoUrl; // 단체사진
 
-    @Column(name = "photo_background_url")
-    private String photoBackgroundUrl; // 단체사진 배경
-
     @Column(name = "created_at")
     private String createdAt; // 포맷팅된 문자열로 저장된 수업 생성 날짜
 

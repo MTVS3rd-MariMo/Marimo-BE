@@ -76,7 +76,8 @@ public class LessonMaterialService {
      * pdf 업로드
      */
     @Transactional
-    public LessonMaterialResponseDto sendPdfToAiServer(MultipartFile pdf, Long userId) {
+    public LessonMaterialResponseDto sendPdfToAiServer(
+            MultipartFile pdf, Long userId, String bookTitle, String author) {
 
         validateUserRole(userId);
 
@@ -116,14 +117,9 @@ public class LessonMaterialService {
                 throw new RuntimeException("AI 서버와의 통신 중 오류가 발생했습니다. 응답 코드: " + response.getStatusCode());
             }
 
-            // 파일 이름에서 확장자를 제거
-            String originalPdfName = pdf.getOriginalFilename();
-            String pdfName = (originalPdfName != null && originalPdfName.endsWith(".pdf"))
-                    ? originalPdfName.substring(0, originalPdfName.length() - 4) // .pdf 제거
-                    : originalPdfName;
 
             // 6. AI 서버에서 받은 JSON 반환
-            return parseLessonMaterialJson(userId, response.getBody(), pdfName);
+            return parseLessonMaterialJson(userId, response.getBody(), bookTitle, author);
 
         } catch (Exception e) {
             log.error("파일 전송 중 오류 발생: {}", e.getMessage(), e);
@@ -210,12 +206,39 @@ public class LessonMaterialService {
 
 
     /**
-     * lessonMaterialId로 수업 자료 내용 상세 조회
+     * lessonMaterialId로 수업자료 수정 상세 조회
      */
-    public Optional<LessonMaterial> findById(Long lessonMaterialId) {
+    public DetailLessonMaterialDto findById(Long lessonMaterialId) {
 
-        return lessonMaterialRepository.findById(lessonMaterialId);
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
+                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업자료를 조회할 수 없습니다."));
 
+        // OpenQuestions 매핑
+        List<OpenQuestionUpdateDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
+                .map(openQuestion -> new OpenQuestionUpdateDto(
+                        openQuestion.getOpenQuestionId(),
+                        openQuestion.getQuestion()))
+                .toList();
+
+        // Quizzes 매핑
+        List<QuizDto> quizList = lessonMaterial.getQuizList().stream()
+                .map(quiz -> new QuizDto(
+                        quiz.getQuizId(),
+                        quiz.getQuestion(),
+                        quiz.getAnswer(),
+                        quiz.getChoices1(),
+                        quiz.getChoices2(),
+                        quiz.getChoices3(),
+                        quiz.getChoices4()
+                ))
+                .toList();
+
+        // DTO 생성 및 반환
+        return new DetailLessonMaterialDto(
+                lessonMaterialId,
+                openQuestions,
+                quizList
+        );
     }
 
 
@@ -258,6 +281,7 @@ public class LessonMaterialService {
         return new ParticipantLessonMaterialDto(
                 lessonMaterial.getBookTitle(),
                 lessonMaterial.getBookContents(),
+                lessonMaterial.getAuthor(),
                 quizzes,
                 openQuestions,
                 lessonRoles
@@ -281,7 +305,7 @@ public class LessonMaterialService {
     /**
      * AI 반환 Json 파싱 메서드
      */
-    private LessonMaterialResponseDto parseLessonMaterialJson(Long userId, String jsonResponse, String pdfName) {
+    private LessonMaterialResponseDto parseLessonMaterialJson(Long userId, String jsonResponse, String bookTitle, String author) {
 
         JsonNode root = null;
         try {
@@ -290,8 +314,9 @@ public class LessonMaterialService {
             // LessonMaterial 객체 생성
             LessonMaterial lessonMaterial = new LessonMaterial(
                     userId,
-                    pdfName,
-                    root.path("pdftext").asText("")
+                    bookTitle,
+                    root.path("pdftext").asText(""),
+                    author
             );
 
 
