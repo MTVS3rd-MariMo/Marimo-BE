@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Getter
@@ -44,8 +45,7 @@ public class User {
     private String password;
 
     @Column(name = "created_at")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 hh시 mm분")
-    private LocalDateTime createdAt; // 생성 날짜
+    private String createdAt; // 생성 날짜
 
     // 생성자
     public User(Role role, String school, Integer grade, Integer classRoom,
@@ -57,5 +57,9 @@ public class User {
         this.studentNumber = studentNumber;
         this.name = name;
         this.password = password;
+
+        // 현재 날짜와 시간을 포맷팅하여 문자열로 저장
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분");
+        this.createdAt = LocalDateTime.now().format(formatter);
     }
 }

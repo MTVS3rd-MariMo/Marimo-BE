@@ -26,6 +26,7 @@ public class ResultService {
     private final LessonMaterialRepository lessonMaterialRepository;
     private final UserRepository userRepository;
 
+
     @Autowired
     public ResultService(
             LessonRepository lessonRepository
@@ -101,18 +102,21 @@ public class ResultService {
 
         // 반환할 LessonResultDto 생성 및 초기 설정
         LessonResultDto lessonResultDto = new LessonResultDto(
-                lessonMaterial.getBookTitle(),
-                lesson.getCreatedAt(),
-                lesson.getPhotoUrl()
+                lessonMaterial.getBookTitle()
+                //    lesson.getCreatedAt(), // 수업 날짜
+                //    lesson.getPhotoUrl() // 수업 단체사진
         );
 
-        // 참가자 목록을 String 형태로 설정
+        // 참가자 설정
+        /*
+      // 참가자 목록을 String 형태로 설정
         List<String> participants = lesson.getParticipantList().stream()
                 .map(participant -> userRepository.findById(participant.getUserId())
                         .map(User::getName)
                         .orElse("Unknown User"))
                 .collect(Collectors.toList());
         lessonResultDto.setParticipants(participants);
+*/
 
         // 열린 질문 설정
         List<OpenQuestionResultDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
@@ -155,9 +159,9 @@ public class ResultService {
                             .orElse("Unknown User") : "Unknown User";
 
                     return new LessonRoleResultDto(
-                            userName,
-                            role.getCharacter(), // 역할 이름
-                            avatarUrl // 아바타 이미지 URL
+                            userName, // 유저 이름
+                            role.getCharacter() // 역할 이름
+                            //avatarUrl // 아바타 이미지 URL
                     );
                 })
                 .collect(Collectors.toList());

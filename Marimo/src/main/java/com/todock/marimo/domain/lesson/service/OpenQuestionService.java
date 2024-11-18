@@ -4,8 +4,6 @@ import com.todock.marimo.domain.lesson.dto.AnswerRequestDto;
 import com.todock.marimo.domain.lesson.repository.OpenQuestionRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestionAnswer;
-import com.todock.marimo.domain.result.entity.Result;
-import com.todock.marimo.domain.result.repository.ResultRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +13,10 @@ import org.springframework.stereotype.Service;
 public class OpenQuestionService {
 
     private final OpenQuestionRepository openQuestionRepository;
-    private final ResultRepository resultRepository;
 
     @Autowired
-    public OpenQuestionService(OpenQuestionRepository openQuestionRepository, ResultRepository resultRepository) {
+    public OpenQuestionService(OpenQuestionRepository openQuestionRepository) {
         this.openQuestionRepository = openQuestionRepository;
-        this.resultRepository = resultRepository;
     }
 
 

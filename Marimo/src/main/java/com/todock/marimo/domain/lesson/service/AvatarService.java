@@ -6,7 +6,6 @@ import com.todock.marimo.domain.lesson.entity.avatar.Animation;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
-import com.todock.marimo.domain.result.repository.ResultRepository;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -145,7 +144,8 @@ public class AvatarService {
             return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
         }
 
-       /* try {
+       /*
+       try {
 
             // 1. HttpHeaders 설정
             HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
@@ -227,6 +227,7 @@ public class AvatarService {
             log.error("파일 처리 중 오류 발생", e);
             throw new RuntimeException("파일 처리 실패", e);
         }*/
+
         return null;
     }
 

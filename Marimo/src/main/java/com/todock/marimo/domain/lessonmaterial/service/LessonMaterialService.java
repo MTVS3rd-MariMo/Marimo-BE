@@ -80,16 +80,14 @@ public class LessonMaterialService {
 
         validateUserRole(userId);
 
-        List<LessonMaterial> lessonMaterials = lessonMaterialRepository.findByUserId(userId)
-                .stream()
-                .toList();
-        if (lessonMaterials.size() >= 3) {
-
-            log.info("더이상 수업 자료를 만들 수 없습니다.");
-
-            return null;
+        if (pdf == null || pdf.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 PDF 파일이 제공되지 않았습니다.");
         }
 
+        List<LessonMaterial> lessonMaterials = lessonMaterialRepository.findByUserId(userId);
+        if (lessonMaterials.size() >= 3) {
+            throw new IllegalStateException("더이상 수업 자료를 만들 수 없습니다. 최대 3개까지 가능합니다.");
+        }
 
         try {
 
@@ -99,41 +97,35 @@ public class LessonMaterialService {
             // 2. HttpHeaders 설정(멀티파트 형식 지정)
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            log.info("HTTP 헤더 설정 완료 - ContentType: {}", headers.getContentType());
 
             // 3. PDF 파일을 멀티파트 형식으로 Wrapping
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("pdf", new ByteArrayResource(pdf.getBytes()) {
                 @Override
                 public String getFilename() {
-                    log.info("파일 원본 이름: {}", pdf.getOriginalFilename());
-                    return pdf.getOriginalFilename(); // 파일 이름 설정
+                    return pdf.getOriginalFilename();
                 }
             });
 
             // 4. HttpEntity 생성
             HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
-            log.info("HttpEntity 생성 완료 - Request: {}", request);
 
             // 5. AI 서버로 요청 전송
             ResponseEntity<String> response = restTemplate.postForEntity(AIServerURL, request, String.class);
-            log.info("AI 서버 응답 수신 - Status: {}, Body: {}", response.getStatusCode(), response.getBody());  // 응답 로그
-
-            // 확인용 응답 로그
-            log.info("AI 서버 응답: {}", response.getBody());
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("AI 서버와의 통신 중 오류가 발생했습니다. 응답 코드: " + response.getStatusCode());
+            }
 
             // 파일 이름에서 확장자를 제거
             String originalPdfName = pdf.getOriginalFilename();
             String pdfName = (originalPdfName != null && originalPdfName.endsWith(".pdf"))
                     ? originalPdfName.substring(0, originalPdfName.length() - 4) // .pdf 제거
                     : originalPdfName;
-            log.info("PDF 이름에서 확장자 제거 후: {}", pdfName);
 
             // 6. AI 서버에서 받은 JSON 반환
-            return parseLessonMaterialJson(userId, response.getBody(), pdfName); // 수정된 파일 이름 사용
+            return parseLessonMaterialJson(userId, response.getBody(), pdfName);
 
-        } catch (Exception e) { // 예외 처리 로직 추가
-
+        } catch (Exception e) {
             log.error("파일 전송 중 오류 발생: {}", e.getMessage(), e);
             throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
         }
@@ -146,18 +138,24 @@ public class LessonMaterialService {
     @Transactional
     public void updateLessonMaterial(LessonMaterialRequestDto lessonMaterialInfo) {
 
+        if (lessonMaterialInfo == null || lessonMaterialInfo.getLessonMaterialId() == null) {
+            throw new IllegalArgumentException("수정할 수업 자료 정보가 제공되지 않았습니다.");
+        }
+
         LessonMaterial lessonMaterial = lessonMaterialRepository
                 .findById(lessonMaterialInfo.getLessonMaterialId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수업 자료입니다: " + lessonMaterialInfo.getLessonMaterialId()));
 
-        List<QuizDto> quizzes = lessonMaterialInfo.getQuizList(); // 수업자료에서 퀴즈 가져오기
+        List<QuizDto> quizzes = lessonMaterialInfo.getQuizList();
 
         if (quizzes != null && !quizzes.isEmpty()) {
-
-            // 기존 퀴즈 목록을 비우고 새 목록으로 업데이트
             lessonMaterial.getQuizList().clear();
 
             for (QuizDto quizDto : quizzes) {
+                if (!isValidQuiz(quizDto)) {
+                    throw new IllegalArgumentException("유효하지 않은 퀴즈 정보가 포함되어 있습니다.");
+                }
+
                 Quiz quiz = new Quiz(
                         lessonMaterial,
                         quizDto.getQuestion(),
@@ -167,22 +165,21 @@ public class LessonMaterialService {
                         quizDto.getChoices3(),
                         quizDto.getChoices4()
                 );
-                lessonMaterial.getQuizList().add(quiz); // addQuiz 메서드를 통해 연관 관계 설정
+                lessonMaterial.getQuizList().add(quiz);
             }
         } else {
             log.info("퀴즈가 존재하지 않습니다.");
         }
 
-        lessonMaterialRepository.save(lessonMaterial); // DB에 저장
-
-        List<OpenQuestionRequestDto> openQuestions = lessonMaterialInfo.getOpenQuestionList(); // 수업자료에서 열린 질문 가져오기
-
+        List<OpenQuestionRequestDto> openQuestions = lessonMaterialInfo.getOpenQuestionList();
         if (openQuestions != null && !openQuestions.isEmpty()) {
-
-            // 기존 열린 질문 삭제
             lessonMaterial.getOpenQuestionList().clear();
 
             for (OpenQuestionRequestDto oqDto : openQuestions) {
+                if (oqDto.getQuestionTitle() == null || oqDto.getQuestionTitle().trim().isEmpty()) {
+                    throw new IllegalArgumentException("유효하지 않은 열린 질문이 포함되어 있습니다.");
+                }
+
                 OpenQuestion openQuestion = new OpenQuestion(
                         lessonMaterial,
                         oqDto.getQuestionTitle()
@@ -193,7 +190,7 @@ public class LessonMaterialService {
             log.info("열린 질문이 존재하지 않습니다.");
         }
 
-        lessonMaterialRepository.save(lessonMaterial); // 최종 저장
+        lessonMaterialRepository.save(lessonMaterial);
     }
 
 
@@ -368,6 +365,19 @@ public class LessonMaterialService {
         if (user.getRole() != Role.TEACHER) {
             throw new IllegalArgumentException("선생님만 수업 자료를 만들 수 있습니다.");
         }
+    }
+
+
+    /**
+     * 퀴즈 수정 시 검증
+     */
+    private boolean isValidQuiz(QuizDto quizDto) {
+        return quizDto != null &&
+                quizDto.getQuestion() != null && !quizDto.getQuestion().trim().isEmpty() &&
+                quizDto.getChoices1() != null && !quizDto.getChoices1().trim().isEmpty() &&
+                quizDto.getChoices2() != null && !quizDto.getChoices2().trim().isEmpty() &&
+                quizDto.getChoices3() != null && !quizDto.getChoices3().trim().isEmpty() &&
+                quizDto.getChoices4() != null && !quizDto.getChoices4().trim().isEmpty();
     }
 
 }

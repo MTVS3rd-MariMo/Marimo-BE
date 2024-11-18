@@ -27,7 +27,7 @@ public class ResultController {
 
 
     /**
-     * 학생이 참가한 모든 수업 리스트 조회 (사진 리스트로 보여줌) - LessonId, photoList 반환
+     * 학생이 참가한 모든 수업 리스트 조회 (사진을 리스트로 보여줌) - LessonId, photoList 반환
      */
     @Operation(summary = "userId로 참가한 모든 수업 조회 - 학생")
     @GetMapping("/student")
@@ -40,7 +40,7 @@ public class ResultController {
 
 
     /**
-     * 선생님이 참가한 모든 수업 조회 ( 참가자 이름?)
+     * 선생님이 참가한 모든 수업 조회
      */
     @Operation(summary = "userId로 참가한 모든 수업 조회 - 선생님")
     @GetMapping("/teacher")
