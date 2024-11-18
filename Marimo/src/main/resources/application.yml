@@ -1,7 +1,9 @@
-server:
-  port: 9999
-
 spring:
+  profiles:
+    #include: dev, local
+    active: local
+  application:
+    name: Marimo
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/marimo
@@ -21,6 +23,24 @@ spring:
       enabled: true
       max-file-size: 10MB # 파일 업로드 제한 용량
       max-request-size: 10MB # 파일 응답 제한 용량
+
+server:
+  port: 9999
+
+# aws s3 bucket
+cloud:
+  aws:
+    s3:
+      bucket: marimo-bucket
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRETE_KEY}
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
+
 
 external:
   api:
