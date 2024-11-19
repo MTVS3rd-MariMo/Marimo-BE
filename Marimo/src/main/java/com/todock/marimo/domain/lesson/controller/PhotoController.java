@@ -45,7 +45,7 @@ public class PhotoController {
 
         photoService.createBackground(lessonMaterialId);
 
-        return ResponseEntity.ok("사진관 배경을 생성했습니다.");
+        return ResponseEntity.ok(photoService.createBackground(lessonMaterialId));
     }
 
 

@@ -100,7 +100,7 @@ public class PhotoService {
             log.info("ai요청 : {}", aiResponse.getBody());
 
             if (aiResponse.getStatusCode().is2xxSuccessful()) {
-                return aiResponse.getBody();
+                return "AI서버로 정상적으로 요청을 보냈습니다.";
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AI 서버에서 이미지 생성 실패. Status: " + aiResponse.getStatusCode());
             }
