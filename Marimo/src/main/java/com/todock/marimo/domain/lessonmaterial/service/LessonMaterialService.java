@@ -3,16 +3,12 @@ package com.todock.marimo.domain.lessonmaterial.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.todock.marimo.domain.lesson.entity.Lesson;
-import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lessonmaterial.dto.*;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialNameResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialResponseDto;
-import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionForLessonResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
-import com.todock.marimo.domain.lessonmaterial.dto.request.QuizRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonRole;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
@@ -40,7 +36,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -53,7 +48,6 @@ public class LessonMaterialService {
 
     private final RestTemplate restTemplate;
     private final UserRepository userRepository;
-    private final LessonRepository lessonRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 파싱용 ObjectMapper 추가
@@ -61,13 +55,11 @@ public class LessonMaterialService {
     @Autowired
     public LessonMaterialService(
             LessonMaterialRepository lessonMaterialRepository,
-            LessonRepository lessonRepository,
             UserRepository userRepository,
             RestTemplate restTemplate) {
 
         this.restTemplate = restTemplate;
         this.userRepository = userRepository;
-        this.lessonRepository = lessonRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
     }
 
@@ -242,51 +234,7 @@ public class LessonMaterialService {
     }
 
 
-    /**
-     * 수업 참가자가 lessonId로 수업자료 조회
-     */
-    public ParticipantLessonMaterialDto getLessonMaterialById(Long lessonMaterialId) {
 
-        Lesson lesson = lessonRepository.findById(lessonMaterialId).orElse(null);
-        // lessonMaterial 조회
-        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
-                .orElseThrow(() -> new EntityNotFoundException("수업자료 not found with id: " + lessonMaterialId));
-
-        // openQuestions 변환
-        List<OpenQuestionForLessonResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
-                .map(openQuestion -> new OpenQuestionForLessonResponseDto(
-                        openQuestion.getOpenQuestionId(),
-                        openQuestion.getQuestion()))
-                .toList();
-
-        // quizzes 변환
-        List<LessonQuizDto> quizzes = lessonMaterial.getQuizList().stream()
-                .map(quiz -> new LessonQuizDto(
-                        quiz.getQuestion(),
-                        quiz.getAnswer(),
-                        quiz.getChoices1(),
-                        quiz.getChoices2(),
-                        quiz.getChoices3(),
-                        quiz.getChoices4()
-                ))
-                .toList();
-
-        // lessonRoles 변환
-        // lessonRoles를 List<LessonRoleDto> -> List<String>으로 변환
-        List<String> lessonRoles = lessonMaterial.getLessonRoleList().stream()
-                .map(LessonRole::getRoleName) // LessonRole 객체의 역할 이름을 추출
-                .toList();
-
-        // TeacherLessonMaterialDto 생성 및 반환
-        return new ParticipantLessonMaterialDto(
-                lessonMaterial.getBookTitle(),
-                lessonMaterial.getBookContents(),
-                lessonMaterial.getAuthor(),
-                quizzes,
-                openQuestions,
-                lessonRoles
-        );
-    }
 
 
     /**

@@ -1,5 +1,7 @@
 package com.todock.marimo.domain.lesson.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.todock.marimo.domain.lesson.dto.BackgroundRequestDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
@@ -26,8 +28,6 @@ import java.util.UUID;
 @Service
 public class PhotoService {
 
-    private final LessonService lessonService;
-
     @Value("${external.api.background-server-url}")
     private String AIServerURL;
 
@@ -36,6 +36,11 @@ public class PhotoService {
 
     @Value("${external.port.external-port}")
     private String serverPort;
+
+    private final AmazonS3 amazonS3;
+
+    @Value("${spring.cloud.aws.s3.bucket}")
+    private String bucketName;
 
     private final LessonMaterialRepository lessonMaterialRepository;
     private final LessonRepository lessonRepository;
@@ -47,12 +52,13 @@ public class PhotoService {
     @Autowired
     public PhotoService(LessonMaterialRepository lessonMaterialRepository,
                         LessonRepository lessonRepository,
-                        RestTemplate restTemplate, LessonService lessonService) {
+                        RestTemplate restTemplate,
+                        AmazonS3 amazonS3) {
         this.lessonMaterialRepository = lessonMaterialRepository;
         this.lessonRepository = lessonRepository;
         this.restTemplate = restTemplate;
+        this.amazonS3 = amazonS3;
         initDirectories();
-        this.lessonService = lessonService;
     }
 
     // 필요한 디렉토리를 초기화 하는 메서드
@@ -77,7 +83,7 @@ public class PhotoService {
                         new EntityNotFoundException("lessonMaterialId로 수업을 찾을 수 없습니다. lessonMaterial"));
 
         // 단체사진 예외처리
-        if(lessonMaterial.getBackgroundUrl() != null) {
+        if (lessonMaterial.getBackgroundUrl() != null) {
             return "단체 사진 배경이 이미 있습니다.";
         }
 
@@ -114,12 +120,11 @@ public class PhotoService {
     /**
      * 배경 이미지 저장
      */
+    @Transactional
     public String saveBackground(Long lessonMaterialId, MultipartFile backgroundImg) {
 
-        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
-                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업자료를 찾을 수 없습니다."));
-
-        try {
+        // 로컬 저장
+        /* try {
             String backgroundImgName = UUID.randomUUID().toString() + ".png"; // 사진 이름 생성
             Path filePath = Paths.get(BACKGROUND_DIR, backgroundImgName).normalize();
 
@@ -136,6 +141,36 @@ public class PhotoService {
             return "배경 이미지가 성공적으로 저장되었습니다.";
         } catch (IOException e) {
             throw new RuntimeException("배경 이미지 저장 중 오류가 발생했습니다.", e);
+        }*/
+
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("lessonMaterialId(" + lessonMaterialId + ")로 수업자료를 찾을 수 없습니다."));
+
+        try {
+
+            // 배경사진 이름 설정
+            String backgroundImgName = "background/" + UUID.randomUUID().toString() + ".png"; // S3에 저장할 파일 이름 (폴더 포함)
+
+            // 메타 데이터 설정
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(backgroundImg.getContentType()); // 객체 콘덴트 타입설정
+            metadata.setContentLength(backgroundImg.getSize()); // 객체 크기 설정
+
+            // S3에 업로드
+            amazonS3.putObject(bucketName, backgroundImgName, backgroundImg.getInputStream(), metadata);
+
+            // S3 URL 생성
+            String s3Url = amazonS3.getUrl(bucketName, backgroundImgName).toString();
+
+            // S3주소로 배경 저장
+            lessonMaterial.setBackgroundUrl(s3Url);
+            lessonMaterialRepository.save(lessonMaterial);
+
+            return "배경 이미지가 S3에 성공적으로 저장되었습니다. URL: " + s3Url;
+
+        } catch (IOException e) {
+            throw new RuntimeException("S3에 배경 이미지를 업로드하는 중 오류가 발생했습니다.", e);
         }
     }
 
@@ -161,8 +196,9 @@ public class PhotoService {
      * 단체사진 저장
      */
     @Transactional
-    public void savePhoto(Long lessonId, MultipartFile photo) {
-
+    public String savePhoto(Long lessonId, MultipartFile groupPhoto) {
+        // 로컬 저장
+        /*
         try {
             String photoName = UUID.randomUUID().toString() + ".png"; // 사진 이름 생성
             Path photoPath = Paths.get(PHOTO_DIR, photoName); // 파일 저장 경로 생성
@@ -171,7 +207,7 @@ public class PhotoService {
                 throw new SecurityException("잘못된 파일 경로입니다.");
             }
 
-            Files.write(photoPath, photo.getBytes()); // 파일 저장
+            Files.write(photoPath, groupPhoto.getBytes()); // 파일 저장
 
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
@@ -182,7 +218,37 @@ public class PhotoService {
 
         } catch (IOException e) {
             throw new IllegalArgumentException("사진을 저장하지 못했습니다.");
+        }*/
+
+        // S3 적용
+        try {
+            Lesson lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId(" + lessonId + ")로 수업을 찾을 수 없습니다."));
+
+            // 배경사진 이름 설정
+            String groupPhotoName = "photo/" + UUID.randomUUID().toString() + ".png"; // S3에 저장할 파일 이름 (폴더 포함)
+
+            // 메타 데이터 설정
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(groupPhoto.getContentType()); // 객체 콘덴트 타입설정
+            metadata.setContentLength(groupPhoto.getSize()); // 객체 크기 설정
+
+            // S3에 업로드
+            amazonS3.putObject(bucketName, groupPhotoName, groupPhoto.getInputStream(), metadata);
+
+            // S3 URL 생성
+            String s3Url = amazonS3.getUrl(bucketName, groupPhotoName).toString();
+
+            // S3주소로 단체사진 저장
+            lesson.setPhotoUrl(s3Url);
+            lessonRepository.save(lesson);
+
+            return "배경 이미지가 S3에 성공적으로 저장되었습니다. URL: " + s3Url;
+
+        } catch (IOException e) {
+            throw new RuntimeException("S3에 배경 이미지를 업로드하는 중 오류가 발생했습니다.", e);
         }
+
     }
 
 

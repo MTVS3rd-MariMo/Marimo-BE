@@ -50,7 +50,7 @@ public class PhotoController {
 
 
     /**
-     * AI에서 서버에 배경사진 저장
+     * AI서버에서 서버에 배경사진 저장
      */
     @Operation(summary = "배경사진 저장")
     @PostMapping("/background/ai/{lessonMaterialId}")
@@ -65,7 +65,7 @@ public class PhotoController {
 
 
     /**
-     * 배경사진 호출
+     * 배경사진 호출 - 수업 자료 호출시점에 같이 반환 (삭제 필요)
      */
     @Operation(summary = "배경사진 호출")
     @GetMapping("/background/{lessonId}")

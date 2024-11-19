@@ -95,7 +95,7 @@ public class LessonController {
 
 
     /**
-     * 수업 중  lessonMaterialId 수업용 수업자료 상세 조회
+     * 참가자들이 수업에 사용하는 수업자료를 lessonMaterialId로 요청
      */
     @Operation(summary = "참가자 수업 자료 조회", description = "수업 중 참가자가 사용할 수업 자료의 상세 정보를 반환합니다.")
     @GetMapping("/{lessonMaterialId}")
@@ -104,7 +104,7 @@ public class LessonController {
 
         log.info("참가자가 lessonMaterialId: {}로 수업에 사용하는 수업자료 조회", lessonMaterialId);
 
-        ParticipantLessonMaterialDto participantLessonMaterialDto = lessonMaterialService.getLessonMaterialById(lessonMaterialId);
+        ParticipantLessonMaterialDto participantLessonMaterialDto = lessonService.getLessonMaterialById(lessonMaterialId);
 
         return ResponseEntity.ok(participantLessonMaterialDto);
     }

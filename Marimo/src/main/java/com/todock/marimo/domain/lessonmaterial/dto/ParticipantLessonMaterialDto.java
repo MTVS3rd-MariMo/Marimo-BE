@@ -26,6 +26,8 @@ public class ParticipantLessonMaterialDto {
 
     private String author;
 
+    private String backgroundUrl;
+
     private List<LessonQuizDto> quizzes = new ArrayList<>();
 
     private List<OpenQuestionForLessonResponseDto> openQuestions = new ArrayList<>();

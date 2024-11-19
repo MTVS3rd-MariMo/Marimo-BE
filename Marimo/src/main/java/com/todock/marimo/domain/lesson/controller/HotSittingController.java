@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lesson.controller;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.todock.marimo.domain.lesson.dto.SelfIntroduceRequestDto;
 import com.todock.marimo.domain.lesson.dto.WavFileClientToServerRequestDto;
 import com.todock.marimo.domain.lesson.service.HotSittingService;
@@ -7,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +25,12 @@ import java.util.Base64;
 public class HotSittingController {
 
     private final HotSittingService hotSittingService;
+    private final AmazonS3 amazonS3;
 
     @Autowired
-    public HotSittingController(HotSittingService hotSittingService) {
+    public HotSittingController(HotSittingService hotSittingService
+            , AmazonS3 amazonS3) {
+        this.amazonS3 = amazonS3;
         this.hotSittingService = hotSittingService;
     }
 
@@ -114,6 +119,22 @@ public class HotSittingController {
         hotSittingService.sendWavToAiServer(userId, wavDto);
 
         return ResponseEntity.ok().body("정상적으로 전송되었습니다.");
+    }
+
+
+    /**
+     * aws 연결 확인
+     */
+    @Value("${spring.cloud.aws.s3.bucket}")
+    private String bucketName;
+
+    @GetMapping("/test-s3")
+    public String testS3() {
+        if (amazonS3.doesBucketExistV2(bucketName)) {
+            return "S3 연결 성공: " + bucketName;
+        } else {
+            return "S3 연결 실패" + bucketName;
+        }
     }
 
 

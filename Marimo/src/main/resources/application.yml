@@ -1,14 +1,20 @@
 spring:
-  profiles:
-    #include: dev, local
-    active: local
-  application:
-    name: Marimo
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/marimo
     username: ohgiraffers
     password: ohgiraffers
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      s3: # aws bucket
+        bucket: marimo-bucket
+      region:
+        static: ap-northeast-2
+      stack:
+        auto: false
 
   jpa:
     show-sql: true # SQL 쿼리 로깅 활성화. 실행되는 모든 SQL 쿼리를 콘솔에 출력함.
@@ -26,21 +32,6 @@ spring:
 
 server:
   port: 9999
-
-# aws s3 bucket
-cloud:
-  aws:
-    s3:
-      bucket: marimo-bucket
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRETE_KEY}
-    region:
-      static: ap-northeast-2
-      auto: false
-    stack:
-      auto: false
-
 
 external:
   api:

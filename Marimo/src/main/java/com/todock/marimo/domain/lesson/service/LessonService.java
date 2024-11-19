@@ -10,6 +10,11 @@ import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
 import com.todock.marimo.domain.lesson.repository.HotSittingRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
+import com.todock.marimo.domain.lessonmaterial.dto.LessonQuizDto;
+import com.todock.marimo.domain.lessonmaterial.dto.ParticipantLessonMaterialDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionForLessonResponseDto;
+import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
+import com.todock.marimo.domain.lessonmaterial.entity.LessonRole;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -150,6 +155,53 @@ public class LessonService {
 
         // ParticipantListDto 생성 및 반환
         return new ParticipantListDto(participantUserIds);
+    }
+
+    /**
+     * 참가자들이 수업에 사용하는 수업자료를 lessonMaterialId로 요청
+     */
+    public ParticipantLessonMaterialDto getLessonMaterialById(Long lessonMaterialId) {
+
+        Lesson lesson = lessonRepository.findById(lessonMaterialId).orElse(null);
+        // lessonMaterial 조회
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
+                .orElseThrow(() -> new EntityNotFoundException("수업자료 not found with id: " + lessonMaterialId));
+
+        // openQuestions 변환
+        List<OpenQuestionForLessonResponseDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
+                .map(openQuestion -> new OpenQuestionForLessonResponseDto(
+                        openQuestion.getOpenQuestionId(),
+                        openQuestion.getQuestion()))
+                .toList();
+
+        // quizzes 변환
+        List<LessonQuizDto> quizzes = lessonMaterial.getQuizList().stream()
+                .map(quiz -> new LessonQuizDto(
+                        quiz.getQuestion(),
+                        quiz.getAnswer(),
+                        quiz.getChoices1(),
+                        quiz.getChoices2(),
+                        quiz.getChoices3(),
+                        quiz.getChoices4()
+                ))
+                .toList();
+
+        // lessonRoles 변환
+        // lessonRoles를 List<LessonRoleDto> -> List<String>으로 변환
+        List<String> lessonRoles = lessonMaterial.getLessonRoleList().stream()
+                .map(LessonRole::getRoleName) // LessonRole 객체의 역할 이름을 추출
+                .toList();
+
+        // TeacherLessonMaterialDto 생성 및 반환
+        return new ParticipantLessonMaterialDto(
+                lessonMaterial.getBookTitle(),
+                lessonMaterial.getBookContents(),
+                lessonMaterial.getAuthor(),
+                lessonMaterial.getBackgroundUrl(),
+                quizzes,
+                openQuestions,
+                lessonRoles
+        );
     }
 
 }
