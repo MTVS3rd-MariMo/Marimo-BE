@@ -32,12 +32,10 @@ public class AvatarController {
     private final AvatarService avatarService;
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png");
-    private final HttpEncodingAutoConfiguration httpEncodingAutoConfiguration;
 
     @Autowired
-    public AvatarController(AvatarService avatarService, HttpEncodingAutoConfiguration httpEncodingAutoConfiguration) {
+    public AvatarController(AvatarService avatarService) {
         this.avatarService = avatarService;
-        this.httpEncodingAutoConfiguration = httpEncodingAutoConfiguration;
     }
 
     /**

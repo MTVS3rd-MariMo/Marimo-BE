@@ -56,7 +56,7 @@ public class PhotoController {
     @PostMapping("/background/ai/{lessonMaterialId}")
     public ResponseEntity<String> saveBackgroundImg(
             @PathVariable("lessonMaterialId") Long lessonMaterialId,
-            @RequestParam MultipartFile img) {
+            @RequestParam("img") MultipartFile img) {
 
         log.info("배경 사진을 가져오기 위한 현재 lessonMaterialId: {}", lessonMaterialId);
 

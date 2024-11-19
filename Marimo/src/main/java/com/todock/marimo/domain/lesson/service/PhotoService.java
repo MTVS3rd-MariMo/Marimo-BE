@@ -27,6 +27,7 @@ import java.util.UUID;
 public class PhotoService {
 
     private final LessonService lessonService;
+
     @Value("${external.api.background-server-url}")
     private String AIServerURL;
 
@@ -128,7 +129,7 @@ public class PhotoService {
 
             Files.write(filePath, backgroundImg.getBytes());
 
-            lessonMaterial.setBackgroundUrl(createPhotoFileUrl(backgroundImgName)); // photoUrl 추가
+            lessonMaterial.setBackgroundUrl(createBackgroundFileUrl(backgroundImgName)); // photoUrl 추가
 
             lessonMaterialRepository.save(lessonMaterial);
 
