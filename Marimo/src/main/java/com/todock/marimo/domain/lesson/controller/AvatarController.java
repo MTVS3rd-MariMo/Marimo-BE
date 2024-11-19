@@ -159,9 +159,25 @@ public class AvatarController {
         }
     }
 
+    /**
+     * 아마존 테스트 AI서버로 전송
+     */
+    @PostMapping(value = "/aws/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AvatarResponseDto> awsSendImgToAiServer(
+            @RequestHeader(name = "userId") Long userId
+            , @RequestParam(name = "lessonId") Long lessonId
+            , @RequestParam(name = "img") MultipartFile img) {
+
+        log.info("userId: {}가, lessonId: {}로, img: {}를 요청했습니다.", userId, lessonId, img);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(avatarService.saveAwsAvatar(userId, lessonId, img));
+
+    }
+
 
     /**
-     * 다른 유저의 아바타 이미지, 애니메이션 받기
+     * 다른 유저Id로 아바타 이미지, 애니메이션 받기
      */
     @Operation(summary = "다른 유저의 아바타 다운")
     @GetMapping("/participant/{lessonId}/{userId}")
