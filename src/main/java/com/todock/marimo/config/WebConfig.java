@@ -12,24 +12,24 @@ public class WebConfig implements WebMvcConfigurer {
         // 여러 경로를 addResourceLocations 메서드에 배열 형태로 전달하여 중복된 경로 핸들러를 하나로 합칩니다.
         registry.addResourceHandler("/data/avatar/**")
                 .addResourceLocations(
-                        "file:C:/Lecture/project/Marimo-BE/Marimo/data/avatar/", // 아바타 - 메타버스
-                        "file:C:/Dev/Project/Mtvs/Marimo-BE/Marimo/data/avatar/", // 아바타 - 노트북
-                        "file:C:/Dev/mtvs/Marimo-BE/Marimo/data/avatar/" // 아바타 - 집
+                        "file:C:/Lecture/project/Marimo-BE/data/avatar/", // 아바타 - 메타버스
+                        "file:C:/Dev/Project/Mtvs/Marimo-BE/data/avatar/", // 아바타 - 노트북
+                        "file:C:/Dev/mtvs/Marimo-BE/data/avatar/" // 아바타 - 집
                 );
 
         // photo 경로 설정
         registry.addResourceHandler("/data/photo/**")
                 .addResourceLocations(
-                        "file:C:/Lecture/project/Marimo-BE/Marimo/data/photo/", // 단체사진 - 메타버스
-                        "file:C:/Dev/Project/Mtvs/Marimo-BE/Marimo/data/photo/", // 단체사진 - 노트북
-                        "file:C:/Dev/mtvs/Marimo-BE/Marimo/data/photo/" // 단체사진 - 집
+                        "file:C:/Lecture/project/Marimo-BE/data/photo/", // 단체사진 - 메타버스
+                        "file:C:/Dev/Project/Mtvs/Marimo-BE/data/photo/", // 단체사진 - 노트북
+                        "file:C:/Dev/mtvs/Marimo-BE/data/photo/" // 단체사진 - 집
                 );
 
         registry.addResourceHandler("/data/background/**")
                 .addResourceLocations(
-                        "file:C:/Lecture/project/Marimo-BE/Marimo/data/background/", // 단체사진 - 메타버스
-                        "file:C:/Dev/Project/Mtvs/Marimo-BE/Marimo/data/background/", // 단체사진 - 노트북
-                        "file:C:/Dev/mtvs/Marimo-BE/Marimo/data/background/" // 단체사진 - 집
+                        "file:C:/Lecture/project/Marimo-BE/data/background/", // 단체사진 - 메타버스
+                        "file:C:/Dev/Project/Mtvs/Marimo-BE/data/background/", // 단체사진 - 노트북
+                        "file:C:/Dev/mtvs/Marimo-BE/data/background/" // 단체사진 - 집
                 );
     }
 }
