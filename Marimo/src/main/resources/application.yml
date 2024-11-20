@@ -1,51 +1,6 @@
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/marimo
-    #url: jdbc:mysql://awseb-e-pfhugca2si-stack-awsebrdsdatabase-ikunfd47ekrd.cpiycgkkk147.ap-northeast-2.rds.amazonaws.com:3306/marimo
-    username: ohgiraffers
-    password: ohgiraffers
-  cloud:
-    aws:
-      credentials:
-        access-key: ${AWS_ACCESS_KEY}
-        secret-key: ${AWS_SECRET_KEY}
-      s3: # aws bucket
-        bucket: marimo-bucket
-      region:
-        static: ap-northeast-2
-      stack:
-        auto: false
-
-  jpa:
-    show-sql: true # SQL 쿼리 로깅 활성화. 실행되는 모든 SQL 쿼리를 콘솔에 출력함.
-    database: mysql # JPA가 사용할 데이터베이스 타입 설정. 여기서는 MySQL을 지정함.
-    hibernate:
-      ddl-auto: update # 데이터베이스 스키마 자동 업데이트. 엔티티 클래스 변경 시 DB 스키마를 자동으로 수정해줌.
-    properties:
-      hibernate:
-        format_sql: true # SQL 쿼리 로깅 시 출력되는 SQL을 읽기 쉽게 포맷팅함.
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: 10MB # 파일 업로드 제한 용량
-      max-request-size: 10MB # 파일 응답 제한 용량
-awseb-e-pfhugca2si-stack-awsebrdsdatabase-ikunfd47ekrd:
-  cpiycgkkk147:
-    ap-northeast-2:
-      rds:
-        amazonaws:
-          com:
-server:
-  port: 9999
-
-external:
-  api:
-    odd-avatar-server-url: ${AI_ODD_AVATAR_SERVER_URL} # 아바타 홀수 유저 URL
-    background-server-url: ${AI_BACKGROUND_SERVER_URL} # 배경 URL
-    even-avatar-server-url: ${AI_EVEN_AVATAR_SERVER_URL} # 아바타 짝수 유저 URL
-    hot-sitting-server-url: ${AI_HOT_SITTING_SERVER_URL} # 핫시팅 URL
-    lesson-material-server-url: ${AI_LESSON_MATERIAL_SERVER_URL} # 수업 자료 URL
-  port:
-    server-host: ${SERVER_HOST} # 외부 IP
-    external-port: ${EXTERNAL_PORT} # 외부 Port
+  profiles:
+    #include: dev, local
+    active: local
+  application:
+    name: marimo
