@@ -8,7 +8,7 @@ public class Pointcuts {
     /**
      * 도메인 전체 범위 Pointcut && !auth
      */
-    @Pointcut("execution(* com.todock.marimo.domain..*(..))")
+    @Pointcut("execution(* com.todock.marimo.domain..*(..)) && !execution(* com.todock.marimo.domain..*Repository.*(..))")
     // 여기서 hello.springmvc.basic 패키지와 그 하위 패키지에 있는 모든 메서드에 AOP를 적용한다
     public void AllLogPointcut() {
     }

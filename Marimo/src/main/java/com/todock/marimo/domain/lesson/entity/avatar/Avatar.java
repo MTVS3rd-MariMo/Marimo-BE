@@ -1,5 +1,7 @@
 package com.todock.marimo.domain.lesson.entity.avatar;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +12,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_avatar")
@@ -21,7 +22,8 @@ public class Avatar {
     private Long avatarId;
 
     @ManyToOne
-    @JoinColumn(name="lessonId") // 수업 id
+    @JsonBackReference
+    @JoinColumn(name = "lesson_id") // 수업 id
     private Lesson lesson;
 
     @Column(name = "user_id") // 유저 id
@@ -30,13 +32,27 @@ public class Avatar {
     @Column(name = "avatar_img") // 아바타 이미지
     private String avatarImg;
 
-    // 한 아바타에 애니메이션 두개
-    @OneToMany(mappedBy ="avatar")
-    private List<Animation> animationList = new ArrayList<>();
+    @Column(name = "charcter") // 아바타의 역할
+    private String character;
 
-    public Avatar(Long userId, String avatarImg, List<Animation> animationList) {
+    // 한 아바타에 애니메이션 두개
+    @JsonManagedReference
+    @OneToMany(mappedBy = "avatar", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Animation> animations = new ArrayList<>();
+
+    public Avatar(Long userId, String avatarImg, List<Animation> animations) {
         this.userId = userId;
         this.avatarImg = avatarImg;
-        this.animationList = animationList;
+        this.animations = animations;
+    }
+
+    @Override
+    public String toString() {
+        return "Avatar{" +
+                "animations=" + animations +
+                ", avatarImg='" + avatarImg + '\'' +
+                ", userId=" + userId +
+                ", avatarId=" + avatarId +
+                '}';
     }
 }

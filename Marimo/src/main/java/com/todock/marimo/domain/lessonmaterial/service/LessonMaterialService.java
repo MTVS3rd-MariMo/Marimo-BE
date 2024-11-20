@@ -1,18 +1,27 @@
 package com.todock.marimo.domain.lessonmaterial.service;
 
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameResponseDto;
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRegistRequestDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.todock.marimo.domain.lessonmaterial.dto.*;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialNameResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonRole;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.entity.quiz.Quiz;
-import com.todock.marimo.domain.lessonmaterial.entity.quiz.SelectedQuiz;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
 import com.todock.marimo.domain.user.entity.Role;
 import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,35 +33,59 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class LessonMaterialService {
+
+    @Value("${external.api.lesson-material-server-url}")
+    private String AIServerURL;
 
     private final RestTemplate restTemplate;
     private final UserRepository userRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
 
+    private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 파싱용 ObjectMapper 추가
+
     @Autowired
     public LessonMaterialService(
-            UserRepository userRepository,
             LessonMaterialRepository lessonMaterialRepository,
+            UserRepository userRepository,
             RestTemplate restTemplate) {
 
+        this.restTemplate = restTemplate;
         this.userRepository = userRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
-        this.restTemplate = restTemplate;
     }
 
 
     /**
      * pdf 업로드
      */
-    public String sendPdfToAiServer(MultipartFile pdf) {
+    @Transactional
+    public LessonMaterialResponseDto sendPdfToAiServer(
+            MultipartFile pdf, Long userId, String bookTitle, String author) {
+
+        validateUserRole(userId);
+
+        if (pdf == null || pdf.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 PDF 파일이 제공되지 않았습니다.");
+        }
+
+        List<LessonMaterial> lessonMaterials = lessonMaterialRepository.findByUserId(userId);
+        if (lessonMaterials.size() >= 3) {
+            throw new IllegalStateException("더이상 수업 자료를 만들 수 없습니다. 최대 3개까지 가능합니다.");
+        }
+
         try {
+
             // 1. AI 서버 URI 설정
-            String AIServerUrI = "http://metaai2.iptime.org:64987/pdfupload";
+            log.info("AI 서버 URI 설정: {}", AIServerURL);
 
             // 2. HttpHeaders 설정(멀티파트 형식 지정)
             HttpHeaders headers = new HttpHeaders();
@@ -63,7 +96,7 @@ public class LessonMaterialService {
             body.add("pdf", new ByteArrayResource(pdf.getBytes()) {
                 @Override
                 public String getFilename() {
-                    return pdf.getOriginalFilename(); // 파일 이름 설정
+                    return pdf.getOriginalFilename();
                 }
             });
 
@@ -71,60 +104,81 @@ public class LessonMaterialService {
             HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
             // 5. AI 서버로 요청 전송
-            ResponseEntity<String> response = restTemplate.postForEntity(AIServerUrI, request, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(AIServerURL, request, String.class);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("AI 서버와의 통신 중 오류가 발생했습니다. 응답 코드: " + response.getStatusCode());
+            }
+
 
             // 6. AI 서버에서 받은 JSON 반환
-            return response.getBody();
+            return parseLessonMaterialJson(userId, response.getBody(), bookTitle, author);
 
-        } catch (Exception e) { // 예외 처리 로직 추가
+        } catch (Exception e) {
+            log.error("파일 전송 중 오류 발생: {}", e.getMessage(), e);
             throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
         }
     }
 
 
     /**
-     * 수업 자료 저장
+     * pdf에서 바로 받은 후 열린질문, 퀴즈 2개 선택해서 수정 - 기본 수정도 포함
      */
     @Transactional
-    public LessonMaterial save(LessonMaterialRegistRequestDto lessonMaterialInfo) {
-        validateUserRole(lessonMaterialInfo.getUserId());
-        validateRequestCounts(lessonMaterialInfo); // 여기서 한번에 검증
+    public void updateLessonMaterial(LessonMaterialRequestDto lessonMaterialInfo) {
 
-        LessonMaterial lessonMaterial = new LessonMaterial(
-                lessonMaterialInfo.getUserId(),
-                lessonMaterialInfo.getBookTitle(),
-                lessonMaterialInfo.getBookContents()
-        );
+        if (lessonMaterialInfo == null || lessonMaterialInfo.getLessonMaterialId() == null) {
+            throw new IllegalArgumentException("수정할 수업 자료 정보가 제공되지 않았습니다.");
+        }
 
-        // 모든 질문을 한번에 추가
-        List<OpenQuestion> questions = lessonMaterialInfo.getOpenQuestionList().stream()
-                .map(q -> new OpenQuestion(lessonMaterial, q.getQuestionTitle()))
-                .collect(Collectors.toList());
-        lessonMaterial.setOpenQuestionList(questions);
+        LessonMaterial lessonMaterial = lessonMaterialRepository
+                .findById(lessonMaterialInfo.getLessonMaterialId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수업 자료입니다: " + lessonMaterialInfo.getLessonMaterialId()));
 
-        // 퀴즈 한번에 추가
-        SelectedQuiz selectedQuiz = new SelectedQuiz(lessonMaterial);
-        List<Quiz> quizList = lessonMaterialInfo.getQuizzeList().stream()
-                .map(quizRequest -> new Quiz(
-                        quizRequest.getQuestion(),
-                        quizRequest.getAnswer(),
-                        quizRequest.getFirstChoice(),
-                        quizRequest.getSecondChoice(),
-                        quizRequest.getThirdChoice(),
-                        quizRequest.getFourthChoice()
-                ))
-                .collect(Collectors.toList());
-        selectedQuiz.setQuizList(quizList);  // 퀴즈 리스트 한번에 설정
-        lessonMaterial.getSelectedQuizList().add(selectedQuiz);
+        List<QuizDto> quizzes = lessonMaterialInfo.getQuizList();
 
-        // 역할 4개 한번에 추가
-        List<LessonRole> roles = lessonMaterialInfo.getRoleList().stream()
-                .map(roleRequest -> new LessonRole(null, roleRequest.getRoleName()))
-                .collect(Collectors.toList());
-        lessonMaterial.setLessonRoleList(roles);
+        if (quizzes != null && !quizzes.isEmpty()) {
+            lessonMaterial.getQuizList().clear();
 
-        // DB에 저장
-        return lessonMaterialRepository.save(lessonMaterial);
+            for (QuizDto quizDto : quizzes) {
+                if (!isValidQuiz(quizDto)) {
+                    throw new IllegalArgumentException("유효하지 않은 퀴즈 정보가 포함되어 있습니다.");
+                }
+
+                Quiz quiz = new Quiz(
+                        lessonMaterial,
+                        quizDto.getQuestion(),
+                        quizDto.getAnswer(),
+                        quizDto.getChoices1(),
+                        quizDto.getChoices2(),
+                        quizDto.getChoices3(),
+                        quizDto.getChoices4()
+                );
+                lessonMaterial.getQuizList().add(quiz);
+            }
+        } else {
+            log.info("퀴즈가 존재하지 않습니다.");
+        }
+
+        List<OpenQuestionRequestDto> openQuestions = lessonMaterialInfo.getOpenQuestionList();
+        if (openQuestions != null && !openQuestions.isEmpty()) {
+            lessonMaterial.getOpenQuestionList().clear();
+
+            for (OpenQuestionRequestDto oqDto : openQuestions) {
+                if (oqDto.getQuestionTitle() == null || oqDto.getQuestionTitle().trim().isEmpty()) {
+                    throw new IllegalArgumentException("유효하지 않은 열린 질문이 포함되어 있습니다.");
+                }
+
+                OpenQuestion openQuestion = new OpenQuestion(
+                        lessonMaterial,
+                        oqDto.getQuestionTitle()
+                );
+                lessonMaterial.getOpenQuestionList().add(openQuestion);
+            }
+        } else {
+            log.info("열린 질문이 존재하지 않습니다.");
+        }
+
+        lessonMaterialRepository.save(lessonMaterial);
     }
 
 
@@ -132,75 +186,55 @@ public class LessonMaterialService {
      * 유저 id로 유저의 수업 자료 전체 조회
      */
     public List<LessonMaterialNameResponseDto> getLessonMaterialByUserId(Long userId) {
-        validateUserRole(userId);
-        return lessonMaterialRepository.findByUserId(userId)
+
+        validateUserRole(userId); // 선생님 검증
+
+        List<LessonMaterialNameResponseDto> lessonMaterialNameList = lessonMaterialRepository.findByUserId(userId)
                 .stream()
-                .map(lm -> new LessonMaterialNameResponseDto(lm.getBookTitle(), lm.getBookContents()))
+                .map(dto -> new LessonMaterialNameResponseDto(dto.getLessonMaterialId(), dto.getBookTitle()))
                 .collect(Collectors.toList());
+        return lessonMaterialNameList.isEmpty() ? Collections.emptyList() : lessonMaterialNameList;
     }
 
 
     /**
-     * lessonMaterialId로 수업 자료 내용 상세 조회
+     * lessonMaterialId로 수업자료 수정 상세 조회
      */
-    public LessonMaterial getLessonMaterialByLessonMaterialId(Long lessonMaterialId) {
+    public DetailLessonMaterialDto findById(Long lessonMaterialId) {
 
-        return lessonMaterialRepository.findLessonMaterialByLessonMaterialId(lessonMaterialId);
-
-    }
-
-
-    /**
-     * 수업 자료를 수업자료 id로 수정 (수정 페이지에서 수정하고 요청)
-     */
-    @Transactional
-    public void updateLessonMaterial(Long lessonMaterialId, LessonMaterialRegistRequestDto updateDto) {
-        // 1. 기존 수업 자료 조회
         LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수업 자료입니다."));
+                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업자료를 조회할 수 없습니다."));
 
-        // 2. 기본 정보 업데이트
-        lessonMaterial.setBookTitle(updateDto.getBookTitle());
-        lessonMaterial.setBookContents(updateDto.getBookContents());
+        // OpenQuestions 매핑
+        List<OpenQuestionUpdateDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
+                .map(openQuestion -> new OpenQuestionUpdateDto(
+                        openQuestion.getOpenQuestionId(),
+                        openQuestion.getQuestion()))
+                .toList();
 
-        // 3. 기존 데이터 초기화
-        lessonMaterial.getOpenQuestionList().clear();
-        lessonMaterial.getSelectedQuizList().clear();
-        lessonMaterial.getLessonRoleList().clear();
-
-        // 4. 열린 질문 업데이트
-        updateDto.getOpenQuestionList().forEach(questionRequest -> {
-            OpenQuestion openQuestion = new OpenQuestion(lessonMaterial, questionRequest.getQuestionTitle());
-            lessonMaterial.addOpenQuestion(openQuestion);
-        });
-
-        // 5. 퀴즈 업데이트
-        SelectedQuiz selectedQuiz = new SelectedQuiz(lessonMaterial);
-        List<Quiz> quizList = updateDto.getQuizzeList().stream()
-                .map(quizRequest -> new Quiz(
-                        quizRequest.getQuestion(),
-                        quizRequest.getAnswer(),
-                        quizRequest.getFirstChoice(),
-                        quizRequest.getSecondChoice(),
-                        quizRequest.getThirdChoice(),
-                        quizRequest.getFourthChoice()
+        // Quizzes 매핑
+        List<QuizDto> quizList = lessonMaterial.getQuizList().stream()
+                .map(quiz -> new QuizDto(
+                        quiz.getQuizId(),
+                        quiz.getQuestion(),
+                        quiz.getAnswer(),
+                        quiz.getChoices1(),
+                        quiz.getChoices2(),
+                        quiz.getChoices3(),
+                        quiz.getChoices4()
                 ))
                 .toList();
-        selectedQuiz.addQuiz(quizList.get(0), quizList.get(1));
-        lessonMaterial.addSelectedQuiz(selectedQuiz);
 
-        // 6. 역할 업데이트
-        updateDto.getRoleList().forEach(roleRequest -> {
-            LessonRole lessonRole = new LessonRole(null, roleRequest.getRoleName());
-            lessonMaterial.addRole(lessonRole);
-        });
-
-        // 7. 요청 데이터 검증
-        validateRequestCounts(updateDto);
-
-        // 8. 저장
-        lessonMaterialRepository.save(lessonMaterial);
+        // DTO 생성 및 반환
+        return new DetailLessonMaterialDto(
+                lessonMaterialId,
+                openQuestions,
+                quizList
+        );
     }
+
+
+
 
 
     /**
@@ -208,7 +242,88 @@ public class LessonMaterialService {
      */
     @Transactional
     public void deleteById(Long lessonMaterialId) {
-        lessonMaterialRepository.deleteById(lessonMaterialId);
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
+                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업자료를 찾을 수 없습니다."));
+
+        lessonMaterial.setUserId(null); // 유저 Id를 없애서 매칭 안되도록 함
+        log.info("lessonMaterial.userId : {}", lessonMaterial.getUserId());
+    }
+
+
+    /**
+     * AI 반환 Json 파싱 메서드
+     */
+    private LessonMaterialResponseDto parseLessonMaterialJson(Long userId, String jsonResponse, String bookTitle, String author) {
+
+        JsonNode root = null;
+        try {
+            root = objectMapper.readTree(jsonResponse);
+
+            // LessonMaterial 객체 생성
+            LessonMaterial lessonMaterial = new LessonMaterial(
+                    userId,
+                    bookTitle,
+                    root.path("pdftext").asText(""),
+                    author
+            );
+
+
+            // 역할 생성 및 추가
+            List<LessonRole> roles = new ArrayList<>();
+            JsonNode charactersNode = root.path("characters");
+            if (!charactersNode.isMissingNode()) { // 노드가 존재할 때만 진행
+                charactersNode.forEach(characterNode -> {
+                    roles.add(new LessonRole(lessonMaterial, characterNode.asText("")));
+                });
+            }
+            lessonMaterial.setLessonRoleList(roles);
+
+            // LessonMaterial 저장 (열린 질문, 퀴즈는 저장하지 않음)
+            lessonMaterialRepository.save(lessonMaterial);
+            log.info("생성된 lessonMaterialId() : {}", lessonMaterial.getLessonMaterialId());
+
+            // 열린 질문을 OpenQuestionDto로 변환하여 클라이언트에 보낼 준비
+            List<OpenQuestionResponseDto> openQuestionDtos = new ArrayList<>();
+
+            JsonNode openQuestionsNode = root.path("open_questions"); //  라는 JSON에서 open_questions 노드 찾기
+
+            // 열린 질문 파싱
+            if (!openQuestionsNode.isMissingNode()) { // 있으면
+                openQuestionsNode.forEach(questionNode -> {
+                    String questionText = questionNode.path("question").asText(""); // question 노드 찾아서 추출
+                    if (!questionText.isEmpty()) {  // 빈 문자열 체크 추가
+                        OpenQuestionResponseDto openQuestionResponseDto = new OpenQuestionResponseDto(
+                                questionText
+                        );
+
+                        openQuestionDtos.add(openQuestionResponseDto);
+                    }
+                });
+            }
+
+            // 퀴즈를 QuizDto로 변환하여 클라이언트에 보낼 준비
+            List<QuizDto> quizDtos = new ArrayList<>();
+            JsonNode quizNode = root.path("quiz");
+            if (!quizNode.isMissingNode()) {
+                final AtomicLong quizIdCounter = new AtomicLong(1); // quizId를 1부터 시작하도록 설정
+                quizNode.forEach(qNode -> {
+                    quizDtos.add(new QuizDto(
+                            quizIdCounter.getAndIncrement(),
+                            qNode.path("question").asText(""),
+                            qNode.path("answer").asInt(),
+                            qNode.path("choices1").asText(""),
+                            qNode.path("choices2").asText(""),
+                            qNode.path("choices3").asText(""),
+                            qNode.path("choices4").asText("")
+                    ));
+                });
+            }
+
+            // 클라이언트에 반환할 LessonMaterialResponseDto 생성
+            return new LessonMaterialResponseDto(lessonMaterial.getLessonMaterialId(), quizDtos, openQuestionDtos);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("json 변형이 잘못되었습니다.");
+        }
     }
 
 
@@ -227,18 +342,15 @@ public class LessonMaterialService {
 
 
     /**
-     * 컨텐츠 개수 검증
+     * 퀴즈 수정 시 검증
      */
-    private void validateRequestCounts(LessonMaterialRegistRequestDto requestDto) {
-        if (requestDto.getOpenQuestionList().size() != 3) {
-            throw new IllegalArgumentException("열린 질문은 3개여야 합니다.");
-        }
-        if (requestDto.getQuizzeList().size() != 2) {
-            throw new IllegalArgumentException("퀴즈는 2개여야 합니다.");
-        }
-        if (requestDto.getRoleList().size() != 4) {
-            throw new IllegalArgumentException("역할은 4개여야 합니다.");
-        }
+    private boolean isValidQuiz(QuizDto quizDto) {
+        return quizDto != null &&
+                quizDto.getQuestion() != null && !quizDto.getQuestion().trim().isEmpty() &&
+                quizDto.getChoices1() != null && !quizDto.getChoices1().trim().isEmpty() &&
+                quizDto.getChoices2() != null && !quizDto.getChoices2().trim().isEmpty() &&
+                quizDto.getChoices3() != null && !quizDto.getChoices3().trim().isEmpty() &&
+                quizDto.getChoices4() != null && !quizDto.getChoices4().trim().isEmpty();
     }
 
 }

@@ -1,16 +1,20 @@
 package com.todock.marimo.domain.lessonmaterial.controller;
 
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameDto;
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialNameResponseDto;
-import com.todock.marimo.domain.lessonmaterial.dto.LessonMaterialRegistRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.QuizDto;
+import com.todock.marimo.domain.lessonmaterial.dto.DetailLessonMaterialDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialNameResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialNamesRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
+import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +27,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/lesson-material")
+@Tag(name = "LessonMaterial API", description = "수업 자료 관련 API")
 public class LessonMaterialController {
 
     private final LessonMaterialService lessonMaterialService;
@@ -32,18 +37,9 @@ public class LessonMaterialController {
         this.lessonMaterialService = lessonMaterialService;
     }
 
-    /**
-     * pdf 전달
-     * 1. yml 파일 설정
-     * 2. POST 엔드포인트 생성 - 파일 업로드 메서드 작성 - pdf 파일 수신 확인
-     * 2-2. HttpStatus: HTTP 상태 코드 (200 OK, 404 Not Found 등)
-     * HttpHeaders: 응답 헤더 정보
-     * HttpBody: 실제 응답 데이터
-     */
-
 
     /**
-     * pdf 업로드
+     * pdf 업로드 하고 수업자료 Id, 퀴즈 8개, 열린 질문 2개를 클라이언트로 반환
      */
     @Operation(
             summary = "PDF 파일 업로드",
@@ -82,29 +78,45 @@ public class LessonMaterialController {
             )
     })
     @PostMapping("/upload-pdf")
-    public ResponseEntity<String> sendPdfToAiServer(@RequestParam("pdf") MultipartFile pdfFile) {
+    public ResponseEntity<LessonMaterialResponseDto> sendPdfToAiServer(
+            @RequestHeader("userId") Long userId,
+            @RequestPart("pdf") MultipartFile pdfFile,
+            @RequestParam("bookTitle") String bookTitle,
+            @RequestParam("author") String author) {
+
+        log.info("수업 자료 생성 요청 보내는 유저의 userId : {}와 pdf : {}", userId, pdfFile);
 
         if (pdfFile.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일이 없습니다.");
-        }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } // 파일 용량 null 확인
 
-        String fileName = pdfFile.getOriginalFilename(); // 파일 이름
+        LessonMaterialResponseDto lessonMaterialResponseDto
+                = lessonMaterialService.sendPdfToAiServer(pdfFile, userId, bookTitle, author);
 
-        lessonMaterialService.sendPdfToAiServer(pdfFile);
+        log.info("수정한 값: {}", lessonMaterialResponseDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body("PDF 파일" + fileName + "이 성공적으로 업로드되었습니다.");
+        return ResponseEntity.status(HttpStatus.OK).body(lessonMaterialResponseDto);
     }
 
 
     /**
-     * 수업자료 저장
+     * 수업자료 저장 - 수업 자료 id, 선택한 퀴즈 2개, 열린 질문 2개
      */
-    @Operation(summary = "수업 자료 생성", description = "새로운 수업 자료를 생성합니다.")
+    @Operation(
+            summary = "수업 자료 수정 후 생성",
+            description = "수업 자료 수정 후 생성합니다.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LessonMaterialRequestDto.class)
+                    )
+            )
+    )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "201",
                     description = "수업 자료 생성 성공",
-                    content = @Content(schema = @Schema(implementation = LessonMaterialRegistRequestDto.class))
+                    content = @Content(schema = @Schema(implementation = LessonMaterialRequestDto.class))
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -112,41 +124,38 @@ public class LessonMaterialController {
                     content = @Content(schema = @Schema(implementation = String.class))
             )
     })
-    @PostMapping
-    public ResponseEntity<LessonMaterialRegistRequestDto> createLessonMaterial(
-            @RequestBody LessonMaterialRegistRequestDto lessonMaterialRegistRequestDto) {
+    @PutMapping
+    public ResponseEntity<String> updateLessonMaterial(
+            @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto) {
 
-        // 1. 서비스에 복합 DTO 전달하여 저장 로직 처리
-        LessonMaterial savedLessonMaterial = lessonMaterialService.save(lessonMaterialRegistRequestDto);
-        log.info("저장 완료");
-        return ResponseEntity.status(HttpStatus.CREATED).body(lessonMaterialRegistRequestDto);
+        log.info("수업 자료 생성 후 수정한 열린 질문, 퀴즈 2개가 있는 DTO : {} ", lessonMaterialRequestDto); // JSON 데이터 로깅
+
+        try {
+            log.info("수업 자료 ID: {}", lessonMaterialRequestDto.getLessonMaterialId());
+
+            // 열린 질문 리스트 확인 및 출력
+            List<OpenQuestionRequestDto> openQuestions = lessonMaterialRequestDto.getOpenQuestionList();
+            log.info("openQuestions: {}", openQuestions.toString());
+
+
+            // 퀴즈 리스트 확인 및 출력
+            List<QuizDto> quizList = lessonMaterialRequestDto.getQuizList();
+            log.info("quizList: {}", quizList.toString());
+
+            // 서비스 호출
+            lessonMaterialService.updateLessonMaterial(lessonMaterialRequestDto);
+            log.info("저장 완료");
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("수업 자료를 생성했습니다.");
+        } catch (Exception e) {
+            log.error("DTO 매핑 중 오류 발생: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("수업 자료 생성 중 오류가 발생했습니다.");
+        }
     }
 
 
     /**
-     * 유저 id로 유저의 수업 자료 전체 조회 (pdf 이름만 보여줌)
-     */
-    @Operation(summary = "유저의 수업 자료 조회", description = "유저 ID로 해당 유저의 모든 수업 자료를 조회합니다.")
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공",
-                    content = @Content(schema = @Schema(implementation = LessonMaterialNameDto.class))
-            )
-    })
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<LessonMaterialNameResponseDto>> getLessonMaterialByUserId(
-            @Parameter(description = "수업 자료 id", required = true, example = "1")
-            @PathVariable("userId") Long userId) {
-
-        List<LessonMaterialNameResponseDto> LessonMaterialNameList = lessonMaterialService.getLessonMaterialByUserId(userId);
-
-        return ResponseEntity.ok(LessonMaterialNameList);
-    }
-
-
-    /**
-     * lessonMaterialId로 수업 자료 내용 상세 조회
+     * lessonMaterialId로 수업 자료 내용 상세 조회 선택한 퀴즈 2개, 열린 질문 2개
      */
     @Operation(summary = "수업 자료 상세 조회", description = "수업 자료 ID로 상세 내용을 조회합니다.")
     @ApiResponses({
@@ -161,41 +170,41 @@ public class LessonMaterialController {
                     content = @Content(schema = @Schema(implementation = String.class))
             )
     })
-    @GetMapping("/{lessonMaterialId}/detail")
-    public ResponseEntity<LessonMaterial> getLessonMaterialByLessonMaterialId(
+    @GetMapping("detail/{lessonMaterialId}")
+    public ResponseEntity<DetailLessonMaterialDto> getLessonMaterialByLessonMaterialId(
             @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
-        LessonMaterial lessonMaterial = lessonMaterialService.getLessonMaterialByLessonMaterialId(lessonMaterialId);
+        log.info("상세 조회할 수업 자료의 lessonMaterialId: {}", lessonMaterialId);
 
-        return ResponseEntity.ok(lessonMaterial);
+        DetailLessonMaterialDto updateLessonMaterialDto = lessonMaterialService.findById(lessonMaterialId);
+
+        return ResponseEntity.ok(updateLessonMaterialDto);
     }
 
+
     /**
-     * 수업자료 id로 수업자료 수정
+     * userId로 lessonMaterial 전체 조회
      */
-    @Operation(summary = "수업 자료 수정", description = "수업 자료를 수정합니다.")
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "수정 성공",
-                    content = @Content(schema = @Schema(implementation = String.class))
-            )
-    })
-    @PutMapping("/{lessonMaterialId}")
-    public ResponseEntity<String> updateLessonMaterial(
-            @PathVariable("lessonMaterialId") Long lessonMaterial,
-            @RequestBody LessonMaterialRegistRequestDto updateLessonMaterialInfo) {
+    @Operation(summary = "userId로 수업 자료 전체 조회")
+    @GetMapping
+    public ResponseEntity<LessonMaterialNamesRequestDto> getLessonMaterialNames(
+            @RequestHeader("userId") Long userId) {
 
-        lessonMaterialService.updateLessonMaterial(lessonMaterial, updateLessonMaterialInfo);
+        log.info("유저의 userId : {}로 가지고 있는 수업 자료 리스트 조회", userId);
 
-        return ResponseEntity.ok("수정 완료");
+        List<LessonMaterialNameResponseDto> lessonMaterialNameResponseDtos
+                = lessonMaterialService.getLessonMaterialByUserId(userId);
+
+        LessonMaterialNamesRequestDto responseDto = new LessonMaterialNamesRequestDto(lessonMaterialNameResponseDtos);
+
+        return ResponseEntity.ok(responseDto);
     }
 
 
     /**
      * 수업자료 id로 수업자료 삭제
      */
-    @Operation(summary = "수업 자료 삭제", description = "수업 자료를 삭제합니다.")
+    @Operation(summary = "lessonMaterialId로 수업 자료 삭제", description = "수업 자료를 삭제합니다.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",

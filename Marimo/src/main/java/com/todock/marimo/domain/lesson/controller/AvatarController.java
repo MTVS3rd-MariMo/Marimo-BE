@@ -7,8 +7,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.servlet.HttpEncodingAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +25,8 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("api/avatar")
+@RequestMapping("/api/avatar")
+@Tag(name = "Avatar API", description = "아바타 관련 API")
 public class AvatarController {
 
     private final AvatarService avatarService;
@@ -36,13 +39,16 @@ public class AvatarController {
     }
 
     /**
-     * 모든 유저의 아바타와 이미지를 한번에 List<dto>로 전달
+     * 모든 유저의 아바타와 이미지를 한번에 List<dto>로 전달 - 선생님용?
      * 수업 id로 아바타를 전부 저장
      */
+    @Operation(summary = "lessonId로 모든 유저의 아바타와 애니메이션 다운")
     @GetMapping
     public ResponseEntity<List<AvatarResponseDto>> getAvatar(Long lessonId) {
 
+        log.info("모든 유저의 아바타를 lessonId {} : 로 받습니다.", lessonId);
         List<AvatarResponseDto> avatarList = avatarService.findByLessonId(lessonId);
+        log.info("AvatarController avatarList: {}", avatarList);
 
         return ResponseEntity.ok(avatarList);
     }
@@ -88,27 +94,35 @@ public class AvatarController {
             )
     })
     @PostMapping(value = "/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> sendImgToAiServer(@RequestParam("img") MultipartFile img) {
+    public ResponseEntity<AvatarResponseDto> sendImgToAiServer(
+            @RequestHeader(name = "userId") Long userId
+            , @RequestParam(name = "lessonId") Long lessonId
+            , @RequestParam(name = "img") MultipartFile img) {
+
+        log.info("userId: {}가, lessonId: {}로, img: {}를 요청했습니다.", userId, lessonId, img);
+
         try {
             // 1. 파일 존재 여부 검증
             if (img == null || img.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("파일이 없습니다.");
+                        .body(null);
             }
 
             // 2. 파일 크기 검증
             if (img.getSize() > MAX_FILE_SIZE) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("파일 크기는 10MB를 초과할 수 없습니다.");
+                        .body(null);
             }
 
-            // 3. 파일 확장자 검증
+
             String originalFilename = img.getOriginalFilename();
             String fileExtension = getFileExtension(originalFilename);
 
+            // 3. 파일 확장자 검증
             if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("허용되지 않는 파일 형식입니다. jpg, jpeg, png 파일만 업로드 가능합니다.");
+                        // .body("허용되지 않는 파일 형식입니다. jpg, jpeg, png 파일만 업로드 가능합니다.");
+                        .body(null);
             }
 
             // 4. 파일 내용 검증
@@ -116,26 +130,72 @@ public class AvatarController {
                 BufferedImage bufferedImage = ImageIO.read(img.getInputStream());
                 if (bufferedImage == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("유효하지 않은 이미지 파일입니다.");
+                            //.body("유효하지 않은 이미지 파일입니다.");
+                            .body(null);
                 }
             } catch (IOException e) {
                 log.error("이미지 파일 검증 중 오류 발생", e);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("이미지 파일 검증 중 오류가 발생했습니다.");
+                        .body(null);
             }
 
             // 5. 서비스 호출
-            avatarService.sendImgToAiServer(img);
+            AvatarResponseDto avatarResponseDto = avatarService.sendImgToAiServer(userId, lessonId, img);
 
+            log.info("avatarResponseDto : {}", avatarResponseDto);
+
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
             return ResponseEntity.status(HttpStatus.OK)
-                    .body("Img 파일 " + originalFilename + "이 성공적으로 업로드되었습니다.");
+                    //.body("Img 파일 " + originalFilename + "이 성공적으로 업로드되었습니다.");
+                    .body(avatarResponseDto);
 
         } catch (Exception e) {
             log.error("파일 업로드 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("파일 처리 중 오류가 발생했습니다.");
+                    //.body("파일 처리 중 오류가 발생했습니다.");
+                    .body(null);
         }
     }
+
+
+    /**
+     * 아마존 테스트 AI서버로 전송
+     */
+    @PostMapping(value = "/aws/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AvatarResponseDto> awsSendImgToAiServer(
+            @RequestHeader(name = "userId") Long userId
+            , @RequestParam(name = "lessonId") Long lessonId
+            , @RequestParam(name = "img") MultipartFile img) {
+
+        log.info("userId: {}가, lessonId: {}로, img: {}를 요청했습니다.", userId, lessonId, img);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(avatarService.saveAwsAvatar(userId, lessonId, img));
+
+    }
+
+
+    /**
+     * 다른 유저Id로 아바타 이미지, 애니메이션 받기
+     */
+    @Operation(summary = "다른 유저의 아바타 다운")
+    @GetMapping("/participant/{lessonId}/{userId}")
+    public ResponseEntity<AvatarResponseDto> getAvatarForParticipant(
+            @PathVariable("lessonId") Long lessonId
+            , @PathVariable("userId") Long userId) {
+
+        log.info("lessonId : {}의 다른 유저 userId: {}의 아바타를 요청합니다.", lessonId, userId);
+
+        AvatarResponseDto avatarResponseDto = avatarService.findByUserId(lessonId, userId);
+
+        log.info("avatarResponseDto : {}", avatarResponseDto);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(avatarResponseDto);
+    }
+
 
     /**
      * 파일 확장자 추출

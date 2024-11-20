@@ -1,14 +1,11 @@
 package com.todock.marimo.domain.lesson.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @Getter
-@ToString
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_participant")
@@ -18,6 +15,9 @@ public class Participant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long participantId; //  참가자 id
 
+    @Column(name = "userId")
+    private Long userId;
+
     @Column(name = "participant_name") // 참가자 이름
     private String participantName;
 
@@ -25,4 +25,10 @@ public class Participant {
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
+    @Override
+    public String toString() {
+        return "Participant{" +
+                "participantName='" + participantName + '\'' +
+                '}';
+    }
 }
