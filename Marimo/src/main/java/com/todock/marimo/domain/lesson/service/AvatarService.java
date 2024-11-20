@@ -241,10 +241,10 @@ public class AvatarService {
         return null;
     }
 
+
     /**
      * 아마존 아바타 저장 메서드
      */
-
     @Transactional
     public AvatarResponseDto saveAwsAvatar(Long userId, Long lessonId, MultipartFile img) {
         log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);

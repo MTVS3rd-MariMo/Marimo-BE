@@ -159,6 +159,7 @@ public class AvatarController {
         }
     }
 
+
     /**
      * 아마존 테스트 AI서버로 전송
      */

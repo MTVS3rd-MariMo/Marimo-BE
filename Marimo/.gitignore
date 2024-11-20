@@ -38,6 +38,7 @@ out/
 
 ### logging ###
 /log/
+/backup
 
 ### data ###
 /data/
