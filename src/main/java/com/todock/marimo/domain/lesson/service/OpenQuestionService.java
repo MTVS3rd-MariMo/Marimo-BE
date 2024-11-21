@@ -38,4 +38,5 @@ public class OpenQuestionService {
         );
         openQuestionRepository.save(openQuestion);
     }
+
 }

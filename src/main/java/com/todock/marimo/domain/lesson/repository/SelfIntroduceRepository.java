@@ -1,6 +1,5 @@
 package com.todock.marimo.domain.lesson.repository;
 
-import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
 import com.todock.marimo.domain.lesson.entity.hotsitting.SelfIntroduce;
 import org.springframework.data.jpa.repository.JpaRepository;
 
