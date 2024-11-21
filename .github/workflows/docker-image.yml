@@ -21,7 +21,8 @@ jobs:
     - name: Set YML
       run: |
         mkdir -p src/main/resources
-        echo "${{ secrets.APPLICATION_LOCAL_YML }}"  | base64 --decode > src/main/resources/application-local.yml
+        echo "${{ secrets.APPLICATION_DEV_YML }}"  | base64 --decode > src/main/resources/application-dev.yml
+        cat src/main/resources/application-local.yml
         echo "AI_ODD_AVATAR_SERVER_URL=${{ secrets.AI_ODD_AVATAR_SERVER_URL }}" >> $GITHUB_ENV
         echo "AI_EVEN_AVATAR_SERVER_URL=${{ secrets.AI_EVEN_AVATAR_SERVER_URL }}" >> $GITHUB_ENV
         echo "AI_BACKGROUND_SERVER_URL=${{ secrets.AI_BACKGROUND_SERVER_URL }}" >> $GITHUB_ENV
