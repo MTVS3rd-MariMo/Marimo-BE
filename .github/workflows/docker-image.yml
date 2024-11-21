@@ -26,7 +26,7 @@ jobs:
         echo "AI_EVEN_AVATAR_SERVER_URL=${{ secrets.AI_EVEN_AVATAR_SERVER_URL }}" >> $GITHUB_ENV
         echo "AI_BACKGROUND_SERVER_URL=${{ secrets.AI_BACKGROUND_SERVER_URL }}" >> $GITHUB_ENV
         echo "AI_HOT_SITTING_SERVER_URL=${{ secrets.AI_HOT_SITTING_SERVER_URL }}" >> $GITHUB_ENV
-        echo "AI_LESSON_MATERIAL_URL=${{ secrets.AI_LESSON_MATERIAL_SERVER_URL }}" >> $GITHUB_ENV
+        echo "AI_LESSON_MATERIAL_SERVER_URL=${{ secrets.AI_LESSON_MATERIAL_SERVER_URL }}" >> $GITHUB_ENV
         echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> $GITHUB_ENV
         echo "EXTERNAL_PORT=${{ secrets.EXTERNAL_PORT }}" >> $GITHUB_ENV
         find src
