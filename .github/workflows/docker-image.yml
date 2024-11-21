@@ -29,6 +29,11 @@ jobs:
         echo "AI_LESSON_MATERIAL_SERVER_URL=${{ secrets.AI_LESSON_MATERIAL_SERVER_URL }}" >> $GITHUB_ENV
         echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> $GITHUB_ENV
         echo "EXTERNAL_PORT=${{ secrets.EXTERNAL_PORT }}" >> $GITHUB_ENV
+
+        # $GITHUB_ENV 값 출력
+        echo "환경 변수 확인:"
+        cat $GITHUB_ENV
+        
         find src
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
