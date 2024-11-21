@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 @Service
 public class LessonMaterialService {
 
-    @Value("${external.api.lesson-material-server-url}")
+   @Value("${external.api.lesson-material-server-url}")
     private String AIServerURL;
 
     private final RestTemplate restTemplate;
