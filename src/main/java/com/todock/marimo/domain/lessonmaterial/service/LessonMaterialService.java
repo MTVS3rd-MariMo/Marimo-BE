@@ -51,7 +51,6 @@ public class LessonMaterialService {
     private final UserRepository userRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
 
-
     @Autowired
     public LessonMaterialService(
             LessonMaterialRepository lessonMaterialRepository,
@@ -136,8 +135,9 @@ public class LessonMaterialService {
             lessonMaterial.getQuizList().clear();
 
             for (QuizDto quizDto : quizzes) {
+
                 if (!isValidQuiz(quizDto)) {
-                    throw new IllegalArgumentException("유효하지 않은 퀴즈 정보가 포함되어 있습니다.");
+                    throw new IllegalArgumentException("퀴즈 정보가 없습니다.");
                 }
 
                 Quiz quiz = new Quiz(
@@ -151,8 +151,6 @@ public class LessonMaterialService {
                 );
                 lessonMaterial.getQuizList().add(quiz);
             }
-        } else {
-            log.info("퀴즈가 존재하지 않습니다.");
         }
 
         List<OpenQuestionRequestDto> openQuestions = lessonMaterialInfo.getOpenQuestionList();
@@ -343,7 +341,7 @@ public class LessonMaterialService {
 
 
     /**
-     * 퀴즈 수정 시 검증
+     * 퀴즈 수정 시 검증 - 내용이 빠져있으면 false
      */
     private boolean isValidQuiz(QuizDto quizDto) {
         return quizDto != null &&
