@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,6 +80,7 @@ public class LessonMaterialController {
     })
     @PostMapping("/upload-pdf")
     public ResponseEntity<LessonMaterialResponseDto> sendPdfToAiServer(
+            @Valid
             @RequestHeader("userId") Long userId,
             @RequestPart("pdf") MultipartFile pdfFile,
             @RequestParam("bookTitle") String bookTitle,
@@ -126,6 +128,7 @@ public class LessonMaterialController {
     })
     @PutMapping
     public ResponseEntity<String> updateLessonMaterial(
+            @Valid
             @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto) {
 
         log.info("수업 자료 생성 후 수정한 열린 질문, 퀴즈 2개가 있는 DTO : {} ", lessonMaterialRequestDto); // JSON 데이터 로깅

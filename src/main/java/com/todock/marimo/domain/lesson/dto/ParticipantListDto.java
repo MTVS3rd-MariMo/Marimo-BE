@@ -1,5 +1,6 @@
 package com.todock.marimo.domain.lesson.dto;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 import java.util.List;
@@ -11,5 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ParticipantListDto {
 
+    @NotEmpty(message = "참가자가 없습니다.")
     private List<Long> userIds;
 }

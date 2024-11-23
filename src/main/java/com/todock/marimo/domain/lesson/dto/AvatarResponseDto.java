@@ -1,6 +1,9 @@
 package com.todock.marimo.domain.lesson.dto;
 
 import com.todock.marimo.domain.lesson.entity.avatar.Animation;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -10,17 +13,16 @@ import java.util.List;
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class AvatarResponseDto {
 
-    private Long userId;
+    @NotNull(message = "유저 ID는 필수 입력값입니다.")
+    private Long userId; // 유저 ID
 
-    private String avatarImg;
+    @NotBlank(message = "아바타 이미지는 필수 입력값입니다.")
+    private String avatarImg; // 아바타 이미지 URL
 
-    private List<Animation> animations = new ArrayList<>();
+    @NotEmpty(message = "애니메이션 리스트는 최소 1개 이상이어야 합니다.")
+    private List<Animation> animations = new ArrayList<>(); // 애니메이션 리스트
 
-    public AvatarResponseDto(Long userId, String avatarImg, List<Animation> animations) {
-        this.userId = userId;
-        this.avatarImg = avatarImg;
-        this.animations = animations;
-    }
 }
