@@ -2,11 +2,10 @@ package com.todock.marimo.domain.user.service;
 
 import com.todock.marimo.domain.user.dto.LoginUserRequestDto;
 import com.todock.marimo.domain.user.dto.LoginUserResponseDto;
-import com.todock.marimo.domain.user.dto.RegistUserRequestDto;
+import com.todock.marimo.domain.user.dto.SignUpUserRequestDto;
 import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -25,7 +24,7 @@ public class UserService {
      * 유저 회원가입
      */
     @Transactional
-    public void signUp(RegistUserRequestDto userInfo) {
+    public void signUp(SignUpUserRequestDto userInfo) {
 
         // 입력값 검증
         if (userInfo == null) {

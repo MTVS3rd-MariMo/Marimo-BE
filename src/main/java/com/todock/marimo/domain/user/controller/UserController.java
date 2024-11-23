@@ -2,10 +2,11 @@ package com.todock.marimo.domain.user.controller;
 
 import com.todock.marimo.domain.user.dto.LoginUserRequestDto;
 import com.todock.marimo.domain.user.dto.LoginUserResponseDto;
-import com.todock.marimo.domain.user.dto.RegistUserRequestDto;
+import com.todock.marimo.domain.user.dto.SignUpUserRequestDto;
 import com.todock.marimo.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,11 +31,11 @@ public class UserController {
      */
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody RegistUserRequestDto registUserRequestDto) {
+    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpUserRequestDto signUpUserRequestDto) {
 
-        log.info("회원가입 하는 유저의 정보 : {}", registUserRequestDto);
+        log.info("회원가입 하는 유저의 정보 : {}", signUpUserRequestDto);
 
-        userService.signUp(registUserRequestDto);
+        userService.signUp(signUpUserRequestDto);
 
         return ResponseEntity.ok().build();
     }
@@ -44,12 +45,11 @@ public class UserController {
      */
     @Operation(summary = "로그인")
     @PostMapping("/login")
-    public ResponseEntity<LoginUserResponseDto> login(@RequestBody LoginUserRequestDto loginUserRequestDto) { // @RequestBody 추가
+    public ResponseEntity<LoginUserResponseDto> login(@Valid @RequestBody LoginUserRequestDto loginUserRequestDto) { // @RequestBody 추가
 
         log.info("로그인 하려는 유저의 정보로 로그인 Dto: {}", loginUserRequestDto);
 
         LoginUserResponseDto loginDto = userService.login(loginUserRequestDto); // 로그인 후 userId 반환
-
 
         return ResponseEntity.ok(loginDto);
     }

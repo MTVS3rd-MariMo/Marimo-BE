@@ -73,7 +73,6 @@ public class LessonMaterialService {
             MultipartFile pdf, Long userId, String bookTitle, String author) {
 
         validateUserRole(userId); // 유저 검증
-
         if (pdf == null || pdf.isEmpty()) {
             throw new IllegalArgumentException("업로드할 PDF 파일이 제공되지 않았습니다.");
         }
@@ -84,7 +83,6 @@ public class LessonMaterialService {
         }
 
         try {
-
             // 1. AI 서버 URI 설정
             log.info("AI 서버 URI 설정: {}", AIServerURL);
 
@@ -101,16 +99,13 @@ public class LessonMaterialService {
 
             // 5. AI 서버로 요청 전송
             ResponseEntity<String> response = restTemplate.postForEntity(AIServerURL, request, String.class);
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException("AI 서버와의 통신 중 오류가 발생했습니다. 응답 코드: " + response.getStatusCode());
-            }
 
             // 6. AI 서버에서 받은 JSON 반환
             return parseLessonMaterialJson(userId, response.getBody(), bookTitle, author);
 
         } catch (Exception e) {
-            log.error("파일 전송 중 오류 발생: {}", e.getMessage(), e);
-            throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
+            log.error("AI서버에 pdf 전송 중 오류 발생: {}", e.getMessage(), e);
+            throw new RuntimeException("AI서버에 pdf 전송 중 오류 발생: " + e.getMessage());
         }
     }
 
