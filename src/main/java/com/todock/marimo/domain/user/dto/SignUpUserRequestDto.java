@@ -39,6 +39,4 @@ public class SignUpUserRequestDto {
     @Min(value = 1, message = "학생 번호는 1 이상의 값이어야 합니다.")
     private Integer studentNumber;
 
-    private
-
 }
