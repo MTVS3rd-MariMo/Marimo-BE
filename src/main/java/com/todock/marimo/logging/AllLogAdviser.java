@@ -19,10 +19,10 @@ public class AllLogAdviser {
      * - 실행 시간: 시작 및 종료 시간을 기록하여 성능을 분석합니다.
      */
 
-    @Around("Pointcuts.AllLogPointcut()")
+
+    @Around("Pointcuts.ControllerLogPointcut() && !Pointcuts.aiServerPointCut()") // 컨트롤러 중 AI 메서드 제외
     public Object logMethodDetails(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        Long startTime = System.currentTimeMillis(); // 메서드 실행 시작 시간 기록
         String methodName = null;
 
         try {
@@ -32,19 +32,49 @@ public class AllLogAdviser {
             methodName = method.getDeclaringClass().getSimpleName() + " - " + method.getName();
 
             // 메서드 이름 로깅
-            log.info("\uD83D\uDD25 호출된 메서드: {}", methodName);
+            log.info("🎯 호출된 컨트롤러 메서드: {}", methodName);
+            
+            // 메서드 실행
             Object result = joinPoint.proceed();
 
-            // 실행 시간
-            Long endTime = System.currentTimeMillis();
-            log.info("\uD83D\uDD51 실행 시간 : {} ms", endTime - startTime);
-
             return result; // 실행 결과 반환
-            
+
         } catch (Throwable e) {
 
-            log.error("\uD83D\uDEA8 메서드 {} 실행 중 에러: {}", methodName, e.getMessage(), e); // 예외 발생 시 에러 로그 기록
+            log.error("❌ 컨트롤러 메서드 실행 중 에러: {} | 에러 메시지: {}", methodName, e.getMessage(), e);
             throw e; // 예외 재발생
         }
     }
+
+
+
+    /**
+     * Around Advice: AI 서버와 통신하는 메서드의 실행 시간 로깅.
+     */
+    @Around("Pointcuts.aiServerPointCut()")
+    public Object logAIServerMethodDetails(ProceedingJoinPoint joinPoint) throws Throwable {
+        Long startTime = System.currentTimeMillis(); // 메서드 실행 시작 시간 기록
+        String methodName = null;
+
+        try {
+            // 메서드 이름 및 클래스명 가져오기
+            MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+            Method method = methodSignature.getMethod();
+            methodName = method.getDeclaringClass().getSimpleName() + " - " + method.getName();
+
+            // 메서드 실행
+            Object result = joinPoint.proceed();
+
+            // 실행 시간 기록
+            Long endTime = System.currentTimeMillis();
+            log.info("✅ AI 서버 통신 종료 - 메서드: {} | 실행 시간: {} ms", methodName, endTime - startTime);
+
+            return result; // 메서드 실행 결과 반환
+
+        } catch (Throwable e) {
+            log.error("❌ AI 서버 통신 중 에러 - 메서드: {} | 에러: {}", methodName, e.getMessage(), e);
+            throw e;
+        }
+    }
+
 }

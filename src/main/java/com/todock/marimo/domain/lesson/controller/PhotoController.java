@@ -41,11 +41,11 @@ public class PhotoController {
     public ResponseEntity<String> getBackGround(
             @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
-        log.info("배경사진 제작 요청 할 lessonMaterialId: {}", lessonMaterialId);
+        log.info("배경사진 제작 요청 하는 lessonMaterialId: {}", lessonMaterialId);
 
-        photoService.createBackground(lessonMaterialId);
+        String result = photoService.createBackground(lessonMaterialId);
+        return ResponseEntity.ok(result);
 
-        return ResponseEntity.ok(photoService.createBackground(lessonMaterialId));
     }
 
 

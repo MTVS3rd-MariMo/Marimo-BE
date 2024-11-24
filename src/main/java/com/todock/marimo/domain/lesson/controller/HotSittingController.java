@@ -46,7 +46,7 @@ public class HotSittingController {
 
         log.info("자기소개 저장 Dto : {} ", selfIntroduceDto);
 
-        hotSittingService.saveAIRequest(selfIntroduceDto);
+        hotSittingService.saveSelfIntroduce(selfIntroduceDto);
 
         return ResponseEntity.ok().body("저장에 성공했습니다.");
     }
