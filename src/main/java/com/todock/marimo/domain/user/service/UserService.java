@@ -25,30 +25,8 @@ public class UserService {
      */
     @Transactional
     public void signUp(SignUpUserRequestDto userInfo) {
-
-        // 입력값 검증
-        if (userInfo == null) {
-            throw new IllegalArgumentException("회원가입 정보가 제공되지 않았습니다.");
-        }
-        if (!StringUtils.hasText(userInfo.getName())) {
-            throw new IllegalArgumentException("이름(아이디)은 필수 입력값입니다.");
-        }
-        if (!StringUtils.hasText(userInfo.getPassword())) {
-            throw new IllegalArgumentException("비밀번호는 필수 입력값입니다.");
-        }
-        if (userInfo.getRole() == null) {
-            throw new IllegalArgumentException("역할(Role)은 필수 입력값입니다.");
-        }
-        if (!StringUtils.hasText(userInfo.getSchool())) {
-            throw new IllegalArgumentException("학교 정보는 필수 입력값입니다.");
-        }
-        if (userInfo.getGrade() == null || userInfo.getGrade() < 1) {
-            throw new IllegalArgumentException("학년은 1 이상의 값이어야 합니다.");
-        }
-        if (userInfo.getClassRoom() == null || userInfo.getClassRoom() < 1) {
-            throw new IllegalArgumentException("반은 1 이상의 값이어야 합니다.");
-        }
-        // 학생 번호는 학생만 입력해야 함
+        
+        // 선생님이 학생번호 입력시 에러
         if (userInfo.getRole().toString().equalsIgnoreCase("STUDENT") &&
                 (userInfo.getStudentNumber() == null || userInfo.getStudentNumber() < 1)) {
             throw new IllegalArgumentException("학생 번호는 1 이상의 값이어야 합니다.");

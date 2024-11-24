@@ -13,7 +13,6 @@ import lombok.*;
 @Setter
 @ToString
 @NoArgsConstructor
-@AllArgsConstructor
 public class SignUpUserRequestDto {
 
     @NotBlank(message = "이름(아이디)은 필수 입력값입니다.")
@@ -38,5 +37,28 @@ public class SignUpUserRequestDto {
 
     @Min(value = 1, message = "학생 번호는 1 이상의 값이어야 합니다.")
     private Integer studentNumber;
+
+    public SignUpUserRequestDto(
+            String name, String password, Role role, String school,
+            Integer grade, Integer classRoom, Integer studentNumber) {
+
+        validateStudentNumber(role, studentNumber);
+
+        this.name = name;
+        this.password = password;
+        this.role = role;
+        this.school = school;
+        this.grade = grade;
+        this.classRoom = classRoom;
+        this.studentNumber = studentNumber;
+    }
+
+    // 선생님일때 학생번호 검증
+    private void validateStudentNumber(Role role, Integer studentNumber) {
+
+        if (role == Role.TEACHER && studentNumber != null) {
+            throw new IllegalArgumentException("선생님은 학생번호를 가질 수 없습니다.");
+        }
+    }
 
 }
