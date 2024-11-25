@@ -14,7 +14,7 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="awsmarimo@awseb-e-sptpqp83jm-stack-awsebrdsdatabase-czz69hpzyrjz.cpiycgkkk147.ap-northeast-2.rds.amazonaws.com" uuid="54819b51-9fb2-41cb-8008-ca90294ffa98">
+    <data-source source="LOCAL" name="awsmarimo@awseb-e-sptpqp83jm-stack-awsebrdsdatabase-czz69hpzyrjz.cpiycgkkk147.ap-northeast-2.rds.amazonaws.com" uuid="b9c1d93e-19e6-4307-821d-40b297eba94d">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
