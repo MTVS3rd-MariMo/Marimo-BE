@@ -22,6 +22,9 @@ public class OpenQuestionAnswer {
     @JoinColumn(name = "open_question_id", nullable = false)
     private OpenQuestion openQuestion;
 
+    @Column(name = "lesson_id", nullable = false)
+    private Long lessonId;
+
     @Column(name = "user_id", nullable = false) // 작성한 유저 id
     private Long userId;
 
@@ -29,8 +32,8 @@ public class OpenQuestionAnswer {
     private String answer;
 
     // 열린 질문 답변 생성자
-    public OpenQuestionAnswer(OpenQuestion openQuestion,Long userId, String answer) {
-
+    public OpenQuestionAnswer(OpenQuestion openQuestion, Long userId, Long lessonId, String answer) {
+        this.lessonId = lessonId;
         this.openQuestion = openQuestion;
         this.userId = userId;
         this.answer = answer;

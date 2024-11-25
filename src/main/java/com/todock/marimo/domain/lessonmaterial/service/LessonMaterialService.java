@@ -92,7 +92,12 @@ public class LessonMaterialService {
 
             // 3. PDF 파일을 멀티파트 형식으로 Wrapping
             MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>(); // 멀티파트타입 전달은 MultiValueMap 사용
-            bodyMap.add("pdf", new ByteArrayResource(pdf.getBytes()));
+            bodyMap.add("pdf", new ByteArrayResource(pdf.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return pdf.getOriginalFilename(); // 파일 이름 설정
+                }
+            });
 
             // 4. HttpEntity 생성
             HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(bodyMap, headers);
@@ -104,6 +109,7 @@ public class LessonMaterialService {
             return parseLessonMaterialJson(userId, response.getBody(), bookTitle, author);
 
         } catch (Exception e) {
+
             log.error("AI서버에 pdf 전송 중 오류 발생: {}", e.getMessage(), e);
             throw new RuntimeException("AI서버에 pdf 전송 중 오류 발생: " + e.getMessage());
         }
@@ -116,24 +122,16 @@ public class LessonMaterialService {
     @Transactional
     public void updateLessonMaterial(LessonMaterialRequestDto lessonMaterialInfo) {
 
-        if (lessonMaterialInfo == null || lessonMaterialInfo.getLessonMaterialId() == null) {
-            throw new IllegalArgumentException("수정할 수업 자료 정보가 제공되지 않았습니다.");
-        }
-
         LessonMaterial lessonMaterial = lessonMaterialRepository
                 .findById(lessonMaterialInfo.getLessonMaterialId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수업 자료입니다: " + lessonMaterialInfo.getLessonMaterialId()));
 
         List<QuizDto> quizzes = lessonMaterialInfo.getQuizList();
 
-        if (quizzes != null && !quizzes.isEmpty()) {
+        if (quizzes != null && !quizzes.isEmpty()) { // 만약
             lessonMaterial.getQuizList().clear();
 
             for (QuizDto quizDto : quizzes) {
-
-                if (!isValidQuiz(quizDto)) {
-                    throw new IllegalArgumentException("퀴즈 정보가 없습니다.");
-                }
 
                 Quiz quiz = new Quiz(
                         lessonMaterial,
@@ -172,22 +170,7 @@ public class LessonMaterialService {
 
 
     /**
-     * 유저 id로 유저의 수업 자료 전체 조회
-     */
-    public List<LessonMaterialNameResponseDto> getLessonMaterialByUserId(Long userId) {
-
-        validateUserRole(userId); // 선생님 검증
-
-        List<LessonMaterialNameResponseDto> lessonMaterialNameList = lessonMaterialRepository.findByUserId(userId)
-                .stream()
-                .map(dto -> new LessonMaterialNameResponseDto(dto.getLessonMaterialId(), dto.getBookTitle()))
-                .collect(Collectors.toList());
-        return lessonMaterialNameList.isEmpty() ? Collections.emptyList() : lessonMaterialNameList;
-    }
-
-
-    /**
-     * lessonMaterialId로 수업자료 수정 상세 조회
+     * lessonMaterialId로 수업자료 상세 조회 - 수정
      */
     public DetailLessonMaterialDto findById(Long lessonMaterialId) {
 
@@ -224,15 +207,38 @@ public class LessonMaterialService {
 
 
     /**
+     * 유저 id로 유저의 수업 자료 전체 조회
+     */
+    public List<LessonMaterialNameResponseDto> getLessonMaterialByUserId(Long userId) {
+
+        validateUserRole(userId); // 선생님 검증
+
+        List<LessonMaterialNameResponseDto> lessonMaterialNameList = lessonMaterialRepository.findByUserId(userId)
+                .stream()
+                .map(dto ->
+                        new LessonMaterialNameResponseDto(
+                                dto.getLessonMaterialId(),
+                                dto.getBookTitle()
+                        )
+                )
+                .collect(Collectors.toList());
+
+        // 비어있어도 반환
+        return lessonMaterialNameList.isEmpty() ? Collections.emptyList() : lessonMaterialNameList;
+    }
+
+
+    /**
      * 수업 자료 id로 수업 자료 삭제
      */
     @Transactional
     public void deleteById(Long lessonMaterialId) {
+
         LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
-                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업자료를 찾을 수 없습니다."));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("lessonMaterialId가 " + lessonMaterialId + "인 수업자료를 찾을 수 없습니다."));
 
         lessonMaterial.setUserId(null); // 유저 Id를 없애서 매칭 안되도록 함
-        log.info("lessonMaterial.userId : {}", lessonMaterial.getUserId());
     }
 
 
@@ -273,7 +279,7 @@ public class LessonMaterialService {
             lessonMaterial.setLessonRoleList(roles);
             lessonMaterialRepository.save(lessonMaterial); // LessonMaterial 저장 (열린 질문, 퀴즈는 저장하지 않음)
 
-            log.info("생성된 lessonMaterialId() : {}", lessonMaterial.getLessonMaterialId());
+            log.info("생성된 lessonMaterialId : {}", lessonMaterial.getLessonMaterialId());
 
             // 열린 질문을 OpenQuestionDto로 변환하여 클라이언트에 보낼 준비
             List<OpenQuestionResponseDto> openQuestionDtos = new ArrayList<>();
@@ -332,19 +338,6 @@ public class LessonMaterialService {
         if (user.getRole() != Role.TEACHER) {
             throw new IllegalArgumentException("선생님만 수업 자료를 만들 수 있습니다.");
         }
-    }
-
-
-    /**
-     * 퀴즈 수정 시 검증 - 내용이 빠져있으면 false
-     */
-    private boolean isValidQuiz(QuizDto quizDto) {
-        return quizDto != null &&
-                quizDto.getQuestion() != null && !quizDto.getQuestion().trim().isEmpty() &&
-                quizDto.getChoices1() != null && !quizDto.getChoices1().trim().isEmpty() &&
-                quizDto.getChoices2() != null && !quizDto.getChoices2().trim().isEmpty() &&
-                quizDto.getChoices3() != null && !quizDto.getChoices3().trim().isEmpty() &&
-                quizDto.getChoices4() != null && !quizDto.getChoices4().trim().isEmpty();
     }
 
 }

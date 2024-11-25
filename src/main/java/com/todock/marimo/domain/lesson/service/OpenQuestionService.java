@@ -33,6 +33,7 @@ public class OpenQuestionService {
                 new OpenQuestionAnswer(
                         openQuestion,
                         userId,
+                        answerDto.getLessonId(),
                         answerDto.getAnswer()
                 )
         );

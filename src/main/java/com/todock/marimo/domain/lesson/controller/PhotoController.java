@@ -38,12 +38,13 @@ public class PhotoController {
      */
     @Operation(summary = "배경사진 제작 요청")
     @PostMapping("/background/{lessonMaterialId}")
-    public ResponseEntity<String> getBackGround(
+    public ResponseEntity<String> createBackGround(
             @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
-        log.info("배경사진 제작 요청 하는 lessonMaterialId: {}", lessonMaterialId);
+        log.info("lessonMaterialId: {}로 수업자료 저장/수정 후 배경사진 제작 요청", lessonMaterialId);
 
         String result = photoService.createBackground(lessonMaterialId);
+
         return ResponseEntity.ok(result);
 
     }
@@ -58,23 +59,9 @@ public class PhotoController {
             @PathVariable("lessonMaterialId") Long lessonMaterialId,
             @RequestParam("img") MultipartFile img) {
 
-        log.info("배경 사진을 가져오기 위한 현재 lessonMaterialId: {}", lessonMaterialId);
+        log.info("AI가 lessonMaterialId: {}의 수업자료로 배경사진 저장", lessonMaterialId);
 
         return ResponseEntity.ok().body(photoService.saveBackground(lessonMaterialId, img));
-    }
-
-
-    /**
-     * 배경사진 호출 - 수업 자료 호출시점에 같이 반환 (삭제 필요)
-     */
-    @Operation(summary = "배경사진 호출")
-    @GetMapping("/background/{lessonId}")
-    public ResponseEntity<String> getPhotoBackground(
-            @PathVariable("lessonId") Long lessonId) {
-
-        log.info("배경 사진을 가져오기 위한 현재 lessonId: {}", lessonId);
-
-        return ResponseEntity.ok().body(photoService.getPhotoBackgroundUrl(lessonId));
     }
 
 
@@ -84,8 +71,8 @@ public class PhotoController {
     @Operation(summary = "단체사진 저장")
     @PostMapping("/{lessonId}")
     public ResponseEntity<String> saveGroupPhoto(
-            @PathVariable("lessonId") Long lessonId
-            , @RequestParam("img") MultipartFile photo) {
+            @PathVariable("lessonId") Long lessonId,
+            @RequestParam("img") MultipartFile photo) {
 
         log.info("단체사진 저장할 수업의 lessonId : {} 와 img: {}", lessonId, photo);
 
@@ -128,9 +115,9 @@ public class PhotoController {
             }
 
             // 5. 서비스 호출
-            photoService.savePhoto(lessonId, photo);
+            String url = photoService.savePhoto(lessonId, photo);
 
-            return ResponseEntity.ok("사진이 저장되었습니다.");
+            return ResponseEntity.ok("사진이 저장되었습니다. : " + url);
 
         } catch (Exception e) {
             log.error("파일 업로드 중 오류 발생", e);

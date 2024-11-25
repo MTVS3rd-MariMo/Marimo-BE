@@ -37,14 +37,14 @@ public class PhotoService {
     @Value("${external.port.external-port}")
     private String serverPort;
 
-    private final AmazonS3 amazonS3;
-
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucketName;
+
 
     private final LessonMaterialRepository lessonMaterialRepository;
     private final LessonRepository lessonRepository;
     private final RestTemplate restTemplate;
+    private final AmazonS3 amazonS3;
 
     private static final String PHOTO_DIR = "data/photo"; // zip 파일 저장 경로
     private static final String BACKGROUND_DIR = "data/background"; // 단체사진 배경 저장 경로
@@ -80,7 +80,7 @@ public class PhotoService {
 
         LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
                 .orElseThrow(() ->
-                        new EntityNotFoundException("lessonMaterialId로 수업을 찾을 수 없습니다. lessonMaterial"));
+                        new EntityNotFoundException("lessonMaterialId로 수업을 찾을 수 없습니다. : " + lessonMaterialId));
 
         // 단체사진 예외처리
         if (lessonMaterial.getBackgroundUrl() != null) {
@@ -172,23 +172,6 @@ public class PhotoService {
         } catch (IOException e) {
             throw new RuntimeException("S3에 배경 이미지를 업로드하는 중 오류가 발생했습니다.", e);
         }
-    }
-
-
-    /**
-     * 배경사진 호출
-     */
-    public String getPhotoBackgroundUrl(Long lessonId) {
-
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("lessonId로 수업을 조회할 수 없습니다."));
-
-        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId())
-                .orElseThrow(() ->
-                        new EntityNotFoundException("lessonMaterialId로 수업자료를 조회할 수 없습니다."));
-
-        return lessonMaterial.getBackgroundUrl();
     }
 
 

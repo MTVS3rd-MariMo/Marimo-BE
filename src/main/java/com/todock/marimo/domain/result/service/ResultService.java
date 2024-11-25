@@ -123,7 +123,10 @@ public class ResultService {
                 .map(question -> new OpenQuestionResultDto(
                         question.getQuestion(),
                         question.getOpenQuestionAnswerList().stream()
+                                // lessonId로 필터링
+                                .filter(answer -> answer.getLessonId().equals(lessonId))
                                 .map(answer -> {
+                                    // 유저 정보를 가져와 DTO 생성
                                     User user = userRepository.findById(answer.getUserId())
                                             .orElseThrow(() -> new IllegalArgumentException("userId로 유저를 찾을 수 없습니다."));
                                     return new ResultAnswerDto(
@@ -132,6 +135,7 @@ public class ResultService {
                                 })
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
+
         lessonResultDto.setOpenQuestions(openQuestions); // 열린 질문 리스트 설정
 
         // 핫시팅 설정

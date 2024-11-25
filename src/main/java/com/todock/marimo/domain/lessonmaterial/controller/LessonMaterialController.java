@@ -80,22 +80,19 @@ public class LessonMaterialController {
     })
     @PostMapping("/upload-pdf")
     public ResponseEntity<LessonMaterialResponseDto> sendPdfToAiServer(
-            @Valid
             @RequestHeader("userId") Long userId,
             @RequestPart("pdf") MultipartFile pdfFile,
             @RequestParam("bookTitle") String bookTitle,
             @RequestParam("author") String author) {
 
-        log.info("수업 자료 생성 요청 보내는 유저의 userId : {}와 pdf : {}", userId, pdfFile);
-
         if (pdfFile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } // 파일 용량 null 확인
 
+        log.info("userId = {}, bookTitle = {}, author = {}", userId, bookTitle, author);
+
         LessonMaterialResponseDto lessonMaterialResponseDto
                 = lessonMaterialService.sendPdfToAiServer(pdfFile, userId, bookTitle, author);
-
-        log.info("수정한 값: {}", lessonMaterialResponseDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(lessonMaterialResponseDto);
     }
@@ -131,34 +128,22 @@ public class LessonMaterialController {
             @Valid
             @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto) {
 
-        log.info("수업 자료 생성 후 수정한 열린 질문, 퀴즈 2개가 있는 DTO : {} ", lessonMaterialRequestDto); // JSON 데이터 로깅
-
         try {
-            log.info("수업 자료 ID: {}", lessonMaterialRequestDto.getLessonMaterialId());
-
-            // 열린 질문 리스트 확인 및 출력
-            List<OpenQuestionRequestDto> openQuestions = lessonMaterialRequestDto.getOpenQuestionList();
-            log.info("openQuestions: {}", openQuestions.toString());
-
-
-            // 퀴즈 리스트 확인 및 출력
-            List<QuizDto> quizList = lessonMaterialRequestDto.getQuizList();
-            log.info("quizList: {}", quizList.toString());
+            log.info("수업 자료 생성 후 수정한 열린 질문, 퀴즈 2개가 있는 DTO : {} ", lessonMaterialRequestDto);
 
             // 서비스 호출
             lessonMaterialService.updateLessonMaterial(lessonMaterialRequestDto);
-            log.info("저장 완료");
 
             return ResponseEntity.status(HttpStatus.CREATED).body("수업 자료를 생성했습니다.");
         } catch (Exception e) {
-            log.error("DTO 매핑 중 오류 발생: {}", e.getMessage());
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("수업 자료 생성 중 오류가 발생했습니다.");
         }
     }
 
 
     /**
-     * lessonMaterialId로 수업 자료 내용 상세 조회 선택한 퀴즈 2개, 열린 질문 2개
+     * lessonMaterialId로 수업자료 상세 조회 - 수정
      */
     @Operation(summary = "수업 자료 상세 조회", description = "수업 자료 ID로 상세 내용을 조회합니다.")
     @ApiResponses({
@@ -194,10 +179,10 @@ public class LessonMaterialController {
             @RequestHeader("userId") Long userId) {
 
         log.info("유저의 userId : {}로 가지고 있는 수업 자료 리스트 조회", userId);
-
+        // Dto List 생성
         List<LessonMaterialNameResponseDto> lessonMaterialNameResponseDtos
                 = lessonMaterialService.getLessonMaterialByUserId(userId);
-
+        // Dto List 전달하기 위한 Dto 생성
         LessonMaterialNamesRequestDto responseDto = new LessonMaterialNamesRequestDto(lessonMaterialNameResponseDtos);
 
         return ResponseEntity.ok(responseDto);
@@ -220,7 +205,7 @@ public class LessonMaterialController {
 
         lessonMaterialService.deleteById(lessonMaterialId);
 
-        return ResponseEntity.ok("수업자료를 삭제했습니다.");
+        return ResponseEntity.ok("lessonMaterialId : " + lessonMaterialId + "인 수업자료를 삭제했습니다.");
 
     }
 
