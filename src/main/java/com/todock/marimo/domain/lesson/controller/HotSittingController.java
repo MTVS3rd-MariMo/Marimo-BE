@@ -28,10 +28,11 @@ public class HotSittingController {
     private final AmazonS3 amazonS3;
 
     @Autowired
-    public HotSittingController(HotSittingService hotSittingService
-            , AmazonS3 amazonS3) {
-        this.amazonS3 = amazonS3;
+    public HotSittingController(
+            HotSittingService hotSittingService,
+            AmazonS3 amazonS3) {
         this.hotSittingService = hotSittingService;
+        this.amazonS3 = amazonS3;
     }
 
 
@@ -45,7 +46,7 @@ public class HotSittingController {
 
         log.info("자기소개 저장 Dto : {} ", selfIntroduceDto);
 
-        hotSittingService.saveAIRequest(selfIntroduceDto);
+        hotSittingService.saveSelfIntroduce(selfIntroduceDto);
 
         return ResponseEntity.ok().body("저장에 성공했습니다.");
     }
@@ -123,7 +124,7 @@ public class HotSittingController {
 
 
     /**
-     * aws 연결 확인
+     * aws 연결 확인용 배포시 삭제필요
      */
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucketName;

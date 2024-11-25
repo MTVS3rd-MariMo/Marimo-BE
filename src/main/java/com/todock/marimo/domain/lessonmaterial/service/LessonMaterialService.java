@@ -43,24 +43,25 @@ import java.util.stream.Collectors;
 @Service
 public class LessonMaterialService {
 
-   @Value("${external.api.lesson-material-server-url}")
+    @Value("${external.api.lesson-material-server-url}")
     private String AIServerURL;
 
+    private final ObjectMapper objectMapper; // JSON 파싱용 ObjectMapper 추가
     private final RestTemplate restTemplate;
     private final UserRepository userRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
-
-    private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 파싱용 ObjectMapper 추가
 
     @Autowired
     public LessonMaterialService(
             LessonMaterialRepository lessonMaterialRepository,
             UserRepository userRepository,
-            RestTemplate restTemplate) {
+            RestTemplate restTemplate,
+            ObjectMapper objectMapper) {
 
-        this.restTemplate = restTemplate;
-        this.userRepository = userRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
+        this.userRepository = userRepository;
+        this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
     }
 
 
@@ -71,8 +72,7 @@ public class LessonMaterialService {
     public LessonMaterialResponseDto sendPdfToAiServer(
             MultipartFile pdf, Long userId, String bookTitle, String author) {
 
-        validateUserRole(userId);
-
+        validateUserRole(userId); // 유저 검증
         if (pdf == null || pdf.isEmpty()) {
             throw new IllegalArgumentException("업로드할 PDF 파일이 제공되지 않았습니다.");
         }
@@ -83,7 +83,6 @@ public class LessonMaterialService {
         }
 
         try {
-
             // 1. AI 서버 URI 설정
             log.info("AI 서버 URI 설정: {}", AIServerURL);
 
@@ -92,30 +91,27 @@ public class LessonMaterialService {
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
             // 3. PDF 파일을 멀티파트 형식으로 Wrapping
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("pdf", new ByteArrayResource(pdf.getBytes()) {
+            MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>(); // 멀티파트타입 전달은 MultiValueMap 사용
+            bodyMap.add("pdf", new ByteArrayResource(pdf.getBytes()) {
                 @Override
                 public String getFilename() {
-                    return pdf.getOriginalFilename();
+                    return pdf.getOriginalFilename(); // 파일 이름 설정
                 }
             });
 
             // 4. HttpEntity 생성
-            HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+            HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(bodyMap, headers);
 
             // 5. AI 서버로 요청 전송
             ResponseEntity<String> response = restTemplate.postForEntity(AIServerURL, request, String.class);
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException("AI 서버와의 통신 중 오류가 발생했습니다. 응답 코드: " + response.getStatusCode());
-            }
-
 
             // 6. AI 서버에서 받은 JSON 반환
             return parseLessonMaterialJson(userId, response.getBody(), bookTitle, author);
 
         } catch (Exception e) {
-            log.error("파일 전송 중 오류 발생: {}", e.getMessage(), e);
-            throw new RuntimeException("파일 전송 중 오류 발생: " + e.getMessage());
+
+            log.error("AI서버에 pdf 전송 중 오류 발생: {}", e.getMessage(), e);
+            throw new RuntimeException("AI서버에 pdf 전송 중 오류 발생: " + e.getMessage());
         }
     }
 
@@ -126,23 +122,16 @@ public class LessonMaterialService {
     @Transactional
     public void updateLessonMaterial(LessonMaterialRequestDto lessonMaterialInfo) {
 
-        if (lessonMaterialInfo == null || lessonMaterialInfo.getLessonMaterialId() == null) {
-            throw new IllegalArgumentException("수정할 수업 자료 정보가 제공되지 않았습니다.");
-        }
-
         LessonMaterial lessonMaterial = lessonMaterialRepository
                 .findById(lessonMaterialInfo.getLessonMaterialId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수업 자료입니다: " + lessonMaterialInfo.getLessonMaterialId()));
 
         List<QuizDto> quizzes = lessonMaterialInfo.getQuizList();
 
-        if (quizzes != null && !quizzes.isEmpty()) {
+        if (quizzes != null && !quizzes.isEmpty()) { // 만약
             lessonMaterial.getQuizList().clear();
 
             for (QuizDto quizDto : quizzes) {
-                if (!isValidQuiz(quizDto)) {
-                    throw new IllegalArgumentException("유효하지 않은 퀴즈 정보가 포함되어 있습니다.");
-                }
 
                 Quiz quiz = new Quiz(
                         lessonMaterial,
@@ -155,8 +144,6 @@ public class LessonMaterialService {
                 );
                 lessonMaterial.getQuizList().add(quiz);
             }
-        } else {
-            log.info("퀴즈가 존재하지 않습니다.");
         }
 
         List<OpenQuestionRequestDto> openQuestions = lessonMaterialInfo.getOpenQuestionList();
@@ -183,22 +170,7 @@ public class LessonMaterialService {
 
 
     /**
-     * 유저 id로 유저의 수업 자료 전체 조회
-     */
-    public List<LessonMaterialNameResponseDto> getLessonMaterialByUserId(Long userId) {
-
-        validateUserRole(userId); // 선생님 검증
-
-        List<LessonMaterialNameResponseDto> lessonMaterialNameList = lessonMaterialRepository.findByUserId(userId)
-                .stream()
-                .map(dto -> new LessonMaterialNameResponseDto(dto.getLessonMaterialId(), dto.getBookTitle()))
-                .collect(Collectors.toList());
-        return lessonMaterialNameList.isEmpty() ? Collections.emptyList() : lessonMaterialNameList;
-    }
-
-
-    /**
-     * lessonMaterialId로 수업자료 수정 상세 조회
+     * lessonMaterialId로 수업자료 상세 조회 - 수정
      */
     public DetailLessonMaterialDto findById(Long lessonMaterialId) {
 
@@ -234,7 +206,26 @@ public class LessonMaterialService {
     }
 
 
+    /**
+     * 유저 id로 유저의 수업 자료 전체 조회
+     */
+    public List<LessonMaterialNameResponseDto> getLessonMaterialByUserId(Long userId) {
 
+        validateUserRole(userId); // 선생님 검증
+
+        List<LessonMaterialNameResponseDto> lessonMaterialNameList = lessonMaterialRepository.findByUserId(userId)
+                .stream()
+                .map(dto ->
+                        new LessonMaterialNameResponseDto(
+                                dto.getLessonMaterialId(),
+                                dto.getBookTitle()
+                        )
+                )
+                .collect(Collectors.toList());
+
+        // 비어있어도 반환
+        return lessonMaterialNameList.isEmpty() ? Collections.emptyList() : lessonMaterialNameList;
+    }
 
 
     /**
@@ -242,53 +233,62 @@ public class LessonMaterialService {
      */
     @Transactional
     public void deleteById(Long lessonMaterialId) {
+
         LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
-                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업자료를 찾을 수 없습니다."));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("lessonMaterialId가 " + lessonMaterialId + "인 수업자료를 찾을 수 없습니다."));
 
         lessonMaterial.setUserId(null); // 유저 Id를 없애서 매칭 안되도록 함
-        log.info("lessonMaterial.userId : {}", lessonMaterial.getUserId());
     }
+
+
+    /**
+     * ===============================================================================
+     *                              검증 및 JsonNode 변환
+     * ===============================================================================
+     */
 
 
     /**
      * AI 반환 Json 파싱 메서드
      */
-    private LessonMaterialResponseDto parseLessonMaterialJson(Long userId, String jsonResponse, String bookTitle, String author) {
+    private LessonMaterialResponseDto parseLessonMaterialJson(
+            Long userId, String jsonResponse, String bookTitle, String author) {
 
-        JsonNode root = null;
+        JsonNode jsonNode = null; // json 객체를 노드(element)로 사용한다.
+
         try {
-            root = objectMapper.readTree(jsonResponse);
+            jsonNode = objectMapper.readTree(jsonResponse);
 
             // LessonMaterial 객체 생성
             LessonMaterial lessonMaterial = new LessonMaterial(
-                    userId,
-                    bookTitle,
-                    root.path("pdftext").asText(""),
-                    author
+                    userId, // 제작자
+                    bookTitle, // pdf 제목
+                    jsonNode.path("pdftext").asText(""), // pdf 내용
+                    author // 저자
             );
-
 
             // 역할 생성 및 추가
             List<LessonRole> roles = new ArrayList<>();
-            JsonNode charactersNode = root.path("characters");
+            JsonNode charactersNode = jsonNode.path("characters");
             if (!charactersNode.isMissingNode()) { // 노드가 존재할 때만 진행
                 charactersNode.forEach(characterNode -> {
                     roles.add(new LessonRole(lessonMaterial, characterNode.asText("")));
                 });
             }
             lessonMaterial.setLessonRoleList(roles);
+            lessonMaterialRepository.save(lessonMaterial); // LessonMaterial 저장 (열린 질문, 퀴즈는 저장하지 않음)
 
-            // LessonMaterial 저장 (열린 질문, 퀴즈는 저장하지 않음)
-            lessonMaterialRepository.save(lessonMaterial);
-            log.info("생성된 lessonMaterialId() : {}", lessonMaterial.getLessonMaterialId());
+            log.info("생성된 lessonMaterialId : {}", lessonMaterial.getLessonMaterialId());
 
             // 열린 질문을 OpenQuestionDto로 변환하여 클라이언트에 보낼 준비
             List<OpenQuestionResponseDto> openQuestionDtos = new ArrayList<>();
 
-            JsonNode openQuestionsNode = root.path("open_questions"); //  라는 JSON에서 open_questions 노드 찾기
+            JsonNode openQuestionsNode = jsonNode.path("open_questions"); //  라는 JSON에서 open_questions 노드 찾기
 
             // 열린 질문 파싱
             if (!openQuestionsNode.isMissingNode()) { // 있으면
+
                 openQuestionsNode.forEach(questionNode -> {
                     String questionText = questionNode.path("question").asText(""); // question 노드 찾아서 추출
                     if (!questionText.isEmpty()) {  // 빈 문자열 체크 추가
@@ -303,7 +303,7 @@ public class LessonMaterialService {
 
             // 퀴즈를 QuizDto로 변환하여 클라이언트에 보낼 준비
             List<QuizDto> quizDtos = new ArrayList<>();
-            JsonNode quizNode = root.path("quiz");
+            JsonNode quizNode = jsonNode.path("quiz");
             if (!quizNode.isMissingNode()) {
                 final AtomicLong quizIdCounter = new AtomicLong(1); // quizId를 1부터 시작하도록 설정
                 quizNode.forEach(qNode -> {
@@ -338,19 +338,6 @@ public class LessonMaterialService {
         if (user.getRole() != Role.TEACHER) {
             throw new IllegalArgumentException("선생님만 수업 자료를 만들 수 있습니다.");
         }
-    }
-
-
-    /**
-     * 퀴즈 수정 시 검증
-     */
-    private boolean isValidQuiz(QuizDto quizDto) {
-        return quizDto != null &&
-                quizDto.getQuestion() != null && !quizDto.getQuestion().trim().isEmpty() &&
-                quizDto.getChoices1() != null && !quizDto.getChoices1().trim().isEmpty() &&
-                quizDto.getChoices2() != null && !quizDto.getChoices2().trim().isEmpty() &&
-                quizDto.getChoices3() != null && !quizDto.getChoices3().trim().isEmpty() &&
-                quizDto.getChoices4() != null && !quizDto.getChoices4().trim().isEmpty();
     }
 
 }

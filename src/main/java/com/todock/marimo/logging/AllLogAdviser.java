@@ -19,10 +19,11 @@ public class AllLogAdviser {
      * - 실행 시간: 시작 및 종료 시간을 기록하여 성능을 분석합니다.
      */
 
-    @Around("Pointcuts.AllLogPointcut()")
+
+    @Around("Pointcuts.ControllerLogPointcut()") // 컨트롤러 중 AI 메서드 제외
+    // @Around("Pointcuts.ControllerLogPointcut()") // 컨트롤러 중 AI 메서드 제외
     public Object logMethodDetails(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        long startTime = System.currentTimeMillis(); // 메서드 실행 시작 시간 기록
         String methodName = null;
 
         try {
@@ -32,20 +33,18 @@ public class AllLogAdviser {
             methodName = method.getDeclaringClass().getSimpleName() + " - " + method.getName();
 
             // 메서드 이름 로깅
-            log.info("\uD83D\uDD25 호출된 메서드: {}", methodName);
+            log.info("🎯 호출된 컨트롤러 메서드: {}", methodName);
 
             // 메서드 실행
             Object result = joinPoint.proceed();
 
             return result; // 실행 결과 반환
+
         } catch (Throwable e) {
-            // 예외 발생 시 에러 로그 기록
-            log.error("\uD83D\uDEA8 메서드 {} 실행 중 에러: {}", methodName, e.getMessage(), e);
+
+            log.error("❌ 컨트롤러 메서드 실행 중 에러: {} | 에러 메시지: {}", methodName, e.getMessage(), e);
             throw e; // 예외 재발생
-        } finally {
-            // 실행 시간 계산 및 로깅
-            //long executionTime = System.currentTimeMillis() - startTime;
-           // log.info("\uD83D\uDFE2 메서드 {} 실행 시간: {} ms", methodName, executionTime);
         }
     }
+
 }

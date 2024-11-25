@@ -110,13 +110,18 @@ public class AvatarService {
         // 시연용 더미 코드
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+
+        AvatarResponseDto avatarResponseDto;
         if (userId == 1L) { // 빨간모자
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 1L)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 1로 빨간모자 아바타를 찾을 수 없습니다."));
             lesson.getAvatarList().add(avatar);
             avatar.setUserId(userId);
             avatar.setLesson(lesson);
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+
+            avatarResponseDto = new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            return avatarResponseDto;
 
         } else if (userId == 2L) { // 할머니
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 2L)
@@ -125,7 +130,9 @@ public class AvatarService {
             avatar.setUserId(userId);
             avatar.setLesson(lesson);
 
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+            avatarResponseDto = new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            return avatarResponseDto;
 
         } else if (userId == 3L) { // 늑대
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 3L)
@@ -135,7 +142,10 @@ public class AvatarService {
             avatar.setLesson(lesson);
             avatarRepository.save(avatar);
             lessonRepository.save(lesson);
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+
+            avatarResponseDto = new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            return avatarResponseDto;
 
         } else if (userId == 4L) { // 사냥꾼
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 4L)
@@ -143,7 +153,10 @@ public class AvatarService {
             lesson.getAvatarList().add(avatar);
             avatar.setUserId(userId);
             avatar.setLesson(lesson);
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+
+            avatarResponseDto = new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            return avatarResponseDto;
 
         } else if (userId == 5L) {// 선생님
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 5L)
@@ -151,9 +164,15 @@ public class AvatarService {
             lesson.getAvatarList().add(avatar);
             avatar.setUserId(userId);
             avatar.setLesson(lesson);
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+
+            avatarResponseDto = new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            return avatarResponseDto;
         }
 
+        return null;
+
+        // local 저장
        /*
        try {
 
@@ -238,7 +257,7 @@ public class AvatarService {
             throw new RuntimeException("파일 처리 실패", e);
         }*/
 
-        return null;
+
     }
 
 
@@ -275,6 +294,7 @@ public class AvatarService {
             throw new RuntimeException("파일 처리 실패", e);
         }
     }
+
     // ai 서버 전송
     private byte[] sendImgToAiServer(Long userId, MultipartFile img) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -296,6 +316,7 @@ public class AvatarService {
         ResponseEntity<byte[]> response = restTemplate.postForEntity(serverUrl, request, byte[].class);
         return response.getBody();
     }
+
     // aws에 올리기
     private void uploadToS3(String key, byte[] data) {
         ObjectMetadata metadata = new ObjectMetadata();
@@ -303,6 +324,7 @@ public class AvatarService {
         amazonS3.putObject(new PutObjectRequest(bucketName, key, new ByteArrayInputStream(data), metadata));
         log.info("파일이 S3에 업로드되었습니다. 경로: {}", key);
     }
+
     // 압축 해제 후 애니메이션 올리기
     private List<String> extractAndUploadFilesToS3(String zipS3Key, String avatarS3Prefix) throws IOException {
         S3Object zipObject = amazonS3.getObject(bucketName, zipS3Key);
@@ -328,6 +350,7 @@ public class AvatarService {
         }
         return fileUrls;
     }
+
     // 아바타 저장
     private Avatar createAvatarEntity(Long userId, Long lessonId, List<String> fileUrls) {
         Lesson lesson = lessonRepository.findById(lessonId)
@@ -398,7 +421,7 @@ public class AvatarService {
 
     /**
      * ===============================================================
-     *                              검증, 변환
+     *                           검증, 변환
      * ===============================================================
      */
 

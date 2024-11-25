@@ -32,9 +32,11 @@ public class LessonController {
 
 
     @Autowired
-    public LessonController(LessonService lessonService, LessonMaterialService lessonMaterialService, LessonRepository lessonRepository) {
-        this.lessonService = lessonService;
+    public LessonController(
+            LessonMaterialService lessonMaterialService,
+            LessonService lessonService) {
         this.lessonMaterialService = lessonMaterialService;
+        this.lessonService = lessonService;
     }
 
 
