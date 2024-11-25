@@ -1,6 +1,5 @@
 package com.todock.marimo.domain.lessonmaterial.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.entity.quiz.Quiz;
@@ -17,7 +16,9 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "tbl_lesson_material")
+@Table(name = "tbl_lesson_material", indexes = {
+        @Index(name = "idx_lesson_material_id", columnList = "lesson_material_id")
+})
 public class LessonMaterial {
 
     @Id
