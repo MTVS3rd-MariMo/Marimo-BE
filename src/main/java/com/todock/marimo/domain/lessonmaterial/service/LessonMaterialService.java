@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 @Service
 public class LessonMaterialService {
 
+    // 문제
     @Value("${external.api.lesson-material-server-url}")
     private String AIServerURL;
 
