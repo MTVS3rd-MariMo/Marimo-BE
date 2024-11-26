@@ -40,9 +40,17 @@ public class Avatar {
     @OneToMany(mappedBy = "avatar", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Animation> animations = new ArrayList<>();
 
-    public Avatar(Long userId, String avatarImg, List<Animation> animations) {
+    public Avatar(Lesson lesson, Long userId, String avatarImg, List<Animation> animations) {
         this.userId = userId;
         this.avatarImg = avatarImg;
+        this.animations = animations;
+    }
+
+    public Avatar(Lesson lesson, Long userId, String avatarImg, String character, List<Animation> animations) {
+        this.lesson = lesson;
+        this.userId = userId;
+        this.avatarImg = avatarImg;
+        this.character = character;
         this.animations = animations;
     }
 
