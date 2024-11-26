@@ -42,11 +42,12 @@ public class HotSittingController {
     @Operation(summary = "자기소개 저장")
     @PutMapping("/self-introduce")
     public ResponseEntity<String> hotSittingRecord(
+            @RequestHeader("userId") Long userId,
             @RequestBody SelfIntroduceRequestDto selfIntroduceDto) {
 
-        log.info("자기소개 저장 Dto : {} ", selfIntroduceDto);
+        log.info("userId:{}로 자기소개 저장 Dto : {} ",userId, selfIntroduceDto);
 
-        hotSittingService.saveSelfIntroduce(selfIntroduceDto);
+        hotSittingService.saveSelfIntroduce(userId, selfIntroduceDto);
 
         return ResponseEntity.ok().body("저장에 성공했습니다.");
     }
@@ -121,22 +122,5 @@ public class HotSittingController {
 
         return ResponseEntity.ok().body("정상적으로 전송되었습니다.");
     }
-
-
-    /**
-     * aws 연결 확인용 배포시 삭제필요
-     */
-    @Value("${spring.cloud.aws.s3.bucket}")
-    private String bucketName;
-
-    @GetMapping("/test-s3")
-    public String testS3() {
-        if (amazonS3.doesBucketExistV2(bucketName)) {
-            return "S3 연결 성공: " + bucketName;
-        } else {
-            return "S3 연결 실패" + bucketName;
-        }
-    }
-
 
 }
