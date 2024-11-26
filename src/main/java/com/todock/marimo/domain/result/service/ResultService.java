@@ -15,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,8 @@ public class ResultService {
                         participant.getLesson().getPhotoUrl()))
                 .collect(Collectors.toList());
 
+        Collections.reverse(photos);
+
         return new StudentResultResponseDto(photos); // photos를 studentResults에 할당
     }
 
@@ -82,6 +85,8 @@ public class ResultService {
                                 : "생성일시 없음" // 기본값 또는 null인 경우 처리
                 ))
                 .collect(Collectors.toList());
+
+        Collections.reverse(results);
 
         return new TeacherResultResponseDto(results); // teacherResults에 List<TeacherResultDto> 할당
     }
@@ -169,8 +174,8 @@ public class ResultService {
                     );
                 })
                 .collect(Collectors.toList());
-
         lessonResultDto.setRoles(roles); // 역할 리스트 설정
+
 
         return lessonResultDto;
     }
