@@ -218,7 +218,7 @@ public class AvatarController {
     /**
      * 다른 유저Id로 아바타 이미지, 애니메이션 받기
      */
-    @Operation(summary = "다른 유저의 아바타 다운")
+    @Operation(summary = "다른 유저의 아바타 받기")
     @GetMapping("/participant/{lessonId}/{userId}")
     public ResponseEntity<AvatarResponseDto> getAvatarForParticipant(
             @PathVariable("lessonId") Long lessonId

@@ -113,7 +113,7 @@ public class AvatarService {
 
         AvatarResponseDto avatarResponseDto;
         if (userId == 1L) { // 빨간모자
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 1L)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, 1L)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 1로 빨간모자 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -148,7 +148,7 @@ public class AvatarService {
             return avatarResponseDto;
 
         } else if (userId == 2L) { // 할머니
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 2L)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, 2L)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 할머니 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -183,7 +183,7 @@ public class AvatarService {
             return avatarResponseDto;
 
         } else if (userId == 3L) { // 늑대
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 3L)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, 3L)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 3로 늑대 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -218,7 +218,7 @@ public class AvatarService {
             return avatarResponseDto;
 
         } else if (userId == 4L) { // 사냥꾼
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 4L)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, 4L)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 사냥꾼 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
