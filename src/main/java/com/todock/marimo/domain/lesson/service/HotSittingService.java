@@ -53,18 +53,18 @@ public class HotSittingService {
 
 
     /**
-     * 핫시팅 wavFile을 AI 서버로 전송하고 SelfIntroduceId를 포함합니다.
+     * 핫시팅 질의응답 wavFile을 AI 서버로 전송하고 SelfIntroduceId를 포함합니다.
      */
     @Transactional
     public void sendWavToAiServer(Long userId, WavFileClientToServerRequestDto wavDto) {
 
-        log.info("userId : {}, wavDto : {}", userId, wavDto);
+        log.info("질의응답의 userId : {}, wavDto : {}", userId, wavDto);
 
         // userId와 character 연결하기, 수업을 lessonId로 찾기
         Lesson lesson = lessonRepository.findById(wavDto.getLessonId())
                 .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
 
-        // 전달받은 lessonId와 selfIntNum 로 로그 출력
+        // 전달받은 lessonId와 selfIntNum 로그 출력
         Long lessonId = wavDto.getLessonId();
         Long selfIntNum = wavDto.getSelfIntNum();
         log.info("wavDto - selfIntNum: {}, lessonId: {}", selfIntNum, lessonId);
@@ -73,18 +73,17 @@ public class HotSittingService {
         Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
                 .orElseThrow(() -> new EntityNotFoundException("lessonId와 userId로 아바타를 찾을 수 없습니다."));
         // 아바타가 존재하지 않을 경우 전달받은 캐릭터 이름으로 업데이트
-        if (avatar.getCharacter() == null) {
+        if (avatar.getCharacter() != null) {
             avatar.setCharacter(wavDto.getCharacter());
         }
 
         // lesson에서 HotSitting 찾기
         HotSitting hotSitting = lesson.getHotSitting();
-
         if (hotSitting == null) {
             throw new EntityNotFoundException("HotSitting 엔티티를 찾을 수 없습니다.");
         }
 
-        log.info("hotSittingId : {},selfIntNum : {}", hotSitting.getHotSittingId(), selfIntNum);
+        log.info("hotSittingId : {}, selfIntNum : {}", hotSitting.getHotSittingId(), selfIntNum);
 
         // SelfIntroduce 엔티티를 lessonId로
         SelfIntroduce selfIntroduce = selfIntroduceRepository
@@ -92,9 +91,6 @@ public class HotSittingService {
         if (selfIntroduce == null) {
             throw new EntityNotFoundException("HotSittingId와 selfIntNum으로 자기소개를 찾을 수 없습니다.");
         }
-
-        // 자기소개 유저 저장
-        selfIntroduce.setUserId(userId);
 
         // wavDto에 selfIntroduceId 추가
         wavDto.setSelfIntroductionId(selfIntroduce.getSelfIntroduceId());
@@ -142,18 +138,21 @@ public class HotSittingService {
     /**
      * 핫시팅 자기소개 저장
      */
-    public void saveSelfIntroduce(SelfIntroduceRequestDto selfIntroduceDto) {
+    public void saveSelfIntroduce(Long userId, SelfIntroduceRequestDto selfIntroduceDto) {
 
         // 수업 찾기
         Lesson lesson = lessonRepository.findById(selfIntroduceDto.getLessonId())
                 .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
 
+        log.info("userId: {}", userId);
+        log.info(selfIntroduceDto.toString());
         // 핫시팅 찾기
         HotSitting hotSitting = lesson.getHotSitting();
 
         // 핫시팅에 자기소개 추가
         SelfIntroduce selfIntroduce = new SelfIntroduce(
                 hotSitting,
+                userId,
                 selfIntroduceDto.getSelfIntNum(),
                 selfIntroduceDto.getSelfIntroduce()
         );

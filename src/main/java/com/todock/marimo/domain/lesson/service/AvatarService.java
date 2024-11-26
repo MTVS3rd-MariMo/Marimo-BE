@@ -515,9 +515,8 @@ public class AvatarService {
         String avatarImgUrl = createFileUrl(avatar.getAvatarImg());
         */
 
-        List<Animation> animations = avatar.getAnimations();
         // AvatarResponseDto 생성 및 반환
-        return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), animations);
+        return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
     }
 
 
