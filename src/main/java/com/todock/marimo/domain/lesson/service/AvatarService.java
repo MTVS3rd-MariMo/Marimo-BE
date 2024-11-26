@@ -115,58 +115,176 @@ public class AvatarService {
         if (userId == 1L) { // 빨간모자
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 1L)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 1로 빨간모자 아바타를 찾을 수 없습니다."));
-            lesson.getAvatarList().add(avatar);
-            avatar.setUserId(userId);
-            avatar.setLesson(lesson);
 
-            avatarResponseDto = new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            // 기존 Animation을 복사하여 새로운 Animation 생성
+            List<Animation> newAnimations = new ArrayList<>();
+            for (Animation animation : avatar.getAnimations()) {
+                Animation newAnimation = new Animation();
+                newAnimation.setAnimation(animation.getAnimation()); // 애니메이션 데이터 복사
+                newAnimation.setAvatar(null); // 새로운 아바타와 연결 예정
+                newAnimations.add(newAnimation);
+            }
+
+            // 새로운 Avatar 생성 및 설정
+            Avatar newAvatar = new Avatar();
+            newAvatar.setLesson(lesson); // 새로운 lesson 설정
+            newAvatar.setUserId(userId); // 새로운 userId 설정
+            newAvatar.setAvatarImg(avatar.getAvatarImg()); // 기존 아바타 이미지 복사
+            newAvatar.setCharacter(avatar.getCharacter()); // 역할 복사
+            newAvatar.setAnimations(newAnimations); // 복사한 애니메이션 설정
+
+            // 새로운 Animation에 Avatar 연결
+            for (Animation animation : newAnimations) {
+                animation.setAvatar(newAvatar); // 새 아바타와 연결
+            }
+
+            // 데이터 저장
+            avatarRepository.save(newAvatar); // 새로운 아바타와 애니메이션 저장
+            lesson.getAvatarList().add(newAvatar); // lesson에 새로운 아바타 추가
+            lessonRepository.save(lesson);
+
+            avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 2로 변경 실패")));
             return avatarResponseDto;
 
         } else if (userId == 2L) { // 할머니
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 2L)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 할머니 아바타를 찾을 수 없습니다."));
-            lesson.getAvatarList().add(avatar);
-            avatar.setUserId(userId);
-            avatar.setLesson(lesson);
 
-            avatarResponseDto = new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+            // 기존 Animation을 복사하여 새로운 Animation 생성
+            List<Animation> newAnimations = new ArrayList<>();
+            for (Animation animation : avatar.getAnimations()) {
+                Animation newAnimation = new Animation();
+                newAnimation.setAnimation(animation.getAnimation()); // 애니메이션 데이터 복사
+                newAnimation.setAvatar(null); // 새로운 아바타와 연결 예정
+                newAnimations.add(newAnimation);
+            }
+
+            // 새로운 Avatar 생성 및 설정
+            Avatar newAvatar = new Avatar();
+            newAvatar.setLesson(lesson); // 새로운 lesson 설정
+            newAvatar.setUserId(userId); // 새로운 userId 설정
+            newAvatar.setAvatarImg(avatar.getAvatarImg()); // 기존 아바타 이미지 복사
+            newAvatar.setCharacter(avatar.getCharacter()); // 역할 복사
+            newAvatar.setAnimations(newAnimations); // 복사한 애니메이션 설정
+
+            // 새로운 Animation에 Avatar 연결
+            for (Animation animation : newAnimations) {
+                animation.setAvatar(newAvatar); // 새 아바타와 연결
+            }
+
+            // 데이터 저장
+            avatarRepository.save(newAvatar); // 새로운 아바타와 애니메이션 저장
+            lesson.getAvatarList().add(newAvatar); // lesson에 새로운 아바타 추가
+            lessonRepository.save(lesson);
+
+            avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
             avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
             return avatarResponseDto;
 
         } else if (userId == 3L) { // 늑대
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 3L)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 3로 늑대 아바타를 찾을 수 없습니다."));
-            lesson.getAvatarList().add(avatar);
-            avatar.setUserId(userId);
-            avatar.setLesson(lesson);
-            avatarRepository.save(avatar);
+
+            // 기존 Animation을 복사하여 새로운 Animation 생성
+            List<Animation> newAnimations = new ArrayList<>();
+            for (Animation animation : avatar.getAnimations()) {
+                Animation newAnimation = new Animation();
+                newAnimation.setAnimation(animation.getAnimation()); // 애니메이션 데이터 복사
+                newAnimation.setAvatar(null); // 새로운 아바타와 연결 예정
+                newAnimations.add(newAnimation);
+            }
+
+            // 새로운 Avatar 생성 및 설정
+            Avatar newAvatar = new Avatar();
+            newAvatar.setLesson(lesson); // 새로운 lesson 설정
+            newAvatar.setUserId(userId); // 새로운 userId 설정
+            newAvatar.setAvatarImg(avatar.getAvatarImg()); // 기존 아바타 이미지 복사
+            newAvatar.setCharacter(avatar.getCharacter()); // 역할 복사
+            newAvatar.setAnimations(newAnimations); // 복사한 애니메이션 설정
+
+            // 새로운 Animation에 Avatar 연결
+            for (Animation animation : newAnimations) {
+                animation.setAvatar(newAvatar); // 새 아바타와 연결
+            }
+
+            // 데이터 저장
+            avatarRepository.save(newAvatar); // 새로운 아바타와 애니메이션 저장
+            lesson.getAvatarList().add(newAvatar); // lesson에 새로운 아바타 추가
             lessonRepository.save(lesson);
 
-            avatarResponseDto = new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1으로 변경 실패")));
             return avatarResponseDto;
 
         } else if (userId == 4L) { // 사냥꾼
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 4L)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 사냥꾼 아바타를 찾을 수 없습니다."));
-            lesson.getAvatarList().add(avatar);
-            avatar.setUserId(userId);
-            avatar.setLesson(lesson);
 
-            avatarResponseDto = new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+            // 기존 Animation을 복사하여 새로운 Animation 생성
+            List<Animation> newAnimations = new ArrayList<>();
+            for (Animation animation : avatar.getAnimations()) {
+                Animation newAnimation = new Animation();
+                newAnimation.setAnimation(animation.getAnimation()); // 애니메이션 데이터 복사
+                newAnimation.setAvatar(null); // 새로운 아바타와 연결 예정
+                newAnimations.add(newAnimation);
+            }
+
+            // 새로운 Avatar 생성 및 설정
+            Avatar newAvatar = new Avatar();
+            newAvatar.setLesson(lesson); // 새로운 lesson 설정
+            newAvatar.setUserId(userId); // 새로운 userId 설정
+            newAvatar.setAvatarImg(avatar.getAvatarImg()); // 기존 아바타 이미지 복사
+            newAvatar.setCharacter(avatar.getCharacter()); // 역할 복사
+            newAvatar.setAnimations(newAnimations); // 복사한 애니메이션 설정
+
+            // 새로운 Animation에 Avatar 연결
+            for (Animation animation : newAnimations) {
+                animation.setAvatar(newAvatar); // 새 아바타와 연결
+            }
+
+            // 데이터 저장
+            avatarRepository.save(newAvatar); // 새로운 아바타와 애니메이션 저장
+            lesson.getAvatarList().add(newAvatar); // lesson에 새로운 아바타 추가
+            lessonRepository.save(lesson);
+
+            avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
             avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
             return avatarResponseDto;
 
         } else if (userId == 5L) {// 선생님
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(1L, 5L)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 선생님 아바타를 찾을 수 없습니다."));
-            lesson.getAvatarList().add(avatar);
-            avatar.setUserId(userId);
-            avatar.setLesson(lesson);
 
-            avatarResponseDto = new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            // 기존 Animation을 복사하여 새로운 Animation 생성
+            List<Animation> newAnimations = new ArrayList<>();
+            for (Animation animation : avatar.getAnimations()) {
+                Animation newAnimation = new Animation();
+                newAnimation.setAnimation(animation.getAnimation()); // 애니메이션 데이터 복사
+                newAnimation.setAvatar(null); // 새로운 아바타와 연결 예정
+                newAnimations.add(newAnimation);
+            }
+
+            // 새로운 Avatar 생성 및 설정
+            Avatar newAvatar = new Avatar();
+            newAvatar.setLesson(lesson); // 새로운 lesson 설정
+            newAvatar.setUserId(userId); // 새로운 userId 설정
+            newAvatar.setAvatarImg(avatar.getAvatarImg()); // 기존 아바타 이미지 복사
+            newAvatar.setCharacter(avatar.getCharacter()); // 역할 복사
+            newAvatar.setAnimations(newAnimations); // 복사한 애니메이션 설정
+
+            // 새로운 Animation에 Avatar 연결
+            for (Animation animation : newAnimations) {
+                animation.setAvatar(newAvatar); // 새 아바타와 연결
+            }
+
+            // 데이터 저장
+            avatarRepository.save(newAvatar); // 새로운 아바타와 애니메이션 저장
+            lesson.getAvatarList().add(newAvatar); // lesson에 새로운 아바타 추가
+            lessonRepository.save(lesson);
+
+            avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(lessonId).orElseThrow(() -> new EntityNotFoundException("lessonId 2로 변경 실패")));
             return avatarResponseDto;
         }
 
@@ -294,7 +412,6 @@ public class AvatarService {
             throw new RuntimeException("파일 처리 실패", e);
         }
     }
-
     // ai 서버 전송
     private byte[] sendImgToAiServer(Long userId, MultipartFile img) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -316,7 +433,6 @@ public class AvatarService {
         ResponseEntity<byte[]> response = restTemplate.postForEntity(serverUrl, request, byte[].class);
         return response.getBody();
     }
-
     // aws에 올리기
     private void uploadToS3(String key, byte[] data) {
         ObjectMetadata metadata = new ObjectMetadata();
@@ -324,7 +440,6 @@ public class AvatarService {
         amazonS3.putObject(new PutObjectRequest(bucketName, key, new ByteArrayInputStream(data), metadata));
         log.info("파일이 S3에 업로드되었습니다. 경로: {}", key);
     }
-
     // 압축 해제 후 애니메이션 올리기
     private List<String> extractAndUploadFilesToS3(String zipS3Key, String avatarS3Prefix) throws IOException {
         S3Object zipObject = amazonS3.getObject(bucketName, zipS3Key);
@@ -350,7 +465,6 @@ public class AvatarService {
         }
         return fileUrls;
     }
-
     // 아바타 저장
     private Avatar createAvatarEntity(Long userId, Long lessonId, List<String> fileUrls) {
         Lesson lesson = lessonRepository.findById(lessonId)
@@ -387,7 +501,8 @@ public class AvatarService {
                 .orElseThrow(() ->
                         new IllegalArgumentException("userId와 lessonId가 공통으로 있는 아바타를 찾을 수 없습니다"));
 
-        // 애니메이션 목록 생성
+        // 애니메이션 목록 생성 로컬
+        /*
         List<Animation> animations = avatar.getAnimations().stream()
                 .map(animation -> {
                     // 각 애니메이션 경로를 URL로 변환
@@ -398,24 +513,11 @@ public class AvatarService {
 
         // 아바타 이미지 URL로 변환
         String avatarImgUrl = createFileUrl(avatar.getAvatarImg());
+        */
 
+        List<Animation> animations = avatar.getAnimations();
         // AvatarResponseDto 생성 및 반환
-        return new AvatarResponseDto(avatar.getUserId(), avatarImgUrl, animations);
-    }
-
-
-    /**
-     * 수업 id로 모든 아바타와 애니메이션 조회
-     */
-    public List<AvatarResponseDto> findByLessonId(Long lessonId) {
-        return avatarRepository.findByLesson_LessonId(lessonId)
-                .stream()
-                .map(avatar -> new AvatarResponseDto(
-                        avatar.getUserId(),
-                        avatar.getAvatarImg(),
-                        avatar.getAnimations()
-                ))
-                .collect(Collectors.toList());
+        return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), animations);
     }
 
 

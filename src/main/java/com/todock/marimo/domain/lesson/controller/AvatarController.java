@@ -38,21 +38,6 @@ public class AvatarController {
         this.avatarService = avatarService;
     }
 
-    /**
-     * 모든 유저의 아바타와 이미지를 한번에 List<dto>로 전달 - 선생님용?
-     * 수업 id로 아바타를 전부 저장
-     */
-    @Operation(summary = "lessonId로 모든 유저의 아바타와 애니메이션 다운")
-    @GetMapping
-    public ResponseEntity<List<AvatarResponseDto>> getAvatar(Long lessonId) {
-
-        log.info("모든 유저의 아바타를 lessonId {} : 로 받습니다.", lessonId);
-        List<AvatarResponseDto> avatarList = avatarService.findByLessonId(lessonId);
-        log.info("AvatarController avatarList: {}", avatarList);
-
-        return ResponseEntity.ok(avatarList);
-    }
-
 
     /**
      * img를 AI서버로 전송
@@ -142,7 +127,7 @@ public class AvatarController {
             // 5. 서비스 호출
             AvatarResponseDto avatarResponseDto = avatarService.sendImgToAiServer(userId, lessonId, img);
 
-            log.info("avatarResponseDto : {}", avatarResponseDto);
+            log.info("userId: {}로 요청한 생성된 아바타 : {}",userId, avatarResponseDto);
 
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -190,7 +175,7 @@ public class AvatarController {
 
         AvatarResponseDto avatarResponseDto = avatarService.findByUserId(lessonId, userId);
 
-        log.info("avatarResponseDto : {}", avatarResponseDto);
+        log.info("다른 유저가 userId: {}의 아바타를 요청 : {}", userId, avatarResponseDto);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(avatarResponseDto);
