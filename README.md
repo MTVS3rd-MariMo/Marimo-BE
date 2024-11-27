@@ -2,6 +2,10 @@
 ## 마리모 소개 영상 :point_down:이미지 클릭!
 [![마리모 썸네일](https://github.com/user-attachments/assets/9b98fbdc-9513-4d6b-9a89-fd384a069fff)](https://youtu.be/iIQx2r_dEj0)
 
+<a href="https://youtu.be/iIQx2r_dEj0" target="_blank">
+  <img src="https://github.com/user-attachments/assets/9b98fbdc-9513-4d6b-9a89-fd384a069fff" alt="마리모 썸네일" />
+</a>
+
 ## :busts_in_silhouette: Team Members ##
 
 |                                               용도원                                               |                                               공혜지                                               |                                               박효근                                                |                                               박소현                                                |                                               박예지                                                |                                               손수연                                                |                                               정현민                                                |
