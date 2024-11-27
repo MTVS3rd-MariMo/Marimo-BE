@@ -17,3 +17,8 @@
 ![image](https://github.com/user-attachments/assets/4d59753b-48cf-4f41-af71-97112b5d1bf4)
 ## 배경 생성 아키텍처
 ![image](https://github.com/user-attachments/assets/5a3f9ca0-ee1a-48c1-a971-39b4c7360763)
+# DDD
+## 컨텍스트맵
+
+## 애그리거트
+![image](https://github.com/user-attachments/assets/7d9662da-d7b0-4205-9a81-80e51a3b300d)
