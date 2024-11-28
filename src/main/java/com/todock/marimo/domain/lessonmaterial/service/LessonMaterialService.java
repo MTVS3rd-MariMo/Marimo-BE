@@ -14,6 +14,8 @@ import com.todock.marimo.domain.lessonmaterial.entity.LessonRole;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.entity.quiz.Quiz;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
+import com.todock.marimo.domain.lessonmaterial.repository.OpenQuestionRepository;
+import com.todock.marimo.domain.lessonmaterial.repository.QuizRepository;
 import com.todock.marimo.domain.user.entity.Role;
 import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
@@ -49,18 +51,24 @@ public class LessonMaterialService {
 
     private final ObjectMapper objectMapper; // JSON 파싱용 ObjectMapper 추가
     private final RestTemplate restTemplate;
+    private final QuizRepository quizRepository;
     private final UserRepository userRepository;
+    private final OpenQuestionRepository openQuestionRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
 
     @Autowired
     public LessonMaterialService(
             LessonMaterialRepository lessonMaterialRepository,
+            OpenQuestionRepository openQuestionRepository,
             UserRepository userRepository,
+            QuizRepository quizRepository,
             RestTemplate restTemplate,
             ObjectMapper objectMapper) {
 
         this.lessonMaterialRepository = lessonMaterialRepository;
+        this.openQuestionRepository = openQuestionRepository;
         this.userRepository = userRepository;
+        this.quizRepository = quizRepository;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
     }
@@ -129,8 +137,10 @@ public class LessonMaterialService {
 
         List<QuizDto> quizzes = lessonMaterialInfo.getQuizList();
 
-        if (quizzes != null && !quizzes.isEmpty()) { // 만약
-            lessonMaterial.getQuizList().clear();
+        if (quizzes != null && !quizzes.isEmpty()) {
+            // 기존 퀴즈 데이터를 명시적으로 삭제 (수정된 부분)
+            quizRepository.deleteAll(lessonMaterial.getQuizList()); // 기존 데이터 DB에서 삭제
+            lessonMaterial.getQuizList().clear(); // 메모리 상에서도 삭제
 
             for (QuizDto quizDto : quizzes) {
 
@@ -149,7 +159,9 @@ public class LessonMaterialService {
 
         List<OpenQuestionRequestDto> openQuestions = lessonMaterialInfo.getOpenQuestionList();
         if (openQuestions != null && !openQuestions.isEmpty()) {
-            lessonMaterial.getOpenQuestionList().clear();
+            // 기존 열린 질문 데이터를 명시적으로 삭제 (수정된 부분)
+            openQuestionRepository.deleteAll(lessonMaterial.getOpenQuestionList()); // 기존 데이터 DB에서 삭제
+            lessonMaterial.getOpenQuestionList().clear(); // 메모리 상에서도 삭제
 
             for (OpenQuestionRequestDto oqDto : openQuestions) {
                 if (oqDto.getQuestionTitle() == null || oqDto.getQuestionTitle().trim().isEmpty()) {

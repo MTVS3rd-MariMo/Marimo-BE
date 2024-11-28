@@ -116,13 +116,11 @@ public class PhotoController {
 
             // 5. 서비스 호출
             String url = photoService.savePhoto(lessonId, photo);
-
             return ResponseEntity.ok("사진이 저장되었습니다. : " + url);
 
         } catch (Exception e) {
-            log.error("파일 업로드 중 오류 발생", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("파일 처리 중 오류가 발생했습니다.");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(e.getMessage());
         }
     }
 
