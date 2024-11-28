@@ -1,9 +1,9 @@
 package com.todock.marimo.domain.lesson.service;
 
 import com.todock.marimo.domain.lesson.dto.AnswerRequestDto;
-import com.todock.marimo.domain.lesson.repository.OpenQuestionRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestionAnswer;
+import com.todock.marimo.domain.lessonmaterial.repository.OpenQuestionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

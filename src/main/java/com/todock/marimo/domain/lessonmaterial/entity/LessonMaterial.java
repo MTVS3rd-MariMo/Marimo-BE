@@ -41,11 +41,13 @@ public class LessonMaterial {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "lessonMaterial", // 열린 질문
-            cascade = CascadeType.ALL)
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<OpenQuestion> openQuestionList = new ArrayList<>();
 
     @OneToMany(mappedBy = "lessonMaterial" // 퀴즈
-            , cascade = CascadeType.ALL)
+            , cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<Quiz> quizList = new ArrayList<>();
 
     @Setter

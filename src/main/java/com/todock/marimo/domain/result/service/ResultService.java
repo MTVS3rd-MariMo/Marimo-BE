@@ -107,8 +107,8 @@ public class ResultService {
 
         // 반환할 LessonResultDto 생성 및 초기 설정
         LessonResultDto lessonResultDto = new LessonResultDto(
-                lessonMaterial.getBookTitle()
-                //    lesson.getCreatedAt(), // 수업 날짜
+                lessonMaterial.getBookTitle(),
+                    lesson.getCreatedAt() // 수업 날짜
                 //    lesson.getPhotoUrl() // 수업 단체사진
         );
 

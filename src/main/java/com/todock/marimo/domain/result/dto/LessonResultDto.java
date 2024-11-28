@@ -18,7 +18,7 @@ public class LessonResultDto {
     private String bookTitle;
 
     // 수업 생성 시간
-    // private String createdAt;
+    private String createdAt;
 
     // 참가자
     // private List<String> participants = new ArrayList<>();
@@ -35,9 +35,9 @@ public class LessonResultDto {
     // 사진
     // private String photoUrl;
 
-    public LessonResultDto(String bookTitle) { // , String createdAt, String photoUrl
+    public LessonResultDto(String bookTitle, String createdAt) { // , String photoUrl
         this.bookTitle = bookTitle;
-     // this.createdAt = createdAt;
-     // this.photoUrl = photoUrl;
+        this.createdAt = createdAt;
+        // this.photoUrl = photoUrl;
     }
 }

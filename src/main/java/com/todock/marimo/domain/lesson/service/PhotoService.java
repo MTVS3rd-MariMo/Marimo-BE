@@ -207,7 +207,9 @@ public class PhotoService {
         try {
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId(" + lessonId + ")로 수업을 찾을 수 없습니다."));
-
+            if(lesson.getPhotoUrl() != null){
+                throw new RuntimeException("배경이 이미 존재합니다.");
+            }
             // 배경사진 이름 설정
             String groupPhotoName = "photo/" + UUID.randomUUID().toString() + ".png"; // S3에 저장할 파일 이름 (폴더 포함)
 
