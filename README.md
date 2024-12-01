@@ -21,7 +21,29 @@
 | <img width="107" alt="용도원 마리모" src="https://github.com/user-attachments/assets/6afc1604-2baa-4608-bb70-96e62daef287"> | <img width="106" alt="공혜지 마리모" src="https://github.com/user-attachments/assets/69087b21-926c-48a5-8732-ca203392b683"> | <img width="112" alt="박효근 마리모" src="https://github.com/user-attachments/assets/96016f29-ed42-4fdd-a9da-50b4c32bc922"> | <img width="104" alt="박소현 마리모" src="https://github.com/user-attachments/assets/d5d58006-b7b7-499b-99db-59a91a2f9b1d"> | <img width="106" alt="박예지 마리모" src="https://github.com/user-attachments/assets/7dbbeaaa-cfc4-4fb1-ada5-0922d9d8ab6f"> | <img width="106" alt="손수연 마리모" src="https://github.com/user-attachments/assets/2242a533-a60c-47c2-b79d-74a993252ba2"> | <img width="107" alt="정현민 마리모" src="https://github.com/user-attachments/assets/73fc7216-0dda-418a-900f-2dbcf7a5cfbb"> |
 |                             [@anditsoon](https://github.com/anditsoon)                              |                           [@hzkkong](https://github.com/hzkkong)                            |                             [@RootPHG](https://github.com/RootPHG)                             |                              [@goongoontroli](https://github.com/goongoontroli)                         |                             [@yeji79](https://github.com/yeji79)                             |                         [@giraffeleg](https://github.com/giraffeleg)                         |                               [@JungHyeonmin](https://github.com/JungHyeonmin)                               |
 
-### 🛠️주요 기술
+### 🛠️기술 스택
+<div align=center> 
+  <img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white">
+  <img src="https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">
+  <img src="https://img.shields.io/badge/jpa-59666C?style=for-the-badge&logo=hibernate&logoColor=white">
+  <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> 
+</div>
+
+### 배포
+<div align=center> 
+  <img src="https://img.shields.io/badge/amazonaw ec2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white">
+  <img src="https://img.shields.io/badge/amazonaw rds-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white">
+  <img src="https://img.shields.io/badge/amazonaw s3-569A31?style=for-the-badge&logo=amazons3&logoColor=white">
+  <img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
+  <img src="https://img.shields.io/badge/GitHub Action-2088FF?style=for-the-badge&logo=githubactions&logoColor=white">
+</div>
+
+### 협업 툴
+<div align=center> 
+  <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
+  <img src="https://img.shields.io/badge/notion-000000?style=for-the-badge&logo=notion&logoColor=white">
+  <img src="https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=white">
+</div>
 Java, Spring Boot, JPA, MySql, aws-ec2, aws-RDS,s3-bucket, GitHub, GitHub CI/CD, Docker
 
 ### 담당 역할
