@@ -62,9 +62,9 @@
   <img src="https://github.com/user-attachments/assets/8f84817b-ebbc-4770-a746-1043f7043453" alt="전체 아키텍처" width="900"/>
 </div>
 
-### 5-2. 아키텍처 [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE.wiki.git)
+### 5-2. 아키텍처 [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE/wiki/Architecture)
 
-### 5-3. Context Map [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE.wiki.git)
+### 5-3. Context Map [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE/wiki/Context)
 
 ### 5-4. Aggregate
 <div align="center">
