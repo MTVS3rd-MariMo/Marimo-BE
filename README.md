@@ -50,11 +50,11 @@
 </div>
 
 ## 🎯 4. 담당 역할
-- AI와 Unity 간의 통신 구현
-- 선생님 수업 자료 제작, 수업 결과 도메인 구현
-- GitHub Action을 이용한 CI/CD 구현
-- AWS EC2, Docker를 이용한 배포 서버와 DB 구축 및 관리
-- API 사용의 편의성을 위한 Swagger docs를 이용한 API 문서화
+- AI와 Unity 간 통신 기능 구현
+- 선생님 온작품읽기 자료 생성 및 학생 수업 결과 도메인 설계 및 구현
+- GitHub Actions를 활용한 CI/CD 파이프라인 구현
+- AWS EC2와 Docker를 활용한 서버 배포 및 데이터베이스 구축 및 관리
+- API 사용 편의성을 위한 Swagger 문서를 활용한 API 문서화
   
 ## 🌐 5. 프로젝트 아키텍처
 ### 🏗️ 5-1. Service Architecture
