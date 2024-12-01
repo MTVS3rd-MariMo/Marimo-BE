@@ -57,7 +57,7 @@
 ## 🌐 5. 프로젝트 아키텍처
 ### 🏗️ 5-1. Service Architecture
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/6bfc13bf-e22d-411e-a6ab-8d38fad4b1ee" alt="전체 아키텍처" width="800"/>
+  <img src="https://github.com/user-attachments/assets/8f84817b-ebbc-4770-a746-1043f7043453" alt="전체 아키텍처" width="800"/>
 </div>
 
 ### 5-2. 아키텍처 [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE.wiki.git)
