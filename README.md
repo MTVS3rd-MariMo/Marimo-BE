@@ -3,7 +3,7 @@
 
 ## 📜프로젝트 소개
 <div align="center">
-  <img width="380" alt="image" src="https://github.com/user-attachments/assets/9225d8fc-837d-45e0-845d-cfac5a55de71">
+  <img width="500" alt="image" src="https://github.com/user-attachments/assets/9225d8fc-837d-45e0-845d-cfac5a55de71">
 </div>
 온작품읽기는 초등학교 정규 교육 과정으로, 책을 읽고 여러 참여형 활동을 함께 하며 책 내용을 더 깊게 이해하도록 돕는 수업입니다. 온작품읽기를 학교 모바일 기기를 활용하여 수업에 활용할 수 있도록 메타버스 플랫폼을 구현했습니다. AI기술을 활용하여 선생님은 간단하게 수업을 준비하고 활동 결과를 확인할 수 있습니다. 학생은 자신이 그린 아바타로 창의적이고 몰입감있는 활동을 할 수 있습니다.
 
@@ -29,7 +29,7 @@
   <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> 
 </div>
 
-### 배포
+### 🚀배포
 <div align=center> 
   <img src="https://img.shields.io/badge/amazonaw ec2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white">
   <img src="https://img.shields.io/badge/amazonaw rds-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white">
@@ -38,13 +38,12 @@
   <img src="https://img.shields.io/badge/GitHub Action-2088FF?style=for-the-badge&logo=githubactions&logoColor=white">
 </div>
 
-### 협업 툴
+### 🤝협업 툴
 <div align=center> 
   <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
   <img src="https://img.shields.io/badge/notion-000000?style=for-the-badge&logo=notion&logoColor=white">
   <img src="https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=white">
 </div>
-Java, Spring Boot, JPA, MySql, aws-ec2, aws-RDS,s3-bucket, GitHub, GitHub CI/CD, Docker
 
 ### 담당 역할
 - AI와 Unity 간의 통신 구현
