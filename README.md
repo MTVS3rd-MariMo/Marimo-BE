@@ -55,13 +55,16 @@
 - API 사용의 편의성을 위한 Swagger docs를 이용한 API 문서화
   
 ## 🌐 5. 프로젝트 아키텍처
-### 🏗️ 5-1. 서비스 아키텍처
+### 🏗️ 5-1. Service Architecture
 <div align="center">
   <img src="https://github.com/user-attachments/assets/6bfc13bf-e22d-411e-a6ab-8d38fad4b1ee" alt="전체 아키텍처" width="800"/>
 </div>
 
-# 설계
-## 도메인 주도 설계 (애그리거트)
+### 5-2. 아키텍처 [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE.wiki.git)
+
+### 5-3. Context Map [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE.wiki.git)
+
+### 5-4. Aggregate
 <div align="center">
   <img src="https://github.com/user-attachments/assets/7d9662da-d7b0-4205-9a81-80e51a3b300d" alt="도메인 주도 설계" width="500"/>
 </div>
