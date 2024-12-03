@@ -40,7 +40,7 @@ public class AvatarController {
 
 
     /**
-     * img를 AI서버로 전송
+     * img를 AI서버로 전송 - 아바타 로컬 저장, 더미데이터 사용
      */
     @Operation(
             summary = "img 파일 업로드",
