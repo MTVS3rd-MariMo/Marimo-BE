@@ -59,14 +59,14 @@
 ## 🌐 5. 프로젝트 아키텍처
 ### 🏗️ 5-1. Service Architecture
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/8f84817b-ebbc-4770-a746-1043f7043453" alt="전체 아키텍처" width="900"/>
+  <img src="https://github.com/user-attachments/assets/b984c198-5510-48bb-a7c2-52ebd1cde687" alt="전체 아키텍처" width="900"/>
 </div>
 
-### 5-2. 아키텍처 [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE/wiki/Architecture)
+### 🧱 5-2. 아키텍처 [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE/wiki/Architecture)
 
-### 5-3. Context Map [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE/wiki/Context)
+### 🗺️ 5-3. Context Map [상세](https://github.com/MTVS3rd-MariMo/Marimo-BE/wiki/Context)
 
-### 5-4. Aggregate
+### 📦 5-4. Aggregate
 <div align="center">
   <img src="https://github.com/user-attachments/assets/cae38d98-acf9-4f01-80c1-93df41d5bc26" alt="도메인 주도 설계" width="700"/>
 </div>
