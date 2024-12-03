@@ -4,6 +4,7 @@ import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.Participant;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
+import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
@@ -26,6 +27,7 @@ public class ResultService {
     private final ParticipantRepository participantRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
     private final UserRepository userRepository;
+    private final AvatarRepository avatarRepository;
 
 
     @Autowired
@@ -33,11 +35,12 @@ public class ResultService {
             LessonRepository lessonRepository
             , ParticipantRepository participantRepository,
             LessonMaterialRepository lessonMaterialRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, AvatarRepository avatarRepository) {
         this.lessonRepository = lessonRepository;
         this.participantRepository = participantRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
         this.userRepository = userRepository;
+        this.avatarRepository = avatarRepository;
     }
 
 
@@ -52,7 +55,9 @@ public class ResultService {
                         lessonMaterialRepository.findById(participant.getLesson().getLessonMaterialId())
                                 .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
                                 .getBookTitle(),
-                        participant.getLesson().getPhotoUrl()))
+                        participant.getLesson().getPhotoUrl(),
+                        participant.getLesson().getCreatedAt()
+                ))
                 .collect(Collectors.toList());
 
         Collections.reverse(photos);
@@ -108,7 +113,7 @@ public class ResultService {
         // 반환할 LessonResultDto 생성 및 초기 설정
         LessonResultDto lessonResultDto = new LessonResultDto(
                 lessonMaterial.getBookTitle(),
-                    lesson.getCreatedAt() // 수업 날짜
+                lesson.getCreatedAt() // 수업 날짜
                 //    lesson.getPhotoUrl() // 수업 단체사진
         );
 
@@ -147,6 +152,11 @@ public class ResultService {
         List<HotSittingResultDto> hotSittings = lesson.getHotSitting().getSelfIntroduces().stream()
                 .map(selfIntroduce -> new HotSittingResultDto(
                         selfIntroduce.getContents(),
+                        userRepository.findById(selfIntroduce.getUserId()).orElseThrow(() ->
+                                new EntityNotFoundException("userId로 유저이름을 찾을 수 없습니다.")).getName(),
+                        avatarRepository.findByLesson_LessonIdAndUserId(
+                                lessonId, selfIntroduce.getUserId()).orElseThrow(() ->
+                                new EntityNotFoundException("lessonId와 userId로 역할을 찾을 수 없습니다.")).getCharacter(),
                         selfIntroduce.getQuestionAnswers().stream()
                                 .map(QuestionAnswer::getQnAContents)
                                 .collect(Collectors.toList())))

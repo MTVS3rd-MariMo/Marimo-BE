@@ -15,4 +15,6 @@ public class StudentResultDto {
 
     private String photo;
 
+    private String createdAt;
+
 }
