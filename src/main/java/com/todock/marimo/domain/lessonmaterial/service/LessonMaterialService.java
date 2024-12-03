@@ -210,11 +210,17 @@ public class LessonMaterialService {
                 ))
                 .toList();
 
+        List<String> roleList = lessonMaterial.getLessonRoleList().stream()
+                .map(role -> role.getRoleName().toString()) // role 객체에서 getName() 메서드를 호출
+                .toList();
+
         // DTO 생성 및 반환
         return new DetailLessonMaterialDto(
                 lessonMaterialId,
+                lessonMaterial.getBookContents(),
                 openQuestions,
-                quizList
+                quizList,
+                roleList
         );
     }
 

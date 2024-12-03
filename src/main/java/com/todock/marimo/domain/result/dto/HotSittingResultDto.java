@@ -16,6 +16,10 @@ public class HotSittingResultDto {
 
     private String selfIntroduce;
 
+    private String userName;
+
+    private String character;
+
     private List<String> questionAnswers = new ArrayList<>();
 
 }
