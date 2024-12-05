@@ -41,7 +41,7 @@ public class HotSittingController {
      */
     @Operation(summary = "자기소개 저장")
     @PutMapping("/self-introduce")
-    public ResponseEntity<String> hotSittingRecord(
+    public ResponseEntity<String> StudentHotSittingRecord(
             @RequestHeader("userId") Long userId,
             @RequestBody SelfIntroduceRequestDto selfIntroduceDto) {
 
@@ -58,7 +58,7 @@ public class HotSittingController {
      */
     @Operation(summary = "핫시팅 QnA AI 서버로 전달")
     @PostMapping(value = "/wav-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> hotSittingWavFile(
+    public ResponseEntity<String> StudentHotSittingWavFile(
             @RequestHeader("userId") Long userId,
             @RequestParam("lessonId") Long lessonId,
             @RequestParam("userName") String userName,

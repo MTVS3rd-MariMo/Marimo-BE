@@ -28,7 +28,7 @@ public class openQuestionController {
      */
     @Operation(summary = "열린 질문 개인 답변 저장")
     @PutMapping()
-    public ResponseEntity<String> openQuestion(
+    public ResponseEntity<String> StudentOpenQuestion(
             @RequestHeader("userId") Long userId
             , @RequestBody AnswerRequestDto answerDto) {
 
