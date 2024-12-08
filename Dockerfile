@@ -20,4 +20,5 @@ COPY nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80 9999
 
 # Nginx와 애플리케이션 모두 실행
-CMD ["sh", "-c", "service nginx start && java -jar /app.jar"]
+# CMD ["sh", "-c", "service nginx start && java -jar /app.jar"]
+CMD ["sh", "-c", "service nginx start && exec java -jar /app.jar"]
