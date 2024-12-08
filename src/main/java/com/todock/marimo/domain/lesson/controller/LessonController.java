@@ -45,7 +45,7 @@ public class LessonController {
      */
     @Operation(summary = "수업 생성", description = "userId와 lessonMaterialId를 받고 수업 생성 후 LessonId 반환합니다.")
     @PostMapping("/{lessonMaterialId}")
-    public ResponseEntity<Long> createLesson(
+    public ResponseEntity<Long> teacherCreateLesson(
             @RequestHeader(value = "userId", required = false) Long userId
             , @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
@@ -84,7 +84,7 @@ public class LessonController {
     @Operation(summary = "수업 참가자 목록 조회", description = "주어진 LessonId의 참가자 목록을 조회합니다.")
     @GetMapping("/participant/{lessonId}")
     public ResponseEntity<ParticipantListDto> getStudentLessonMaterial(
-            //@RequestHeader("userId") Long userId
+            @RequestHeader("userId") Long userId,
             @PathVariable("lessonId") Long lessonId) {
 
         log.info("참가자가 lessonId : {}로 수업의 참가자 목록을 요청", lessonId);
@@ -102,6 +102,7 @@ public class LessonController {
     @Operation(summary = "참가자 수업 자료 조회", description = "수업 중 참가자가 사용할 수업 자료의 상세 정보를 반환합니다.")
     @GetMapping("/{lessonMaterialId}")
     public ResponseEntity<ParticipantLessonMaterialDto> getLessonMaterial(
+            @RequestHeader("userId") Long userId,
             @PathVariable(name = "lessonMaterialId") Long lessonMaterialId) {
 
         log.info("참가자가 lessonMaterialId: {}로 수업에 사용하는 수업자료 조회", lessonMaterialId);

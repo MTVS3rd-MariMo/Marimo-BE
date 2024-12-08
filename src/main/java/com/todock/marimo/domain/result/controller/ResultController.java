@@ -5,10 +5,13 @@ import com.todock.marimo.domain.result.service.ResultService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 
@@ -31,10 +34,11 @@ public class ResultController {
      */
     @Operation(summary = "userId로 참가한 모든 수업 조회 - 학생")
     @GetMapping("/student")
-    public ResponseEntity<StudentResultResponseDto> getPhotoList(@RequestHeader("userId") Long userId) {
+    public ResponseEntity<StudentResultResponseDto> studentGetPhotoList(
+            @RequestHeader("userId") Long userId) {
 
         log.info("학생이 userId: {}로 참가한 수업 리스트 조회", userId);
-        
+
         return ResponseEntity.ok().body(resultService.findAllPhotos(userId));
     }
 
@@ -44,9 +48,9 @@ public class ResultController {
      */
     @Operation(summary = "userId로 참가한 모든 수업 조회 - 선생님")
     @GetMapping("/teacher")
-    public ResponseEntity<TeacherResultResponseDto> getLessonList(
+    public ResponseEntity<TeacherResultResponseDto> teacherGetLessonList(
             @RequestHeader("userId") Long userId) {
-        
+
         log.info("선생님이 userId: {}로 참가한 수업 리스트 조회", userId);
 
         return ResponseEntity.ok().body(resultService.findAllLessons(userId));
@@ -58,10 +62,12 @@ public class ResultController {
      */
     @Operation(summary = "선생님 수업 결과 조회")
     @GetMapping("/teacher/{lessonId}")
-    public ResponseEntity<LessonResultDto> getLesson(@PathVariable("lessonId") Long lessonId) {
+    public ResponseEntity<LessonResultDto> teacherGetLesson(
+            @RequestHeader("userId") Long userId,
+            @PathVariable("lessonId") Long lessonId) {
 
         log.info("선생님이 lessonId: {}로 수업결과 상세 조회", lessonId);
-        
+
         return ResponseEntity.ok().body(resultService.lessonDetail(lessonId));
     }
 

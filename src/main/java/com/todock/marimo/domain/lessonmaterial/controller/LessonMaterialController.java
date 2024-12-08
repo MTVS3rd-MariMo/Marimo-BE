@@ -1,12 +1,10 @@
 package com.todock.marimo.domain.lessonmaterial.controller;
 
-import com.todock.marimo.domain.lessonmaterial.dto.QuizDto;
 import com.todock.marimo.domain.lessonmaterial.dto.DetailLessonMaterialDto;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialNameResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialNamesRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
-import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.service.LessonMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,7 +77,7 @@ public class LessonMaterialController {
             )
     })
     @PostMapping("/upload-pdf")
-    public ResponseEntity<LessonMaterialResponseDto> sendPdfToAiServer(
+    public ResponseEntity<LessonMaterialResponseDto> teacherSendPdfToAiServer(
             @RequestHeader("userId") Long userId,
             @RequestPart("pdf") MultipartFile pdfFile,
             @RequestParam("bookTitle") String bookTitle,
@@ -124,9 +122,9 @@ public class LessonMaterialController {
             )
     })
     @PutMapping
-    public ResponseEntity<String> updateLessonMaterial(
-            @Valid
-            @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto) {
+    public ResponseEntity<String> teacherUpdateLessonMaterial(
+            @RequestHeader("userId") Long userId,
+            @Valid @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto) {
 
         try {
             log.info("수업 자료 생성 후 수정한 열린 질문, 퀴즈 2개가 있는 DTO : {} ", lessonMaterialRequestDto);
@@ -159,7 +157,8 @@ public class LessonMaterialController {
             )
     })
     @GetMapping("detail/{lessonMaterialId}")
-    public ResponseEntity<DetailLessonMaterialDto> getLessonMaterialByLessonMaterialId(
+    public ResponseEntity<DetailLessonMaterialDto> teacherGetLessonMaterialByLessonMaterialId(
+            @RequestHeader("userId") Long userId,
             @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
         log.info("상세 조회할 수업 자료의 lessonMaterialId: {}", lessonMaterialId);
@@ -175,7 +174,7 @@ public class LessonMaterialController {
      */
     @Operation(summary = "userId로 수업 자료 전체 조회")
     @GetMapping
-    public ResponseEntity<LessonMaterialNamesRequestDto> getLessonMaterialNames(
+    public ResponseEntity<LessonMaterialNamesRequestDto> teacherGetLessonMaterialNames(
             @RequestHeader("userId") Long userId) {
 
         log.info("유저의 userId : {}로 가지고 있는 수업 자료 리스트 조회", userId);
@@ -201,7 +200,9 @@ public class LessonMaterialController {
             )
     })
     @DeleteMapping("/{lessonMaterialId}")
-    public ResponseEntity<String> deleteLessonMaterial(@PathVariable("lessonMaterialId") Long lessonMaterialId) {
+    public ResponseEntity<String> teacherDeleteLessonMaterial(
+            @RequestHeader("userId") Long userId,
+            @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
         lessonMaterialService.deleteById(lessonMaterialId);
 
