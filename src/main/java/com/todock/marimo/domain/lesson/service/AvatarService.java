@@ -394,7 +394,7 @@ public class AvatarService {
 
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
-        String serverUrl = (userId % 2 != 0) ? AIEvenAvatarServerURL : AIOddAvatarServerURL;
+        String serverUrl = (userId % 2 != 0) ? AIEvenAvatarServerURL : AIEvenAvatarServerURL;
         log.info("userId : {} 서버 URL : {}", userId, serverUrl);
 
         ResponseEntity<byte[]> response = restTemplate.postForEntity(serverUrl, request, byte[].class);
