@@ -79,7 +79,7 @@ public class AvatarController {
             )
     })
     @PostMapping(value = "/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AvatarResponseDto> StudentSendImgToAiServer(
+    public ResponseEntity<AvatarResponseDto> studentSendImgToAiServer(
             @RequestHeader(name = "userId") Long userId
             , @RequestParam(name = "lessonId") Long lessonId
             , @RequestParam(name = "img") MultipartFile img) {
@@ -149,7 +149,7 @@ public class AvatarController {
      * 아마존 테스트 AI서버로 전송
      */
     @PostMapping(value = "/aws/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AvatarResponseDto> StudentAwsSendImgToAiServer(
+    public ResponseEntity<AvatarResponseDto> studentAwsSendImgToAiServer(
             @RequestHeader(name = "userId") Long userId
             , @RequestParam(name = "lessonId") Long lessonId
             , @RequestParam(name = "img") MultipartFile img) {

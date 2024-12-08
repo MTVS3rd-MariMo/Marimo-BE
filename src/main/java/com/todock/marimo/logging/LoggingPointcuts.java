@@ -4,7 +4,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Pointcuts {
+public class LoggingPointcuts {
 
     /**
      * 도메인 전체 범위 Pointcut && !auth

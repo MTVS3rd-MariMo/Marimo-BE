@@ -2,7 +2,7 @@ package com.todock.marimo.aspect;
 
 import org.aspectj.lang.annotation.Pointcut;
 
-public class PointCuts {
+public class ExceptionPointCuts {
 
     /**
      * teacherRole() 포인트컷

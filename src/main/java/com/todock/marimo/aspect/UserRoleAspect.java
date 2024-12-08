@@ -28,13 +28,15 @@ public class UserRoleAspect {
     /**
      * userId가 선생님인지 확인
      */
-    @Before("PointCuts.teacherRole()")
+    @Before("com.todock.marimo.aspect.ExceptionPointCuts.teacherRole()")
     public void isTeacher(JoinPoint joinPoint) throws IllegalAccessException {
 
         Long userId = getUserId(joinPoint);
 
 
         if (Role.TEACHER != userService.findRoleById(userId)) {
+            
+            log.warn("Access denied for userId : {} 선생님이 아닙니다.", userId);
             throw new IllegalAccessException("선생님이 아닙니다.");
         }
     }
@@ -43,12 +45,14 @@ public class UserRoleAspect {
     /**
      * userId가 학생인지 확인
      */
-    @Before("PointCuts.studentRole()")
+    @Before("com.todock.marimo.aspect.ExceptionPointCuts.studentRole()")
     public void isStudent(JoinPoint joinPoint) throws IllegalAccessException {
 
         Long userId = getUserId(joinPoint);
 
         if (Role.STUDENT != userService.findRoleById(userId)) {
+
+            log.warn("Access denied for userId : {} 학생이 아닙니다.", userId);
             throw new IllegalAccessException("학생이 아닙니다.");
         }
 
@@ -59,11 +63,6 @@ public class UserRoleAspect {
      * userId가 있는지 검증
      */
     private Long getUserId(JoinPoint joinPoint) throws IllegalAccessException {
-
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
-
-        log.info(method.getName() + " 메서드 에서 유저 권한 조회");
 
         Object[] args = joinPoint.getArgs();
         if (args[0] instanceof Long) {
