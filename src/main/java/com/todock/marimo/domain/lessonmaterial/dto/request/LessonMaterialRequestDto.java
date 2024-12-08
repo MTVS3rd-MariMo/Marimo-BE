@@ -2,10 +2,12 @@ package com.todock.marimo.domain.lessonmaterial.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.todock.marimo.domain.lessonmaterial.dto.QuizDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.RoleResponseDto;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -14,6 +16,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LessonMaterialRequestDto {
+
+    private String bookContents;
+
+    private List<RoleResponseDto> roleList = new ArrayList<>();
 
     @NotNull(message = "수업 자료 ID는 필수 입력값입니다.")
     @JsonProperty("lessonMaterialId")

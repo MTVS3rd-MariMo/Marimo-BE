@@ -36,6 +36,7 @@ public class LessonMaterial {
     private String author;
 
     @Lob
+    @Setter
     @Column(name = "book_contents", columnDefinition = "LONGTEXT")
     private String bookContents;
 

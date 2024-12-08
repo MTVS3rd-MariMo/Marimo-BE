@@ -350,6 +350,7 @@ public class AvatarService {
      */
     @Transactional
     public AvatarResponseDto saveAwsAvatar(Long userId, Long lessonId, MultipartFile img) {
+
         log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
 
         try {
