@@ -40,7 +40,7 @@ public class AvatarController {
 
 
     /**
-     * img를 AI서버로 전송
+     * img를 AI서버로 전송 - 아바타 로컬 저장, 더미데이터 사용
      */
     @Operation(
             summary = "img 파일 업로드",
@@ -79,7 +79,7 @@ public class AvatarController {
             )
     })
     @PostMapping(value = "/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AvatarResponseDto> sendImgToAiServer(
+    public ResponseEntity<AvatarResponseDto> studentSendImgToAiServer(
             @RequestHeader(name = "userId") Long userId
             , @RequestParam(name = "lessonId") Long lessonId
             , @RequestParam(name = "img") MultipartFile img) {
@@ -149,7 +149,7 @@ public class AvatarController {
      * 아마존 테스트 AI서버로 전송
      */
     @PostMapping(value = "/aws/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AvatarResponseDto> awsSendImgToAiServer(
+    public ResponseEntity<AvatarResponseDto> studentAwsSendImgToAiServer(
             @RequestHeader(name = "userId") Long userId
             , @RequestParam(name = "lessonId") Long lessonId
             , @RequestParam(name = "img") MultipartFile img) {
@@ -221,14 +221,15 @@ public class AvatarController {
     @Operation(summary = "다른 유저의 아바타 받기")
     @GetMapping("/participant/{lessonId}/{userId}")
     public ResponseEntity<AvatarResponseDto> getAvatarForParticipant(
-            @PathVariable("lessonId") Long lessonId
-            , @PathVariable("userId") Long userId) {
+            @RequestHeader(name = "userId") Long userId,
+            @PathVariable("lessonId") Long lessonId,
+            @PathVariable("userId") Long otherUserId) {
 
-        log.info("lessonId : {}의 다른 유저 userId: {}의 아바타를 요청합니다.", lessonId, userId);
+        log.info("lessonId : {}의 다른 유저 userId: {}의 아바타를 요청합니다.", lessonId, otherUserId);
 
-        AvatarResponseDto avatarResponseDto = avatarService.findByUserId(lessonId, userId);
+        AvatarResponseDto avatarResponseDto = avatarService.findByUserId(lessonId, otherUserId);
 
-        log.info("다른 유저가 userId: {}의 아바타를 요청 : {}", userId, avatarResponseDto);
+        log.info("다른 유저가 userId: {}의 아바타를 요청 : {}", otherUserId, avatarResponseDto);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(avatarResponseDto);

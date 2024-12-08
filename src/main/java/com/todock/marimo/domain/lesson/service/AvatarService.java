@@ -100,7 +100,7 @@ public class AvatarService {
 
 
     /**
-     * img를 AI서버로 전송
+     * img를 AI서버로 전송 - 아바타 로컬 저장, 더미데이터 사용
      */
     @Transactional
     public AvatarResponseDto sendImgToAiServer(Long userId, Long lessonId, MultipartFile img) {
@@ -112,8 +112,9 @@ public class AvatarService {
                 .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
 
         AvatarResponseDto avatarResponseDto;
+
         if (userId == 1L) { // 빨간모자
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, 1L)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 1로 빨간모자 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -148,7 +149,7 @@ public class AvatarService {
             return avatarResponseDto;
 
         } else if (userId == 2L) { // 할머니
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, 2L)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 할머니 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -183,7 +184,7 @@ public class AvatarService {
             return avatarResponseDto;
 
         } else if (userId == 3L) { // 늑대
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, 3L)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 3로 늑대 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -218,7 +219,7 @@ public class AvatarService {
             return avatarResponseDto;
 
         } else if (userId == 4L) { // 사냥꾼
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, 4L)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 사냥꾼 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -341,7 +342,6 @@ public class AvatarService {
             throw new RuntimeException("파일 처리 실패", e);
         }*/
 
-
     }
 
 
@@ -393,7 +393,7 @@ public class AvatarService {
 
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
-        String serverUrl = (userId % 2 != 0) ? AIEvenAvatarServerURL : AIEvenAvatarServerURL;
+        String serverUrl = (userId % 2 != 0) ? AIEvenAvatarServerURL : AIOddAvatarServerURL;
         log.info("userId : {} 서버 URL : {}", userId, serverUrl);
 
         ResponseEntity<byte[]> response = restTemplate.postForEntity(serverUrl, request, byte[].class);
