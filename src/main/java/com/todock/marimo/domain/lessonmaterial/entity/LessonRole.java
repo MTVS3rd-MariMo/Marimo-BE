@@ -23,6 +23,7 @@ public class LessonRole {
     @JoinColumn(name = "lesson_material_id")
     private LessonMaterial lessonMaterial;
 
+    @Setter
     @Column(name = "lesson_role_name", nullable = false) // 역할 이름
     private String roleName;
 

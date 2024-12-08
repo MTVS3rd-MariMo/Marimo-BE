@@ -7,6 +7,7 @@ import com.todock.marimo.domain.lessonmaterial.dto.*;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialNameResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.LessonMaterialResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.reponse.OpenQuestionResponseDto;
+import com.todock.marimo.domain.lessonmaterial.dto.reponse.RoleResponseDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.LessonMaterialRequestDto;
 import com.todock.marimo.domain.lessonmaterial.dto.request.OpenQuestionRequestDto;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
@@ -14,6 +15,7 @@ import com.todock.marimo.domain.lessonmaterial.entity.LessonRole;
 import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.entity.quiz.Quiz;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
+import com.todock.marimo.domain.lessonmaterial.repository.LessonRoleRepository;
 import com.todock.marimo.domain.lessonmaterial.repository.OpenQuestionRepository;
 import com.todock.marimo.domain.lessonmaterial.repository.QuizRepository;
 import com.todock.marimo.domain.user.entity.Role;
@@ -53,6 +55,7 @@ public class LessonMaterialService {
     private final RestTemplate restTemplate;
     private final QuizRepository quizRepository;
     private final UserRepository userRepository;
+    private final LessonRoleRepository lessonRoleRepository;
     private final OpenQuestionRepository openQuestionRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
 
@@ -60,6 +63,7 @@ public class LessonMaterialService {
     public LessonMaterialService(
             LessonMaterialRepository lessonMaterialRepository,
             OpenQuestionRepository openQuestionRepository,
+            LessonRoleRepository lessonRoleRepository,
             UserRepository userRepository,
             QuizRepository quizRepository,
             RestTemplate restTemplate,
@@ -67,6 +71,7 @@ public class LessonMaterialService {
 
         this.lessonMaterialRepository = lessonMaterialRepository;
         this.openQuestionRepository = openQuestionRepository;
+        this.lessonRoleRepository = lessonRoleRepository;
         this.userRepository = userRepository;
         this.quizRepository = quizRepository;
         this.restTemplate = restTemplate;
@@ -81,7 +86,6 @@ public class LessonMaterialService {
     public LessonMaterialResponseDto sendPdfToAiServer(
             MultipartFile pdf, Long userId, String bookTitle, String author) {
 
-        validateUserRole(userId); // 유저 검증
         if (pdf == null || pdf.isEmpty()) {
             throw new IllegalArgumentException("업로드할 PDF 파일이 제공되지 않았습니다.");
         }
@@ -126,10 +130,12 @@ public class LessonMaterialService {
 
 
     /**
-     * pdf에서 바로 받은 후 열린질문, 퀴즈 2개 선택해서 수정 - 기본 수정도 포함
+     * pdf에서 바로 받은 후 열린질문, 퀴즈 2개 선택해서 수정 후 저장- 기본 수정도 포함
      */
     @Transactional
     public void updateLessonMaterial(LessonMaterialRequestDto lessonMaterialInfo) {
+
+        log.info(lessonMaterialInfo.toString());
 
         LessonMaterial lessonMaterial = lessonMaterialRepository
                 .findById(lessonMaterialInfo.getLessonMaterialId())
@@ -174,6 +180,30 @@ public class LessonMaterialService {
                 );
                 lessonMaterial.getOpenQuestionList().add(openQuestion);
             }
+
+            // 책 내용 수정
+            lessonMaterial.setBookContents(lessonMaterialInfo.getBookContents());
+
+            // 역할 리스트 수정
+            List<RoleResponseDto> roles = lessonMaterialInfo.getRoleList();
+
+            for (RoleResponseDto role : roles) {
+                LessonRole lessonRole = lessonRoleRepository.findById(role.getRoleId()).orElseThrow(() ->
+                        new EntityNotFoundException("역할을 찾을 수 없습니다."));
+                lessonRole.setRoleName(role.getRoleName());
+                lessonRoleRepository.save(lessonRole);
+            }
+/*
+
+            if (roles != null && !roles.isEmpty()) {
+                lessonMaterial.getLessonRoleList().clear();
+                roles.forEach(roleDto -> {
+                    LessonRole role = new LessonRole(lessonMaterial, roleDto.getRoleName());
+                    lessonMaterial.getLessonRoleList().add(role);
+                });
+            }
+*/
+
         } else {
             log.info("열린 질문이 존재하지 않습니다.");
         }
@@ -210,17 +240,23 @@ public class LessonMaterialService {
                 ))
                 .toList();
 
-        List<String> roleList = lessonMaterial.getLessonRoleList().stream()
-                .map(role -> role.getRoleName().toString()) // role 객체에서 getName() 메서드를 호출
-                .toList();
+        // 저장된 역할을 RoleResponseDto로 변환
+        List<RoleResponseDto> roleList = lessonMaterial.getLessonRoleList().stream()
+                .map(role -> new RoleResponseDto(
+                        role.getRoleId(),
+                        role.getRoleName()
+                ))
+                .collect(Collectors.toList());
+
+        log.info(roleList.toString());
 
         // DTO 생성 및 반환
         return new DetailLessonMaterialDto(
                 lessonMaterialId,
                 lessonMaterial.getBookContents(),
+                roleList,
                 openQuestions,
-                quizList,
-                roleList
+                quizList
         );
     }
 
@@ -229,8 +265,6 @@ public class LessonMaterialService {
      * 유저 id로 유저의 수업 자료 전체 조회
      */
     public List<LessonMaterialNameResponseDto> getLessonMaterialByUserId(Long userId) {
-
-        validateUserRole(userId); // 선생님 검증
 
         List<LessonMaterialNameResponseDto> lessonMaterialNameList = lessonMaterialRepository.findByUserId(userId)
                 .stream()
@@ -298,6 +332,8 @@ public class LessonMaterialService {
             lessonMaterial.setLessonRoleList(roles);
             lessonMaterialRepository.save(lessonMaterial); // LessonMaterial 저장 (열린 질문, 퀴즈는 저장하지 않음)
 
+            // 수업 자료 저장 아래는 클라이언트로 보내는 코드
+
             log.info("생성된 lessonMaterialId : {}", lessonMaterial.getLessonMaterialId());
 
             // 열린 질문을 OpenQuestionDto로 변환하여 클라이언트에 보낼 준비
@@ -338,24 +374,23 @@ public class LessonMaterialService {
                 });
             }
 
+            // 저장된 역할을 RoleResponseDto로 변환
+            List<RoleResponseDto> roleDtos = lessonMaterial.getLessonRoleList().stream()
+                    .map(role -> new RoleResponseDto(
+                            role.getRoleId(),
+                            role.getRoleName()
+                    ))
+                    .collect(Collectors.toList());
+
             // 클라이언트에 반환할 LessonMaterialResponseDto 생성
-            return new LessonMaterialResponseDto(lessonMaterial.getLessonMaterialId(), quizDtos, openQuestionDtos);
+            return new LessonMaterialResponseDto(
+                    lessonMaterial.getLessonMaterialId(),
+                    lessonMaterial.getBookContents(),
+                    roleDtos,
+                    quizDtos,
+                    openQuestionDtos);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("json 변형이 잘못되었습니다.");
-        }
-    }
-
-
-    /**
-     * 선생님인지 검증
-     */
-    private void validateUserRole(Long userId) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 선생님입니다."));
-
-        if (user.getRole() != Role.TEACHER) {
-            throw new IllegalArgumentException("선생님만 수업 자료를 만들 수 있습니다.");
         }
     }
 

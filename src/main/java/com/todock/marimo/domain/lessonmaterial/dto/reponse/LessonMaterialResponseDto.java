@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -16,6 +17,12 @@ public class LessonMaterialResponseDto { // pdf 결과 전송
     // 수업 자료 Id
     @JsonProperty("lessonMaterialId")
     private Long lessonMaterialId;
+
+    // 책 내용
+    private String bookContents;
+
+    // 역할 정리
+    private List<RoleResponseDto> roleList = new ArrayList<>();
 
     // 퀴즈 리스트
     @JsonProperty("quizList")

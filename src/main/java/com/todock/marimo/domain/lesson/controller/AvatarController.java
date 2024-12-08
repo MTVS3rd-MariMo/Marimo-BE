@@ -146,7 +146,7 @@ public class AvatarController {
 
 
     /**
-     * 아마존 테스트 AI서버로 전송
+     * AI서버로 전송 - aws
      */
     @PostMapping(value = "/aws/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AvatarResponseDto> studentAwsSendImgToAiServer(
