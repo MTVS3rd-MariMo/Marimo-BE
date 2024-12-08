@@ -3,8 +3,10 @@ package com.todock.marimo.domain.user.service;
 import com.todock.marimo.domain.user.dto.LoginUserRequestDto;
 import com.todock.marimo.domain.user.dto.LoginUserResponseDto;
 import com.todock.marimo.domain.user.dto.SignUpUserRequestDto;
+import com.todock.marimo.domain.user.entity.Role;
 import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,7 @@ public class UserService {
      */
     @Transactional
     public void signUp(SignUpUserRequestDto userInfo) {
-        
+
         // 선생님이 학생번호 입력시 에러
         if (userInfo.getRole().toString().equalsIgnoreCase("STUDENT") &&
                 (userInfo.getStudentNumber() == null || userInfo.getStudentNumber() < 1)) {
@@ -84,4 +86,14 @@ public class UserService {
         );
     }
 
+    /**
+     * 유저 역할 확인
+     */
+    public Role findRoleById(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new EntityNotFoundException("유저가 존재하지 않습니다."));
+
+        return user.getRole();
+
+    }
 }

@@ -20,7 +20,7 @@ public class AllLogAdviser {
      */
 
 
-    @Around("Pointcuts.ControllerLogPointcut()") // 컨트롤러 중 AI 메서드 제외
+    @Around("com.todock.marimo.logging.LoggingPointcuts.ControllerLogPointcut()") // 컨트롤러 중 AI 메서드 제외
     // @Around("Pointcuts.ControllerLogPointcut()") // 컨트롤러 중 AI 메서드 제외
     public Object logMethodDetails(ProceedingJoinPoint joinPoint) throws Throwable {
 

@@ -38,7 +38,8 @@ public class PhotoController {
      */
     @Operation(summary = "배경사진 제작 요청")
     @PostMapping("/background/{lessonMaterialId}")
-    public ResponseEntity<String> createBackGround(
+    public ResponseEntity<String> teacherCreateBackGround(
+            @RequestHeader("userId") Long userId,
             @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
         log.info("lessonMaterialId: {}로 수업자료 저장/수정 후 배경사진 제작 요청", lessonMaterialId);
@@ -71,6 +72,7 @@ public class PhotoController {
     @Operation(summary = "단체사진 저장")
     @PostMapping("/{lessonId}")
     public ResponseEntity<String> saveGroupPhoto(
+            @RequestHeader("userId") Long userId,
             @PathVariable("lessonId") Long lessonId,
             @RequestParam("img") MultipartFile photo) {
 

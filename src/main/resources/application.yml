@@ -1,6 +1,6 @@
 spring:
   profiles:
     #include: dev, local
-    active: dev
+    active: local
   application:
     name: marimo
