@@ -114,7 +114,7 @@ public class AvatarService {
         AvatarResponseDto avatarResponseDto;
 
         if (userId == 1L) { // 만복이
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(3L, userId)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 1로 빨간모자 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -145,11 +145,11 @@ public class AvatarService {
             lessonRepository.save(lesson);
 
             avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(3L).orElseThrow(() -> new EntityNotFoundException("lessonId 2로 변경 실패")));
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 2로 변경 실패")));
             return avatarResponseDto;
 
         } else if (userId == 2L) { // 만복이엄마
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(3L, userId)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 할머니 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -180,11 +180,11 @@ public class AvatarService {
             lessonRepository.save(lesson);
 
             avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(3L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
             return avatarResponseDto;
 
         } else if (userId == 3L) { // 선생님
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(3L, userId)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 3로 늑대 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -215,11 +215,11 @@ public class AvatarService {
             lessonRepository.save(lesson);
 
             avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(3L).orElseThrow(() -> new EntityNotFoundException("lessonId 1으로 변경 실패")));
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 1으로 변경 실패")));
             return avatarResponseDto;
 
         } else if (userId == 4L) { // 은지
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(3L, userId)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 사냥꾼 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -250,7 +250,7 @@ public class AvatarService {
             lessonRepository.save(lesson);
 
             avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(3L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
             return avatarResponseDto;
 
         }
@@ -267,7 +267,7 @@ public class AvatarService {
 
         log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
 
-       try {
+        try {
 
             // 1. HttpHeaders 설정
             HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
@@ -486,7 +486,6 @@ public class AvatarService {
         relativePath = relativePath.replaceFirst("^data/avatar/", ""); // "data/avatar/" 제거
         return "http://" + serverHost + ":" + serverPort + "/data/avatar/" + relativePath;
     }
-
 
     /**
      * 아마존 아바타 저장 메서드
