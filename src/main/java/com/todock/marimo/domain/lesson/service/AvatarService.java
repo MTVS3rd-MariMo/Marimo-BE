@@ -290,9 +290,9 @@ public class AvatarService {
             ResponseEntity<byte[]> AIResponse;
             // 5. AI 서버로 POST 요청을 보내고 응답을 받음 - 유저Id를 홀수, 짝수 일때 나눠서 AI서버로 요청 보냄
             if (userId % 2 != 0) {
-                log.info("userId : {}는 홀수라서 {}로 보냈습니다.", userId, AIOddAvatarServerURL);
+                log.info("userId : {}는 홀수라서 {}로 보냈습니다.", userId, AIEvenAvatarServerURL);
                 AIResponse = restTemplate.postForEntity(
-                        AIOddAvatarServerURL, request, byte[].class);
+                        AIEvenAvatarServerURL, request, byte[].class);
             } else {
                 log.info("userId : {}는 짝수라서 {}로 보냈습니다.", userId, AIEvenAvatarServerURL);
                 AIResponse = restTemplate.postForEntity(

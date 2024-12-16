@@ -40,7 +40,7 @@ public class AvatarController {
 
 
     /**
-     * img를 AI서버로 전송 - 아바타 로컬 저장, 더미데이터 사용
+     * img를 AI서버로 전송 - 아바타 로컬 저장, 아바타 생성 !!!!!! 잠시 dummy랑 url 바꾼 상태임!!!!!!@!!
      */
     @Operation(
             summary = "img 파일 업로드",
@@ -78,7 +78,8 @@ public class AvatarController {
                     )
             )
     })
-    @PostMapping(value = "/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+    @PostMapping(value = "/dummy/upload-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AvatarResponseDto> studentSendImgToAiServer(
             @RequestHeader(name = "userId") Long userId
             , @RequestParam(name = "lessonId") Long lessonId
@@ -127,7 +128,7 @@ public class AvatarController {
             // 5. 서비스 호출
             AvatarResponseDto avatarResponseDto = avatarService.sendImgToAiServer(userId, lessonId, img);
 
-            log.info("userId: {}로 요청한 생성된 아바타 : {}",userId, avatarResponseDto);
+            log.info("userId: {}로 요청한 생성된 아바타 : {}", userId, avatarResponseDto);
 
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -148,7 +149,7 @@ public class AvatarController {
     /**
      * Dummy Avatar
      */
-    @PostMapping("/dummy/upload-img")
+    @PostMapping("/upload-img")
     public ResponseEntity<AvatarResponseDto> dummyAvatar(
             @RequestHeader(name = "userId") Long userId
             , @RequestParam(name = "lessonId") Long lessonId
@@ -197,7 +198,7 @@ public class AvatarController {
             // 5. 서비스 호출
             AvatarResponseDto avatarResponseDto = avatarService.dummyAvatar(userId, lessonId, img);
 
-            log.info("userId: {}로 요청한 생성된 아바타 : {}",userId, avatarResponseDto);
+            log.info("userId: {}로 요청한 생성된 아바타 : {}", userId, avatarResponseDto);
 
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -233,6 +234,17 @@ public class AvatarController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(avatarResponseDto);
+    }
+
+
+    /**
+     * 파일 확장자 추출
+     */
+    private String getFileExtension(String filename) {
+        if (filename == null || filename.lastIndexOf(".") == -1) {
+            return "";
+        }
+        return filename.substring(filename.lastIndexOf(".") + 1);
     }
 
 
@@ -306,16 +318,4 @@ public class AvatarController {
         }
     }
     */
-
-
-    /**
-     * 파일 확장자 추출
-     */
-    private String getFileExtension(String filename) {
-        if (filename == null || filename.lastIndexOf(".") == -1) {
-            return "";
-        }
-        return filename.substring(filename.lastIndexOf(".") + 1);
-    }
-
 }
