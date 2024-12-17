@@ -63,9 +63,9 @@ public class AvatarService {
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucketName;
 
+    private final RestTemplate restTemplate;
     private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
-    private final RestTemplate restTemplate;
 
     private static final String DATA_DIR = "data"; // 파일 저장 경로
     private static final String ZIP_DIR = "data/zip"; // zip 파일 저장 경로
@@ -100,10 +100,10 @@ public class AvatarService {
 
 
     /**
-     * img를 AI서버로 전송 - 아바타 로컬 저장, 더미데이터 사용
+     * img를 AI서버로 전송 - 아바타 더미데이터 사용
      */
     @Transactional
-    public AvatarResponseDto sendImgToAiServer(Long userId, Long lessonId, MultipartFile img) {
+    public AvatarResponseDto dummyAvatar(Long userId, Long lessonId, MultipartFile img) {
 
         log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
 
@@ -114,7 +114,7 @@ public class AvatarService {
         AvatarResponseDto avatarResponseDto;
 
         if (userId == 1L) { // 만복이
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(3L, userId)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 1로 빨간모자 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -145,11 +145,11 @@ public class AvatarService {
             lessonRepository.save(lesson);
 
             avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(3L).orElseThrow(() -> new EntityNotFoundException("lessonId 2로 변경 실패")));
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 2로 변경 실패")));
             return avatarResponseDto;
 
         } else if (userId == 2L) { // 만복이엄마
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(3L, userId)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 할머니 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -180,11 +180,11 @@ public class AvatarService {
             lessonRepository.save(lesson);
 
             avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(3L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
             return avatarResponseDto;
 
         } else if (userId == 3L) { // 선생님
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(3L, userId)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 3로 늑대 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -215,11 +215,11 @@ public class AvatarService {
             lessonRepository.save(lesson);
 
             avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(3L).orElseThrow(() -> new EntityNotFoundException("lessonId 1으로 변경 실패")));
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 1으로 변경 실패")));
             return avatarResponseDto;
 
         } else if (userId == 4L) { // 은지
-            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(3L, userId)
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
                     .orElseThrow(() -> new EntityNotFoundException("lessonId : 1, userId 2로 사냥꾼 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
@@ -250,16 +250,24 @@ public class AvatarService {
             lessonRepository.save(lesson);
 
             avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
-            avatar.setLesson(lessonRepository.findById(3L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 1로 변경 실패")));
             return avatarResponseDto;
 
         }
 
         return null;
+    }
 
-        // local 저장
-       /*
-       try {
+
+    /**
+     * img를 AI서버로 전송 - 로컬저장
+     */
+    @Transactional
+    public AvatarResponseDto sendImgToAiServer(Long userId, Long lessonId, MultipartFile img) {
+
+        log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
+
+        try {
 
             // 1. HttpHeaders 설정
             HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
@@ -282,9 +290,9 @@ public class AvatarService {
             ResponseEntity<byte[]> AIResponse;
             // 5. AI 서버로 POST 요청을 보내고 응답을 받음 - 유저Id를 홀수, 짝수 일때 나눠서 AI서버로 요청 보냄
             if (userId % 2 != 0) {
-                log.info("userId : {}는 홀수라서 {}로 보냈습니다.", userId, AIOddAvatarServerURL);
+                log.info("userId : {}는 홀수라서 {}로 보냈습니다.", userId, AIEvenAvatarServerURL);
                 AIResponse = restTemplate.postForEntity(
-                        AIOddAvatarServerURL, request, byte[].class);
+                        AIEvenAvatarServerURL, request, byte[].class);
             } else {
                 log.info("userId : {}는 짝수라서 {}로 보냈습니다.", userId, AIEvenAvatarServerURL);
                 AIResponse = restTemplate.postForEntity(
@@ -340,121 +348,7 @@ public class AvatarService {
         } catch (Exception e) {
             log.error("파일 처리 중 오류 발생", e);
             throw new RuntimeException("파일 처리 실패", e);
-        }*/
-
-    }
-
-
-    /**
-     * 아마존 아바타 저장 메서드
-     */
-    @Transactional
-    public AvatarResponseDto saveAwsAvatar(Long userId, Long lessonId, MultipartFile img) {
-
-        log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
-
-        try {
-            // 1. AI 서버 요청
-            byte[] zipBytes = sendImgToAiServer(userId, img);
-
-            // 2. ZIP 파일을 S3에 저장
-            String zipFileName = UUID.randomUUID().toString() + ".zip";
-            String zipS3Key = "zip/" + zipFileName;
-            uploadToS3(zipS3Key, zipBytes);
-
-            // 3. ZIP 파일 압축 해제 및 S3 업로드
-            String uuidFolder = UUID.randomUUID().toString();
-            String avatarS3Prefix = "avatars/" + uuidFolder + "/";
-            List<String> fileUrls = extractAndUploadFilesToS3(zipS3Key, avatarS3Prefix);
-
-            // 4. 아바타 및 애니메이션 데이터 처리
-            Avatar avatar = createAvatarEntity(userId, lessonId, fileUrls);
-
-            // 5. DB에 저장
-            avatar = avatarRepository.save(avatar);
-
-            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
-        } catch (Exception e) {
-            log.error("파일 처리 중 오류 발생", e);
-            throw new RuntimeException("파일 처리 실패", e);
         }
-    }
-    // ai 서버 전송
-    private byte[] sendImgToAiServer(Long userId, MultipartFile img) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("img", new ByteArrayResource(img.getBytes()) {
-            @Override
-            public String getFilename() {
-                return img.getOriginalFilename();
-            }
-        });
-
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
-
-        String serverUrl = (userId % 2 != 0) ? AIEvenAvatarServerURL : AIOddAvatarServerURL;
-        log.info("userId : {} 서버 URL : {}", userId, serverUrl);
-
-        ResponseEntity<byte[]> response = restTemplate.postForEntity(serverUrl, request, byte[].class);
-        return response.getBody();
-    }
-    // aws에 올리기
-    private void uploadToS3(String key, byte[] data) {
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(data.length);
-        amazonS3.putObject(new PutObjectRequest(bucketName, key, new ByteArrayInputStream(data), metadata));
-        log.info("파일이 S3에 업로드되었습니다. 경로: {}", key);
-    }
-    // 압축 해제 후 애니메이션 올리기
-    private List<String> extractAndUploadFilesToS3(String zipS3Key, String avatarS3Prefix) throws IOException {
-        S3Object zipObject = amazonS3.getObject(bucketName, zipS3Key);
-
-        List<String> fileUrls = new ArrayList<>();
-        try (ZipInputStream zis = new ZipInputStream(zipObject.getObjectContent())) {
-            ZipEntry zipEntry;
-            while ((zipEntry = zis.getNextEntry()) != null) {
-                if (!zipEntry.isDirectory()) {
-                    String fileName = zipEntry.getName();
-                    String s3Key = avatarS3Prefix + fileName;
-
-                    // 파일을 S3에 직접 업로드
-                    byte[] fileData = zis.readAllBytes();
-                    uploadToS3(s3Key, fileData);
-
-                    // 업로드된 파일 URL 생성
-                    String fileUrl = amazonS3.getUrl(bucketName, s3Key).toString();
-                    fileUrls.add(fileUrl);
-                    log.info("압축 해제 및 업로드 완료: {}", fileUrl);
-                }
-            }
-        }
-        return fileUrls;
-    }
-    // 아바타 저장
-    private Avatar createAvatarEntity(Long userId, Long lessonId, List<String> fileUrls) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
-
-        Avatar avatar = new Avatar();
-        avatar.setUserId(userId);
-        avatar.setLesson(lesson);
-
-        List<Animation> animations = new ArrayList<>();
-        for (String fileUrl : fileUrls) {
-            if (fileUrl.endsWith(".png")) {
-                avatar.setAvatarImg(fileUrl);
-            } else if (fileUrl.endsWith(".mp4")) {
-                Animation animation = new Animation();
-                animation.setAvatar(avatar);
-                animation.setAnimation(fileUrl);
-                animations.add(animation);
-            }
-        }
-        avatar.setAnimations(animations);
-
-        return avatar;
     }
 
 
@@ -592,5 +486,119 @@ public class AvatarService {
         relativePath = relativePath.replaceFirst("^data/avatar/", ""); // "data/avatar/" 제거
         return "http://" + serverHost + ":" + serverPort + "/data/avatar/" + relativePath;
     }
+
+    /**
+     * 아마존 아바타 저장 메서드
+     */
+    /*
+    @Transactional
+    public AvatarResponseDto saveAwsAvatar(Long userId, Long lessonId, MultipartFile img) {
+
+        log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
+
+        try {
+            // 1. AI 서버 요청
+            byte[] zipBytes = sendImgToAiServer(userId, img);
+
+            // 2. ZIP 파일을 S3에 저장
+            String zipFileName = UUID.randomUUID().toString() + ".zip";
+            String zipS3Key = "zip/" + zipFileName;
+            uploadToS3(zipS3Key, zipBytes);
+
+            // 3. ZIP 파일 압축 해제 및 S3 업로드
+            String uuidFolder = UUID.randomUUID().toString();
+            String avatarS3Prefix = "avatars/" + uuidFolder + "/";
+            List<String> fileUrls = extractAndUploadFilesToS3(zipS3Key, avatarS3Prefix);
+
+            // 4. 아바타 및 애니메이션 데이터 처리
+            Avatar avatar = createAvatarEntity(userId, lessonId, fileUrls);
+
+            // 5. DB에 저장
+            avatar = avatarRepository.save(avatar);
+
+            return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+        } catch (Exception e) {
+            log.error("파일 처리 중 오류 발생", e);
+            throw new RuntimeException("파일 처리 실패", e);
+        }
+    }
+    // ai 서버 전송
+    private byte[] sendImgToAiServer(Long userId, MultipartFile img) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("img", new ByteArrayResource(img.getBytes()) {
+            @Override
+            public String getFilename() {
+                return img.getOriginalFilename();
+            }
+        });
+
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+
+        String serverUrl = (userId % 2 != 0) ? AIEvenAvatarServerURL : AIOddAvatarServerURL;
+        log.info("userId : {} 서버 URL : {}", userId, serverUrl);
+
+        ResponseEntity<byte[]> response = restTemplate.postForEntity(serverUrl, request, byte[].class);
+        return response.getBody();
+    }
+    // aws에 올리기
+    private void uploadToS3(String key, byte[] data) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(data.length);
+        amazonS3.putObject(new PutObjectRequest(bucketName, key, new ByteArrayInputStream(data), metadata));
+        log.info("파일이 S3에 업로드되었습니다. 경로: {}", key);
+    }
+    // 압축 해제 후 애니메이션 올리기
+    private List<String> extractAndUploadFilesToS3(String zipS3Key, String avatarS3Prefix) throws IOException {
+        S3Object zipObject = amazonS3.getObject(bucketName, zipS3Key);
+
+        List<String> fileUrls = new ArrayList<>();
+        try (ZipInputStream zis = new ZipInputStream(zipObject.getObjectContent())) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                if (!zipEntry.isDirectory()) {
+                    String fileName = zipEntry.getName();
+                    String s3Key = avatarS3Prefix + fileName;
+
+                    // 파일을 S3에 직접 업로드
+                    byte[] fileData = zis.readAllBytes();
+                    uploadToS3(s3Key, fileData);
+
+                    // 업로드된 파일 URL 생성
+                    String fileUrl = amazonS3.getUrl(bucketName, s3Key).toString();
+                    fileUrls.add(fileUrl);
+                    log.info("압축 해제 및 업로드 완료: {}", fileUrl);
+                }
+            }
+        }
+        return fileUrls;
+    }
+    // 아바타 저장
+    private Avatar createAvatarEntity(Long userId, Long lessonId, List<String> fileUrls) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+
+        Avatar avatar = new Avatar();
+        avatar.setUserId(userId);
+        avatar.setLesson(lesson);
+
+        List<Animation> animations = new ArrayList<>();
+        for (String fileUrl : fileUrls) {
+            if (fileUrl.endsWith(".png")) {
+                avatar.setAvatarImg(fileUrl);
+            } else if (fileUrl.endsWith(".mp4")) {
+                Animation animation = new Animation();
+                animation.setAvatar(avatar);
+                animation.setAnimation(fileUrl);
+                animations.add(animation);
+            }
+        }
+        avatar.setAnimations(animations);
+
+        return avatar;
+    }
+    */
 
 }

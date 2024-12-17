@@ -25,14 +25,10 @@ import java.util.Base64;
 public class HotSittingController {
 
     private final HotSittingService hotSittingService;
-    private final AmazonS3 amazonS3;
 
     @Autowired
-    public HotSittingController(
-            HotSittingService hotSittingService,
-            AmazonS3 amazonS3) {
+    public HotSittingController(HotSittingService hotSittingService) {
         this.hotSittingService = hotSittingService;
-        this.amazonS3 = amazonS3;
     }
 
 
@@ -45,7 +41,7 @@ public class HotSittingController {
             @RequestHeader("userId") Long userId,
             @RequestBody SelfIntroduceRequestDto selfIntroduceDto) {
 
-        log.info("userId:{}로 자기소개 저장 Dto : {} ",userId, selfIntroduceDto);
+        log.info("userId:{}로 자기소개 저장 Dto : {} ", userId, selfIntroduceDto);
 
         hotSittingService.saveSelfIntroduce(userId, selfIntroduceDto);
 

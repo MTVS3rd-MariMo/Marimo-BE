@@ -123,8 +123,11 @@ public class PhotoService {
     @Transactional
     public String saveBackground(Long lessonMaterialId, MultipartFile backgroundImg) {
 
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId).orElseThrow(()
+                -> new EntityNotFoundException(lessonMaterialId + "로 수업자료를 찾을 수 없습니다."));
+
         // 로컬 저장
-        /* try {
+        try {
             String backgroundImgName = UUID.randomUUID().toString() + ".png"; // 사진 이름 생성
             Path filePath = Paths.get(BACKGROUND_DIR, backgroundImgName).normalize();
 
@@ -141,8 +144,8 @@ public class PhotoService {
             return "배경 이미지가 성공적으로 저장되었습니다.";
         } catch (IOException e) {
             throw new RuntimeException("배경 이미지 저장 중 오류가 발생했습니다.", e);
-        }*/
-
+        }
+        /*
         LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lessonMaterialId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("lessonMaterialId(" + lessonMaterialId + ")로 수업자료를 찾을 수 없습니다."));
@@ -172,6 +175,8 @@ public class PhotoService {
         } catch (IOException e) {
             throw new RuntimeException("S3에 배경 이미지를 업로드하는 중 오류가 발생했습니다.", e);
         }
+        */
+
     }
 
 
@@ -181,7 +186,7 @@ public class PhotoService {
     @Transactional
     public String savePhoto(Long lessonId, MultipartFile groupPhoto) {
         // 로컬 저장
-        /*
+
         try {
             String photoName = UUID.randomUUID().toString() + ".png"; // 사진 이름 생성
             Path photoPath = Paths.get(PHOTO_DIR, photoName); // 파일 저장 경로 생성
@@ -198,11 +203,13 @@ public class PhotoService {
             lesson.setPhotoUrl(createPhotoFileUrl(photoName)); // photoUrl 추가
 
             lessonRepository.save(lesson);
+            return "배경 이미지가 S3에 성공적으로 저장되었습니다.";
 
         } catch (IOException e) {
             throw new IllegalArgumentException("사진을 저장하지 못했습니다.");
-        }*/
+        }
 
+        /*
         // S3 적용
         try {
             Lesson lesson = lessonRepository.findById(lessonId)
@@ -233,6 +240,7 @@ public class PhotoService {
         } catch (IOException e) {
             throw new RuntimeException("S3에 배경 이미지를 업로드하는 중 오류가 발생했습니다.", e);
         }
+        */
 
     }
 

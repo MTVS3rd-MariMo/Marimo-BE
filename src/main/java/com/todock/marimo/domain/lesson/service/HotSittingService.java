@@ -72,9 +72,13 @@ public class HotSittingService {
         // 아바타에 캐릭터명 저장
         Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(lessonId, userId)
                 .orElseThrow(() -> new EntityNotFoundException("lessonId와 userId로 아바타를 찾을 수 없습니다."));
-        // 아바타가 존재하지 않을 경우 전달받은 캐릭터 이름으로 업데이트
-        if (avatar.getCharacter() != null) {
+        // 아바타에 캐릭터 명이 존재하지 않을 경우 전달받은 캐릭터 이름으로 업데이트
+        if (avatar.getCharacter() == null) {
             avatar.setCharacter(wavDto.getCharacter());
+            log.info(avatar.getCharacter() + "로 저장되었습니다.");
+            avatarRepository.save(avatar); // 아바타에 캐릭터명 저장
+        } else {
+            log.info("이미 캐릭터가 있습니다.");
         }
 
         // lesson에서 HotSitting 찾기
