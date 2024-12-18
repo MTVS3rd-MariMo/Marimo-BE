@@ -353,6 +353,181 @@ public class AvatarService {
 
 
     /**
+     * img를 AI서버로 전송 - 로컬저장
+     */
+    @Transactional
+    public AvatarResponseDto halfDummyAvatar(Long userId, Long lessonId, MultipartFile img) {
+
+        log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
+
+        if (userId == 3L) {
+
+            Lesson lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new EntityNotFoundException(lessonId + "로 수업을 찾을 수 없습니다."));
+
+            AvatarResponseDto avatarResponseDto;
+
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 2, userId 3으로 바다 마녀 아바타를 찾을 수 없습니다."));
+            // 기존 Animation을 복사하여 새로운 Animation 생성
+            List<Animation> newAnimations = new ArrayList<>();
+            for (Animation animation : avatar.getAnimations()) {
+                Animation newAnimation = new Animation();
+                newAnimation.setAnimation(animation.getAnimation()); // 애니메이션 데이터 복사
+                newAnimation.setAvatar(null); // 새로운 아바타와 연결 예정
+                newAnimations.add(newAnimation);
+            }
+
+            // 새로운 Avatar 생성 및 설정
+            Avatar newAvatar = new Avatar();
+            newAvatar.setLesson(lesson); // 새로운 lesson 설정
+            newAvatar.setUserId(userId); // 새로운 userId 설정
+            newAvatar.setAvatarImg(avatar.getAvatarImg()); // 기존 아바타 이미지 복사
+            newAvatar.setCharacter(avatar.getCharacter()); // 역할 복사
+            newAvatar.setAnimations(newAnimations); // 복사한 애니메이션 설정
+
+            // 새로운 Animation에 Avatar 연결
+            for (Animation animation : newAnimations) {
+                animation.setAvatar(newAvatar); // 새 아바타와 연결
+            }
+
+            // 데이터 저장
+            avatarRepository.save(newAvatar); // 새로운 아바타와 애니메이션 저장
+            lesson.getAvatarList().add(newAvatar); // lesson에 새로운 아바타 추가
+            lessonRepository.save(lesson);
+
+            avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 2로 변경 실패")));
+            return avatarResponseDto;
+
+        } else if (userId == 4L) {
+            Lesson lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new EntityNotFoundException(lessonId + "로 수업을 찾을 수 없습니다."));
+
+            AvatarResponseDto avatarResponseDto;
+
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 2, userId 3로  바다 왕 아바타를 찾을 수 없습니다."));
+
+            // 기존 Animation을 복사하여 새로운 Animation 생성
+            List<Animation> newAnimations = new ArrayList<>();
+            for (Animation animation : avatar.getAnimations()) {
+                Animation newAnimation = new Animation();
+                newAnimation.setAnimation(animation.getAnimation()); // 애니메이션 데이터 복사
+                newAnimation.setAvatar(null); // 새로운 아바타와 연결 예정
+                newAnimations.add(newAnimation);
+            }
+
+            // 새로운 Avatar 생성 및 설정
+            Avatar newAvatar = new Avatar();
+            newAvatar.setLesson(lesson); // 새로운 lesson 설정
+            newAvatar.setUserId(userId); // 새로운 userId 설정
+            newAvatar.setAvatarImg(avatar.getAvatarImg()); // 기존 아바타 이미지 복사
+            newAvatar.setCharacter(avatar.getCharacter()); // 역할 복사
+            newAvatar.setAnimations(newAnimations); // 복사한 애니메이션 설정
+
+            // 새로운 Animation에 Avatar 연결
+            for (Animation animation : newAnimations) {
+                animation.setAvatar(newAvatar); // 새 아바타와 연결
+            }
+
+            // 데이터 저장
+            avatarRepository.save(newAvatar); // 새로운 아바타와 애니메이션 저장
+            lesson.getAvatarList().add(newAvatar); // lesson에 새로운 아바타 추가
+            lessonRepository.save(lesson);
+
+            avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 1으로 변경 실패")));
+            return avatarResponseDto;
+        } else {
+
+            try {
+
+                // 1. HttpHeaders 설정
+                HttpHeaders headers = new HttpHeaders(); // Http 요청 헤더 생성
+                headers.setContentType(MediaType.MULTIPART_FORM_DATA); // 컨텐츠 타입을 multipart/form-data 로 설정
+
+                // 2. Img 파일을 멀티파트 형식으로 Wrapping
+                MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+                // 3. 이미지 파일을 ByteArrayResource로 변환하여 요청 바디에 추가
+                body.add("img", new ByteArrayResource(img.getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return img.getOriginalFilename(); // 파일 이름 원본으로 설정
+                    }
+                });
+
+                // 4. HTTP 요청 엔티티 생성 (헤더와 바디 포함)
+                HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+
+                ResponseEntity<byte[]> AIResponse;
+                // 5. AI 서버로 POST 요청을 보내고 응답을 받음 - 유저Id를 홀수, 짝수 일때 나눠서 AI서버로 요청 보냄
+                if (userId % 2 != 0) {
+                    log.info("userId : {}는 홀수라서 {}로 보냈습니다.", userId, AIEvenAvatarServerURL);
+                    AIResponse = restTemplate.postForEntity(
+                            AIEvenAvatarServerURL, request, byte[].class);
+                } else {
+                    log.info("userId : {}는 짝수라서 {}로 보냈습니다.", userId, AIEvenAvatarServerURL);
+                    AIResponse = restTemplate.postForEntity(
+                            AIEvenAvatarServerURL, request, byte[].class);
+                }
+
+                // 고유한 zip 파일명 생성
+                String zipFileName = UUID.randomUUID().toString() + ".zip";
+
+                // zip 파일 저장 경로 생성
+                Path zipPath = Paths.get(ZIP_DIR, zipFileName);
+
+                if (!zipPath.normalize().startsWith(Paths.get(ZIP_DIR))) {
+                    throw new SecurityException("잘못된 파일 경로입니다.");
+                }
+
+                // zip 파일 저장
+                Files.write(zipPath, AIResponse.getBody());
+
+                // zip 파일 압축 해제 경로 설정 및 압축 해제 수행
+                String unzipDirPath = Paths.get(AVATAR_DIR, zipFileName.replace(".zip", "")).toString();
+                List<String> filePaths = unzipFile(zipPath.toString(), unzipDirPath);
+
+                // 아바타 엔티티 생성 및 파일 저장
+                Avatar avatar = new Avatar();
+                // 나머지 아바타들도 통신할대는 Lesson 타입 지정할 것
+                Lesson lesson = lessonRepository.findById(lessonId)
+                        .orElseThrow(() -> new EntityNotFoundException("lessonId로 수업을 찾을 수 없습니다."));
+                avatar.setUserId(userId);
+                avatar.setLesson(lesson);
+
+                // 애니메이션 엔티티 연결
+                List<Animation> animations = new ArrayList<>();
+                for (String filePath : filePaths) {
+                    if (filePath.endsWith(".png")) {
+                        avatar.setAvatarImg(createFileUrl(filePath)); // URL로 변환하여 avatarImg에 저장
+                    } else if (filePath.endsWith(".mp4")) {
+                        Animation animation = new Animation();
+                        animation.setAvatar(avatar);
+                        animation.setAnimation(createFileUrl(filePath)); // URL로 변환하여 애니메이션에 저장
+                        animations.add(animation);
+                    }
+                }
+
+                avatar.setAnimations(animations);
+
+                // 8. 저장된 아바타와 애니메이션 정보로 AvatarResponseDto 생성
+                avatar = avatarRepository.save(avatar);
+
+                // 유저에게 반환
+                return new AvatarResponseDto(avatar.getUserId(), avatar.getAvatarImg(), avatar.getAnimations());
+
+            } catch (Exception e) {
+                log.error("파일 처리 중 오류 발생", e);
+                throw new RuntimeException("파일 처리 실패", e);
+            }
+        }
+    }
+
+
+    /**
      * 유저 Id로 아바타 조회(이미지, 애니메이션)
      */
     public AvatarResponseDto findByUserId(Long lessonId, Long userId) {
@@ -488,7 +663,7 @@ public class AvatarService {
     }
 
     /**
-     * 아마존 아바타 저장 메서드
+     * 아마존 S3 아바타 저장 메서드
      */
     /*
     @Transactional
