@@ -217,7 +217,7 @@ public class AvatarController {
 
 
     /**
-     * Dummy Avatar
+     * half Dummy Avatar - 1,2만 생성, 3,4는 더미
      */
     @PostMapping("/dummy/upload-img")
     public ResponseEntity<AvatarResponseDto> halfDummyAvatar(
