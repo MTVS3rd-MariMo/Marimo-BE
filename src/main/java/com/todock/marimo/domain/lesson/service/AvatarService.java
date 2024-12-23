@@ -824,5 +824,4 @@ public class AvatarService {
         }
     }
 
-
 }
