@@ -618,7 +618,7 @@ public class AvatarService {
 
         log.info("\n\n아바타 생성 테스트 : lessonId = {}, userId = {}\n\n", lessonId, userId);
 
-        if (userId == 3L) {
+        if (userId == 2L) {
 
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new EntityNotFoundException(lessonId + "로 수업을 찾을 수 없습니다."));
@@ -626,7 +626,7 @@ public class AvatarService {
             AvatarResponseDto avatarResponseDto;
 
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
-                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 2, userId 3으로 바다 마녀 아바타를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 2, userId 2으로 왕자 아바타를 찾을 수 없습니다."));
             // 기존 Animation을 복사하여 새로운 Animation 생성
             List<Animation> newAnimations = new ArrayList<>();
             for (Animation animation : avatar.getAnimations()) {
@@ -658,6 +658,46 @@ public class AvatarService {
             avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 2로 변경 실패")));
             return avatarResponseDto;
 
+        } else if (userId == 3L) {
+            Lesson lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new EntityNotFoundException(lessonId + "로 수업을 찾을 수 없습니다."));
+
+            AvatarResponseDto avatarResponseDto;
+
+            Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 2, userId 4로  바다 마녀 아바타를 찾을 수 없습니다."));
+
+            // 기존 Animation을 복사하여 새로운 Animation 생성
+            List<Animation> newAnimations = new ArrayList<>();
+            for (Animation animation : avatar.getAnimations()) {
+                Animation newAnimation = new Animation();
+                newAnimation.setAnimation(animation.getAnimation()); // 애니메이션 데이터 복사
+                newAnimation.setAvatar(null); // 새로운 아바타와 연결 예정
+                newAnimations.add(newAnimation);
+            }
+
+            // 새로운 Avatar 생성 및 설정
+            Avatar newAvatar = new Avatar();
+            newAvatar.setLesson(lesson); // 새로운 lesson 설정
+            newAvatar.setUserId(userId); // 새로운 userId 설정
+            newAvatar.setAvatarImg(avatar.getAvatarImg()); // 기존 아바타 이미지 복사
+            newAvatar.setCharacter(avatar.getCharacter()); // 역할 복사
+            newAvatar.setAnimations(newAnimations); // 복사한 애니메이션 설정
+
+            // 새로운 Animation에 Avatar 연결
+            for (Animation animation : newAnimations) {
+                animation.setAvatar(newAvatar); // 새 아바타와 연결
+            }
+
+            // 데이터 저장
+            avatarRepository.save(newAvatar); // 새로운 아바타와 애니메이션 저장
+            lesson.getAvatarList().add(newAvatar); // lesson에 새로운 아바타 추가
+            lessonRepository.save(lesson);
+
+            avatarResponseDto = new AvatarResponseDto(newAvatar.getUserId(), newAvatar.getAvatarImg(), newAvatar.getAnimations());
+            avatar.setLesson(lessonRepository.findById(2L).orElseThrow(() -> new EntityNotFoundException("lessonId 1으로 변경 실패")));
+            return avatarResponseDto;
+
         } else if (userId == 4L) {
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new EntityNotFoundException(lessonId + "로 수업을 찾을 수 없습니다."));
@@ -665,7 +705,7 @@ public class AvatarService {
             AvatarResponseDto avatarResponseDto;
 
             Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(2L, userId)
-                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 2, userId 3로  바다 왕 아바타를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new EntityNotFoundException("lessonId : 2, userId 4로  바다 왕 아바타를 찾을 수 없습니다."));
 
             // 기존 Animation을 복사하여 새로운 Animation 생성
             List<Animation> newAnimations = new ArrayList<>();
