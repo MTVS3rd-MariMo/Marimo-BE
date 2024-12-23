@@ -338,113 +338,6 @@ public class AvatarService {
 
     /**
      * ===============================================================
-     *                           검증, 변환
-     * ===============================================================
-     */
-
-
-    /**
-     * zip 파일을 압축 해제하고 압축 해제된 파일들의 경로 목록을 반환
-     */
-    private List<String> unzipFile(String zipFilePath, String destDirectory) throws IOException {
-
-        // 압축 해제된 파일들의 경로를 저장할 리스트 생성
-        List<String> filePaths = new ArrayList<>();
-
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFilePath))) {
-
-            ZipEntry zipEntry; // zip 파일 관리 클래스
-
-            // normalize()를 통해 경로를 표준화하고, destDirectory로 시작하는지 확인
-            while ((zipEntry = zis.getNextEntry()) != null) {
-                Path destPath = Paths.get(destDirectory, zipEntry.getName()); // avatar 폴더에 압축 해제
-
-                if (!destPath.normalize().startsWith(Paths.get(destDirectory))) {
-                    throw new SecurityException("잘못된 zip 파일 경로입니다.");
-                }
-
-                // 엔트리가 디렉토리가 아닌 경우에만 파일을 처리한다
-                if (!zipEntry.isDirectory()) {
-                    Files.createDirectories(destPath.getParent());
-                    Files.copy(zis, destPath, StandardCopyOption.REPLACE_EXISTING);
-                    filePaths.add(destPath.toString());
-                }
-            }
-
-            return filePaths;
-
-        } catch (Exception e) {
-
-            throw new IOException("파일 처리 중 오류 발생(" + zipFilePath + ")", e);
-        }
-    }
-
-
-    /**
-     * MultipartFile을 로컬 파일 시스템에 저장하고 저장된 경로를 반환
-     */
-    private String saveImageFile(MultipartFile file) throws IOException {
-        String fileName = UUID.randomUUID().toString() + getFileExtension(file.getOriginalFilename());
-        Path destinationPath = Paths.get(DATA_DIR, fileName);
-        Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
-        return destinationPath.toString();
-    }
-
-
-    /**
-     * 파일명에서 확장자를 추출
-     */
-    private String getFileExtension(String filename) {
-        return Optional.ofNullable(filename)
-                .filter(f -> f.contains("."))
-                .map(f -> "." + f.substring(filename.lastIndexOf(".") + 1))
-                .orElse("");
-    }
-
-
-    /**
-     * 파일 확장자에 따라 다른 폴더에 저장
-     */
-    private String saveFileByType(MultipartFile file) throws IOException {
-        String fileExtension = getFileExtension(file.getOriginalFilename()).toLowerCase();
-        String targetDir;
-
-        // 파일 확장자에 따라 폴더를 구분
-        if (fileExtension.equals(".png")) {
-            targetDir = AVATAR_DIR;
-        } else if (fileExtension.equals(".mp4")) {
-            targetDir = "data/animation";
-        } else {
-            throw new IllegalArgumentException("지원되지 않는 파일 형식입니다. PNG 또는 MP4 파일만 업로드 가능합니다.");
-        }
-
-        // 폴더가 없으면 생성
-        Files.createDirectories(Paths.get(targetDir));
-
-        // 파일을 저장할 경로를 설정
-        String fileName = UUID.randomUUID().toString() + fileExtension;
-        Path destinationPath = Paths.get(targetDir, fileName);
-
-        // 파일 저장
-        Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
-
-        return destinationPath.toString();
-    }
-
-
-    /**
-     * 파일 경로를 URL 형식으로 변환
-     */
-    private String createFileUrl(String filePath) {
-        // 파일 경로에서 중복된 루트 디렉토리를 제거
-        String relativePath = filePath.replace("\\", "/");
-        relativePath = relativePath.replaceFirst("^data/avatar/", ""); // "data/avatar/" 제거
-        return "http://" + serverHost + ":" + serverPort + "/data/avatar/" + relativePath;
-    }
-
-    
-    /**
-     * ===============================================================
      *                           더미데이터
      * ===============================================================
      */
@@ -822,6 +715,113 @@ public class AvatarService {
                 throw new RuntimeException("파일 처리 실패", e);
             }
         }
+    }
+
+
+    /**
+     * ===============================================================
+     *                           검증, 변환
+     * ===============================================================
+     */
+
+
+    /**
+     * zip 파일을 압축 해제하고 압축 해제된 파일들의 경로 목록을 반환
+     */
+    private List<String> unzipFile(String zipFilePath, String destDirectory) throws IOException {
+
+        // 압축 해제된 파일들의 경로를 저장할 리스트 생성
+        List<String> filePaths = new ArrayList<>();
+
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFilePath))) {
+
+            ZipEntry zipEntry; // zip 파일 관리 클래스
+
+            // normalize()를 통해 경로를 표준화하고, destDirectory로 시작하는지 확인
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                Path destPath = Paths.get(destDirectory, zipEntry.getName()); // avatar 폴더에 압축 해제
+
+                if (!destPath.normalize().startsWith(Paths.get(destDirectory))) {
+                    throw new SecurityException("잘못된 zip 파일 경로입니다.");
+                }
+
+                // 엔트리가 디렉토리가 아닌 경우에만 파일을 처리한다
+                if (!zipEntry.isDirectory()) {
+                    Files.createDirectories(destPath.getParent());
+                    Files.copy(zis, destPath, StandardCopyOption.REPLACE_EXISTING);
+                    filePaths.add(destPath.toString());
+                }
+            }
+
+            return filePaths;
+
+        } catch (Exception e) {
+
+            throw new IOException("파일 처리 중 오류 발생(" + zipFilePath + ")", e);
+        }
+    }
+
+
+    /**
+     * MultipartFile을 로컬 파일 시스템에 저장하고 저장된 경로를 반환
+     */
+    private String saveImageFile(MultipartFile file) throws IOException {
+        String fileName = UUID.randomUUID().toString() + getFileExtension(file.getOriginalFilename());
+        Path destinationPath = Paths.get(DATA_DIR, fileName);
+        Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+        return destinationPath.toString();
+    }
+
+
+    /**
+     * 파일명에서 확장자를 추출
+     */
+    private String getFileExtension(String filename) {
+        return Optional.ofNullable(filename)
+                .filter(f -> f.contains("."))
+                .map(f -> "." + f.substring(filename.lastIndexOf(".") + 1))
+                .orElse("");
+    }
+
+
+    /**
+     * 파일 확장자에 따라 다른 폴더에 저장
+     */
+    private String saveFileByType(MultipartFile file) throws IOException {
+        String fileExtension = getFileExtension(file.getOriginalFilename()).toLowerCase();
+        String targetDir;
+
+        // 파일 확장자에 따라 폴더를 구분
+        if (fileExtension.equals(".png")) {
+            targetDir = AVATAR_DIR;
+        } else if (fileExtension.equals(".mp4")) {
+            targetDir = "data/animation";
+        } else {
+            throw new IllegalArgumentException("지원되지 않는 파일 형식입니다. PNG 또는 MP4 파일만 업로드 가능합니다.");
+        }
+
+        // 폴더가 없으면 생성
+        Files.createDirectories(Paths.get(targetDir));
+
+        // 파일을 저장할 경로를 설정
+        String fileName = UUID.randomUUID().toString() + fileExtension;
+        Path destinationPath = Paths.get(targetDir, fileName);
+
+        // 파일 저장
+        Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+
+        return destinationPath.toString();
+    }
+
+
+    /**
+     * 파일 경로를 URL 형식으로 변환
+     */
+    private String createFileUrl(String filePath) {
+        // 파일 경로에서 중복된 루트 디렉토리를 제거
+        String relativePath = filePath.replace("\\", "/");
+        relativePath = relativePath.replaceFirst("^data/avatar/", ""); // "data/avatar/" 제거
+        return "http://" + serverHost + ":" + serverPort + "/data/avatar/" + relativePath;
     }
 
 }
