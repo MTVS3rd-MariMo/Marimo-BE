@@ -29,7 +29,7 @@ public class OpenQuestionService {
         OpenQuestion openQuestion = openQuestionRepository.findById(answerDto.getQuestionId())
                 .orElseThrow(() -> new EntityNotFoundException("openQuestionId로 openQuestion을 찾을 수 없습니다."));
 
-        openQuestion.getOpenQuestionAnswerList().add( //  수업의 열린 질문에 답변 저장
+        openQuestion.getOpenQuestionAnswerList().add(
                 new OpenQuestionAnswer(
                         openQuestion,
                         userId,
