@@ -1,8 +1,5 @@
 package com.todock.marimo.domain.lesson.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.todock.marimo.domain.lesson.dto.BackgroundRequestDto;
 import com.todock.marimo.domain.lesson.dto.ParticipantListDto;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.Participant;
@@ -21,20 +18,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 
 /**
@@ -50,9 +35,6 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final UserRepository userRepository;
 
-    private static final String PHOTO_DIR = "data/photo"; // zip 파일 저장 경로
-    private static final String BACKGROUND_DIR = "data/background"; // 단체사진 배경 저장 경로
-
     @Autowired
     public LessonService(LessonMaterialRepository lessonMaterialRepository
             , ParticipantRepository participantRepository
@@ -64,18 +46,6 @@ public class LessonService {
         this.hotSittingRepository = hotSittingRepository;
         this.lessonRepository = lessonRepository;
         this.userRepository = userRepository;
-        initDirectories();
-    }
-
-    // 필요한 디렉토리를 초기화 하는 메서드
-    public void initDirectories() {
-        try { // 디렉토리 생성
-            Files.createDirectories(Paths.get(PHOTO_DIR)); // PHOTO 파일 저장 경로
-            Files.createDirectories(Paths.get(BACKGROUND_DIR)); // PHOTO 파일 저장 경로
-
-        } catch (IOException e) {
-            throw new RuntimeException("디렉토리 생성 실패", e);
-        }
     }
 
 
@@ -85,27 +55,20 @@ public class LessonService {
     @Transactional
     public Long createLesson(Long userId, Long lessonMaterialId) {
 
-        // Lesson 생성 및 설정
         Lesson newLesson = new Lesson(userId, lessonMaterialId);
-
-        // Lesson을 먼저 저장하여 ID를 생성합니다.
         lessonRepository.save(newLesson);
 
-        // HotSitting 생성 후 Lesson과 연결
         HotSitting newHotSitting = new HotSitting();
         newHotSitting.setLesson(newLesson);
 
-        // HotSitting 저장
         hotSittingRepository.save(newHotSitting);
 
-        // Lesson에 HotSitting 설정 후 다시 저장
         newLesson.setHotSitting(newHotSitting);
         lessonRepository.save(newLesson);
 
-        Long lessonId = newLesson.getLessonId(); // lessonId 추출
+        Long lessonId = newLesson.getLessonId();
 
-        log.info("\n\n생성된 lessonId : {}\n\n", lessonId);
-        log.info("\n\n적용된 lessonMaterialId : {}\n\n", newLesson.getLessonMaterialId());
+        log.info("생성된 lessonId: {}, 적용된 lessonMaterialId: {}", lessonId, newLesson.getLessonMaterialId());
 
         return lessonId;
 
