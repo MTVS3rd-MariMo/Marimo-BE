@@ -85,9 +85,7 @@ public class LessonMaterialController {
 
         if (pdfFile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        } // 파일 용량 null 확인
-
-        log.info("userId = {}, bookTitle = {}, author = {}", userId, bookTitle, author);
+        }
 
         LessonMaterialResponseDto lessonMaterialResponseDto
                 = lessonMaterialService.sendPdfToAiServer(pdfFile, userId, bookTitle, author);
@@ -127,9 +125,6 @@ public class LessonMaterialController {
             @Valid @RequestBody LessonMaterialRequestDto lessonMaterialRequestDto) {
 
         try {
-            log.info("수업 자료 생성 후 수정한 열린 질문, 퀴즈 2개가 있는 DTO : {} ", lessonMaterialRequestDto);
-
-            // 서비스 호출
             lessonMaterialService.updateLessonMaterial(lessonMaterialRequestDto);
 
             return ResponseEntity.status(HttpStatus.CREATED).body("수업 자료를 생성했습니다.");
@@ -177,11 +172,8 @@ public class LessonMaterialController {
     public ResponseEntity<LessonMaterialNamesRequestDto> teacherGetLessonMaterialNames(
             @RequestHeader("userId") Long userId) {
 
-        log.info("유저의 userId : {}로 가지고 있는 수업 자료 리스트 조회", userId);
-        // Dto List 생성
         List<LessonMaterialNameResponseDto> lessonMaterialNameResponseDtos
                 = lessonMaterialService.getLessonMaterialByUserId(userId);
-        // Dto List 전달하기 위한 Dto 생성
         LessonMaterialNamesRequestDto responseDto = new LessonMaterialNamesRequestDto(lessonMaterialNameResponseDtos);
 
         return ResponseEntity.ok(responseDto);
