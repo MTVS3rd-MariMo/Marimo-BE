@@ -5,15 +5,9 @@ import com.todock.marimo.domain.result.service.ResultService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.lang.reflect.Method;
-import java.util.List;
-
 
 @Slf4j
 @RestController
@@ -30,14 +24,12 @@ public class ResultController {
 
 
     /**
-     * 학생이 참가한 모든 수업 리스트 조회 (사진을 리스트로 보여줌) - LessonId, photoList 반환
+     * 학생이 참가한 모든 수업 리스트 조회
      */
     @Operation(summary = "userId로 참가한 모든 수업 조회 - 학생")
     @GetMapping("/student")
     public ResponseEntity<StudentResultResponseDto> studentGetPhotoList(
             @RequestHeader("userId") Long userId) {
-
-        log.info("학생이 userId: {}로 참가한 수업 리스트 조회", userId);
 
         return ResponseEntity.ok().body(resultService.findAllPhotos(userId));
     }
@@ -51,8 +43,6 @@ public class ResultController {
     public ResponseEntity<TeacherResultResponseDto> teacherGetLessonList(
             @RequestHeader("userId") Long userId) {
 
-        log.info("선생님이 userId: {}로 참가한 수업 리스트 조회", userId);
-
         return ResponseEntity.ok().body(resultService.findAllLessons(userId));
     }
 
@@ -65,8 +55,6 @@ public class ResultController {
     public ResponseEntity<LessonResultDto> teacherGetLesson(
             @RequestHeader("userId") Long userId,
             @PathVariable("lessonId") Long lessonId) {
-
-        log.info("선생님이 lessonId: {}로 수업결과 상세 조회", lessonId);
 
         return ResponseEntity.ok().body(resultService.lessonDetail(lessonId));
     }

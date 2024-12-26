@@ -64,18 +64,16 @@ public class AvatarService {
     @Autowired
     public AvatarService(
             AmazonS3 amazonS3,
-            LessonRepository lessonRepository
-            , AvatarRepository avatarRepository
-            , RestTemplate restTemplate) {
-
+            RestTemplate restTemplate,
+            LessonRepository lessonRepository,
+            AvatarRepository avatarRepository) {
         this.amazonS3 = amazonS3;
+        this.restTemplate = restTemplate;
         this.lessonRepository = lessonRepository;
         this.avatarRepository = avatarRepository;
-        this.restTemplate = restTemplate;
     }
 
 
-    
     /**
      * 아마존 S3 아바타 저장 메서드
      */
@@ -88,7 +86,7 @@ public class AvatarService {
             // 1. AI 서버 요청
             byte[] zipBytes = sendImgToAiServer(userId, img);
 
-            // 2. ZIP 파일을 S3에 저장
+            // 2. zip 파일을 S3에 저장
             String zipFileName = UUID.randomUUID().toString() + ".zip";
             String zipS3Key = "zip/" + zipFileName;
             uploadToS3(zipS3Key, zipBytes);
@@ -110,6 +108,7 @@ public class AvatarService {
             throw new RuntimeException("파일 처리 실패", e);
         }
     }
+
     // ai 서버 전송
     private byte[] sendImgToAiServer(Long userId, MultipartFile img) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -131,6 +130,7 @@ public class AvatarService {
         ResponseEntity<byte[]> response = restTemplate.postForEntity(serverUrl, request, byte[].class);
         return response.getBody();
     }
+
     // aws에 올리기
     private void uploadToS3(String key, byte[] data) {
         ObjectMetadata metadata = new ObjectMetadata();
@@ -138,6 +138,7 @@ public class AvatarService {
         amazonS3.putObject(new PutObjectRequest(bucketName, key, new ByteArrayInputStream(data), metadata));
         log.info("파일이 S3에 업로드되었습니다. 경로: {}", key);
     }
+
     // 압축 해제 후 애니메이션 올리기
     private List<String> extractAndUploadFilesToS3(String zipS3Key, String avatarS3Prefix) throws IOException {
         S3Object zipObject = amazonS3.getObject(bucketName, zipS3Key);
@@ -163,6 +164,7 @@ public class AvatarService {
         }
         return fileUrls;
     }
+
     // 아바타 저장
     private Avatar createAvatarEntity(Long userId, Long lessonId, List<String> fileUrls) {
         Lesson lesson = lessonRepository.findById(lessonId)
@@ -187,8 +189,8 @@ public class AvatarService {
 
         return avatar;
     }
-    
-    
+
+
     /**
      * 유저 Id로 아바타 조회(이미지, 애니메이션)
      */
