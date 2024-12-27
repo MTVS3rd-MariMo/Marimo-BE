@@ -32,15 +32,16 @@ public class ResultService {
 
     @Autowired
     public ResultService(
-            LessonRepository lessonRepository
-            , ParticipantRepository participantRepository,
-            LessonMaterialRepository lessonMaterialRepository,
-            UserRepository userRepository, AvatarRepository avatarRepository) {
+            UserRepository userRepository,
+            LessonRepository lessonRepository,
+            AvatarRepository avatarRepository,
+            ParticipantRepository participantRepository,
+            LessonMaterialRepository lessonMaterialRepository) {
+        this.userRepository = userRepository;
+        this.avatarRepository = avatarRepository;
         this.lessonRepository = lessonRepository;
         this.participantRepository = participantRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
-        this.userRepository = userRepository;
-        this.avatarRepository = avatarRepository;
     }
 
 
@@ -53,7 +54,8 @@ public class ResultService {
                 .stream()
                 .map(participant -> new StudentResultDto(
                         lessonMaterialRepository.findById(participant.getLesson().getLessonMaterialId())
-                                .orElseThrow(() -> new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
+                                .orElseThrow(() ->
+                                        new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
                                 .getBookTitle(),
                         participant.getLesson().getPhotoUrl(),
                         participant.getLesson().getCreatedAt()
@@ -62,7 +64,7 @@ public class ResultService {
 
         Collections.reverse(photos);
 
-        return new StudentResultResponseDto(photos); // photos를 studentResults에 할당
+        return new StudentResultResponseDto(photos);
     }
 
 
@@ -86,14 +88,14 @@ public class ResultService {
                                 .map(Participant::getParticipantName)
                                 .collect(Collectors.toList()),
                         lesson.getCreatedAt() != null
-                                ? lesson.getCreatedAt().toString() // 포맷팅 없이 문자열 반환
+                                ? lesson.getCreatedAt() // 포맷팅 없이 문자열 반환
                                 : "생성일시 없음" // 기본값 또는 null인 경우 처리
                 ))
                 .collect(Collectors.toList());
 
         Collections.reverse(results);
 
-        return new TeacherResultResponseDto(results); // teacherResults에 List<TeacherResultDto> 할당
+        return new TeacherResultResponseDto(results);
     }
 
 
@@ -113,20 +115,8 @@ public class ResultService {
         // 반환할 LessonResultDto 생성 및 초기 설정
         LessonResultDto lessonResultDto = new LessonResultDto(
                 lessonMaterial.getBookTitle(),
-                lesson.getCreatedAt() // 수업 날짜
-                //    lesson.getPhotoUrl() // 수업 단체사진
+                lesson.getCreatedAt()
         );
-
-        // 참가자 설정
-        /*
-      // 참가자 목록을 String 형태로 설정
-        List<String> participants = lesson.getParticipantList().stream()
-                .map(participant -> userRepository.findById(participant.getUserId())
-                        .map(User::getName)
-                        .orElse("Unknown User"))
-                .collect(Collectors.toList());
-        lessonResultDto.setParticipants(participants);
-*/
 
         // 열린 질문 설정
         List<OpenQuestionResultDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
@@ -180,12 +170,10 @@ public class ResultService {
                     return new LessonRoleResultDto(
                             userName, // 유저 이름
                             role.getCharacter() // 역할 이름
-                            //avatarUrl // 아바타 이미지 URL
                     );
                 })
                 .collect(Collectors.toList());
         lessonResultDto.setRoles(roles); // 역할 리스트 설정
-
 
         return lessonResultDto;
     }

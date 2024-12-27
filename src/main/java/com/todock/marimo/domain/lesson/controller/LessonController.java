@@ -28,14 +28,10 @@ import java.util.List;
 public class LessonController {
 
     private final LessonService lessonService;
-    private final LessonMaterialService lessonMaterialService;
 
 
     @Autowired
-    public LessonController(
-            LessonMaterialService lessonMaterialService,
-            LessonService lessonService) {
-        this.lessonMaterialService = lessonMaterialService;
+    public LessonController(LessonService lessonService) {
         this.lessonService = lessonService;
     }
 
@@ -49,8 +45,6 @@ public class LessonController {
             @RequestHeader(value = "userId", required = false) Long userId
             , @PathVariable("lessonMaterialId") Long lessonMaterialId) {
 
-        log.info("수업에 사용할 수업자료를 lessonMaterialId: {}로 전달 후 수업 생성", lessonMaterialId);
-
         Long lessonId = lessonService.createLesson(userId, lessonMaterialId);
 
         return ResponseEntity.ok(lessonId);
@@ -60,18 +54,17 @@ public class LessonController {
     /**
      * LessonId로 participant 목록에 userId, userName 추가하기
      */
-    @Operation(summary = "수업 참가자 목록에 유저 추가", description = "userId와 lessonMaterialId를 받고 수업 생성 후 LessonId 반환합니다.")
+    @Operation(summary = "수업 참가자 목록에 유저 추가",
+            description = "userId와 lessonMaterialId를 받고 수업 생성 후 LessonId 반환합니다.")
     @PutMapping("/enter/{lessonId}")
     public ResponseEntity<String> enter(
-            @RequestHeader(value = "userId", required = false) Long userId
-            , @PathVariable("lessonId") Long lessonId) {
+            @RequestHeader(value = "userId", required = false) Long userId,
+            @PathVariable("lessonId") Long lessonId) {
 
         log.info("수업 참가자가 수업 참가자 목록에 lessonId: {}로 조회 후 추가", lessonId);
-
         if (userId == null) {
             return ResponseEntity.badRequest().body("userId 헤더가 필요합니다.");
         }
-
         lessonService.updateUserByLessonId(userId, lessonId);
 
         return ResponseEntity.ok("유저 " + userId + "가 " + lessonId + "에 참가하였습니다.");
@@ -90,7 +83,6 @@ public class LessonController {
         log.info("참가자가 lessonId : {}로 수업의 참가자 목록을 요청", lessonId);
 
         ParticipantListDto participantListDto = lessonService.findParticipantByLessonId(lessonId);
-        log.info("참가자 Id = {}", participantListDto);
 
         return ResponseEntity.ok(participantListDto);
     }

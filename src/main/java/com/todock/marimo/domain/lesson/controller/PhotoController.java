@@ -61,7 +61,6 @@ public class PhotoController {
             @RequestParam("img") MultipartFile img) {
 
         log.info("AI가 lessonMaterialId: {}의 수업자료로 배경사진 저장", lessonMaterialId);
-
         return ResponseEntity.ok().body(photoService.saveBackground(lessonMaterialId, img));
     }
 
@@ -97,7 +96,6 @@ public class PhotoController {
             // 3. 파일 확장자 검증
             if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        // .body("허용되지 않는 파일 형식입니다. jpg, jpeg, png 파일만 업로드 가능합니다.");
                         .body(null);
             }
 
@@ -106,13 +104,11 @@ public class PhotoController {
                 BufferedImage bufferedImage = ImageIO.read(photo.getInputStream());
                 if (bufferedImage == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            //.body("유효하지 않은 이미지 파일입니다.");
                             .body(null);
                 }
             } catch (IOException e) {
                 log.error("이미지 파일 검증 중 오류 발생", e);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                        .body("이미지 파일 검증 중 오류가 발생했습니다.");
                         .body(null);
             }
 

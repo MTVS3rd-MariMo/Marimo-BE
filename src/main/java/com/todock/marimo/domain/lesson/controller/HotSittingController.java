@@ -62,13 +62,6 @@ public class HotSittingController {
             @RequestParam("selfIntNum") Long selfIntNum,
             @RequestPart("wavFile") MultipartFile wavFile) {
 
-        log.info("핫시팅 음성 폼데이터 : {}", wavFile.getContentType());
-        log.info("lessonId: {}", lessonId);
-        log.info("userName: {}", userName);
-        log.info("character: {}", character);
-        log.info("selfIntNum: {}", selfIntNum);
-        log.info("wavFile: {}", (wavFile != null ? wavFile.getOriginalFilename() : "null"));
-
         // MIME 타입과 파일 확장자 확인
         if (wavFile != null) {
             String contentType = wavFile.getContentType();
@@ -79,11 +72,6 @@ public class HotSittingController {
             // 파일 확장자 체크
             boolean isWavExtension = originalFilename != null && originalFilename.toLowerCase().endsWith(".wav");
 
-            // 로그로 결과 출력
-            log.info("Is WAV MIME type: {}", isWavMimeType);
-            log.info("Is WAV file extension: {}", isWavExtension);
-
-            // 확인 결과에 따라 추가 작업 수행
             if (!isWavMimeType || !isWavExtension) {
                 return ResponseEntity.badRequest().body("파일이 .wav 형식이 아닙니다.");
             }
@@ -104,15 +92,10 @@ public class HotSittingController {
             byte[] fileBytes = wavFile.getBytes();
             String encodedFile = Base64.getEncoder().encodeToString(fileBytes);
             wavDto.setWavFile(encodedFile);
-
-            log.info("Encoded WAV file content: {}", encodedFile.substring(0, 50) + "...");
-
         } catch (IOException e) {
             log.error("File encoding error: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 인코딩 중 오류 발생");
         }
-
-        log.info("Controller Received DTO: {}", wavDto);
 
         hotSittingService.sendWavToAiServer(userId, wavDto);
 

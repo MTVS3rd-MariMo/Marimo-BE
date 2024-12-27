@@ -54,7 +54,6 @@ public class LessonMaterialService {
     private final ObjectMapper objectMapper; // JSON 파싱용 ObjectMapper 추가
     private final RestTemplate restTemplate;
     private final QuizRepository quizRepository;
-    private final UserRepository userRepository;
     private final LessonRoleRepository lessonRoleRepository;
     private final OpenQuestionRepository openQuestionRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
@@ -64,7 +63,6 @@ public class LessonMaterialService {
             LessonMaterialRepository lessonMaterialRepository,
             OpenQuestionRepository openQuestionRepository,
             LessonRoleRepository lessonRoleRepository,
-            UserRepository userRepository,
             QuizRepository quizRepository,
             RestTemplate restTemplate,
             ObjectMapper objectMapper) {
@@ -72,7 +70,6 @@ public class LessonMaterialService {
         this.lessonMaterialRepository = lessonMaterialRepository;
         this.openQuestionRepository = openQuestionRepository;
         this.lessonRoleRepository = lessonRoleRepository;
-        this.userRepository = userRepository;
         this.quizRepository = quizRepository;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
@@ -193,17 +190,6 @@ public class LessonMaterialService {
                 lessonRole.setRoleName(role.getRoleName());
                 lessonRoleRepository.save(lessonRole);
             }
-/*
-
-            if (roles != null && !roles.isEmpty()) {
-                lessonMaterial.getLessonRoleList().clear();
-                roles.forEach(roleDto -> {
-                    LessonRole role = new LessonRole(lessonMaterial, roleDto.getRoleName());
-                    lessonMaterial.getLessonRoleList().add(role);
-                });
-            }
-*/
-
         } else {
             log.info("열린 질문이 존재하지 않습니다.");
         }
