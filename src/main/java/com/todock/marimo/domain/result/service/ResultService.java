@@ -165,7 +165,7 @@ public class ResultService {
                     String avatarUrl = (avatar != null) ? avatar.getAvatarImg() : "defaultAvatarUrl";
                     String userName = (avatar != null) ? userRepository.findById(avatar.getUserId())
                             .map(User::getName)
-                            .orElse("Unknown User") : "Unknown User";
+                            .orElse("존재하지 않는 유저입니다.") : "Unknown User";
 
                     return new LessonRoleResultDto(
                             userName, // 유저 이름
