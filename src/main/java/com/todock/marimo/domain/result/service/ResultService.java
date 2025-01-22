@@ -13,6 +13,7 @@ import com.todock.marimo.domain.result.dto.*;
 import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ResultService {
 
@@ -50,18 +52,30 @@ public class ResultService {
      */
     public StudentResultResponseDto findAllPhotos(Long userId) {
 
-        List<StudentResultDto> photos = participantRepository.findAllByUserId(userId)
-                .stream()
-                .map(participant -> new StudentResultDto(
-                        lessonMaterialRepository.findById(participant.getLesson().getLessonMaterialId())
-                                .orElseThrow(() ->
-                                        new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
-                                .getBookTitle(),
-                        participant.getLesson().getPhotoUrl(),
-                        participant.getLesson().getCreatedAt()
-                ))
-                .collect(Collectors.toList());
+        List<Lesson> lessons = lessonRepository.findAllLessonsWithParticipants(userId);
 
+        log.info("Lessons fetched: {}", lessons.size());
+        log.info("userId : {}", userId);
+
+        List<StudentResultDto> photos = lessons
+                .stream()
+                .map(lesson -> {
+                    // lessonMaterialId를 통해 해당 수업 자료의 책 제목을 조회
+
+                    String bookTitle = lessonMaterialRepository.findByLessonMaterialId(
+                                    lesson.getLessonMaterialId())
+                            //.orElseThrow(() ->
+                            //        new EntityNotFoundException("lessonMaterialId에 맞는 수업 자료가 없습니다."))
+                            .getBookTitle();
+
+                    return new StudentResultDto(
+                            bookTitle,             // 수업 자료의 책 제목
+                            lesson.getPhotoUrl(),  // 단체사진
+                            lesson.getCreatedAt()  // 수업 날짜
+                    );
+                })
+                .collect(Collectors.toList());
+        // 최신순 정렬
         Collections.reverse(photos);
 
         return new StudentResultResponseDto(photos);
