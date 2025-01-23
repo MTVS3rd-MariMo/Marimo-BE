@@ -52,33 +52,11 @@ public class ResultService {
      */
     public StudentResultResponseDto findAllPhotos(Long userId) {
 
-        List<Lesson> lessons = lessonRepository.findAllLessonsWithParticipants(userId);
+        List<StudentResultDto> results = lessonRepository.findAllLessonsWithParticipants(userId);
 
-        log.info("Lessons fetched: {}", lessons.size());
-        log.info("userId : {}", userId);
+        Collections.reverse(results);
 
-        List<StudentResultDto> photos = lessons
-                .stream()
-                .map(lesson -> {
-                    // lessonMaterialId를 통해 해당 수업 자료의 책 제목을 조회
-
-                    String bookTitle = lessonMaterialRepository.findByLessonMaterialId(
-                                    lesson.getLessonMaterialId())
-                            //.orElseThrow(() ->
-                            //        new EntityNotFoundException("lessonMaterialId에 맞는 수업 자료가 없습니다."))
-                            .getBookTitle();
-
-                    return new StudentResultDto(
-                            bookTitle,             // 수업 자료의 책 제목
-                            lesson.getPhotoUrl(),  // 단체사진
-                            lesson.getCreatedAt()  // 수업 날짜
-                    );
-                })
-                .collect(Collectors.toList());
-        // 최신순 정렬
-        Collections.reverse(photos);
-
-        return new StudentResultResponseDto(photos);
+        return new StudentResultResponseDto(results);
     }
 
 

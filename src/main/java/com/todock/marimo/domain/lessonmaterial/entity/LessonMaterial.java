@@ -43,17 +43,18 @@ public class LessonMaterial {
     @JsonManagedReference
     @OneToMany(mappedBy = "lessonMaterial", // 열린 질문
             cascade = CascadeType.PERSIST,
-            orphanRemoval = true)
+            fetch = FetchType.LAZY)
     private List<OpenQuestion> openQuestionList = new ArrayList<>();
 
     @OneToMany(mappedBy = "lessonMaterial",
             cascade = CascadeType.PERSIST,
-            orphanRemoval = true)
+            fetch = FetchType.LAZY)
     private List<Quiz> quizList = new ArrayList<>();
 
     @Setter
     @OneToMany(mappedBy = "lessonMaterial", // 역할
-            cascade = CascadeType.PERSIST)
+            cascade = CascadeType.PERSIST,
+            fetch = FetchType.LAZY)
     private List<LessonRole> lessonRoleList = new ArrayList<>();
 
     @Setter
