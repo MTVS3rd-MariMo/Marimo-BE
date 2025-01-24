@@ -15,7 +15,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_lesson")
@@ -58,4 +57,16 @@ public class Lesson {
         this.createdAt = LocalDateTime.now().format(formatter);
     }
 
+    @Override
+    public String toString() {
+        return "Lesson{" +
+                "createdUserId=" + createdUserId +
+                ", lessonMaterialId=" + lessonMaterialId +
+                ", participantList=" + participantList +
+                ", avatarList=" + avatarList +
+                ", hotSitting=" + hotSitting +
+                ", photoUrl='" + photoUrl + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                '}';
+    }
 }

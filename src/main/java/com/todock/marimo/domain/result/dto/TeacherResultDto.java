@@ -1,12 +1,13 @@
 package com.todock.marimo.domain.result.dto;
 
+import com.todock.marimo.domain.lesson.entity.Participant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Setter
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TeacherResultDto {
 
-    private Long LessonId; // 수업Id (상세 조회용)
+    private Long lessonId; // 수업Id (상세 조회용)
 
     private String bookTitle; // 책 제목
 

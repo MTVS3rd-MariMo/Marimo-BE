@@ -17,8 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -65,31 +64,30 @@ public class ResultService {
      */
     public TeacherResultResponseDto findAllLessons(Long userId) {
 
-        List<TeacherResultDto> results = lessonRepository.findAllByCreatedUserId(userId)
-                .stream()
-                .map(lesson -> new TeacherResultDto(
-                        lesson.getLessonId(),
-                        lessonMaterialRepository
-                                .findById(lesson.getLessonMaterialId())
-                                .orElseThrow(() -> new EntityNotFoundException(
-                                        "lesson.getLessonId : " + lesson.getLessonId()
-                                                + "의 lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
-                                .getBookTitle(),
-                        lesson.getParticipantList()
-                                .stream()
-                                .map(Participant::getParticipantName)
-                                .collect(Collectors.toList()),
-                        lesson.getCreatedAt() != null
-                                ? lesson.getCreatedAt() // 포맷팅 없이 문자열 반환
-                                : "생성일시 없음" // 기본값 또는 null인 경우 처리
-                ))
-                .collect(Collectors.toList());
+        // 결과 저장
+        List<Object[]> objects = lessonRepository.findAllByCreatedUserId(userId);
+
+        List<TeacherResultDto> results = objects.stream().map(
+                object -> {
+                    Long lessonId = (Long) object[0]; // lessonId
+                    String bookTitle = object[1].toString(); // bookTitle
+                    String participantNames = object[2].toString();// participantNames GROUP_CONCAT으로 반환
+                    List<String> participantList = Arrays.asList(participantNames.split(","));
+                    String createdAt = object[3].toString();  // createdAt
+
+                    return new TeacherResultDto(
+                            lessonId,
+                            bookTitle,
+                            participantList,
+                            createdAt
+                    );
+                }
+        ).collect(Collectors.toList());
 
         Collections.reverse(results);
 
         return new TeacherResultResponseDto(results);
     }
-
 
     /**
      * 선생님이 참가한 수업 상세 조회
