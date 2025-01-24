@@ -9,4 +9,6 @@ public interface AvatarRepository extends JpaRepository<Avatar, Long> {
 
     // lessonId와 userId로 특정 아바타 조회
     Optional<Avatar> findByLesson_LessonIdAndUserId(Long lessonId,Long userId); // Optional로 수정하여 null을 방지
+
+    Long userId(Long userId);
 }

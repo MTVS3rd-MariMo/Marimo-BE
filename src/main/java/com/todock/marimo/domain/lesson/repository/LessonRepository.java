@@ -2,7 +2,6 @@ package com.todock.marimo.domain.lesson.repository;
 
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.result.dto.StudentResultDto;
-import com.todock.marimo.domain.result.dto.TeacherResultDto;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +12,7 @@ import java.util.List;
 
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
+    // 선생님 수업결과 조회
     @EntityGraph(attributePaths = {"participantList"})
     @Query(
             "SELECT " +
