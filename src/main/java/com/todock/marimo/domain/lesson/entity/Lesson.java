@@ -1,11 +1,9 @@
 package com.todock.marimo.domain.lesson.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
 import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
-import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +15,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_lesson")
@@ -60,4 +57,16 @@ public class Lesson {
         this.createdAt = LocalDateTime.now().format(formatter);
     }
 
+    @Override
+    public String toString() {
+        return "Lesson{" +
+                "createdUserId=" + createdUserId +
+                ", lessonMaterialId=" + lessonMaterialId +
+                ", participantList=" + participantList +
+                ", avatarList=" + avatarList +
+                ", hotSitting=" + hotSitting +
+                ", photoUrl='" + photoUrl + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                '}';
+    }
 }

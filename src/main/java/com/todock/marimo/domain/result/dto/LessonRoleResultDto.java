@@ -15,5 +15,4 @@ public class LessonRoleResultDto {
 
     private String character;
 
-    // private String avatarUrl; 아바타 이미지
 }
