@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 public class ResultService {
 
     private final LessonRepository lessonRepository;
-    private final ParticipantRepository participantRepository;
     private final LessonMaterialRepository lessonMaterialRepository;
     private final UserRepository userRepository;
     private final AvatarRepository avatarRepository;
@@ -36,12 +35,10 @@ public class ResultService {
             UserRepository userRepository,
             LessonRepository lessonRepository,
             AvatarRepository avatarRepository,
-            ParticipantRepository participantRepository,
             LessonMaterialRepository lessonMaterialRepository) {
         this.userRepository = userRepository;
         this.avatarRepository = avatarRepository;
         this.lessonRepository = lessonRepository;
-        this.participantRepository = participantRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
     }
 
@@ -64,22 +61,20 @@ public class ResultService {
      */
     public TeacherResultResponseDto findAllLessons(Long userId) {
 
-        // 결과 저장
         List<Object[]> objects = lessonRepository.findAllByCreatedUserId(userId);
-
+        // Response DTO 변환
         List<TeacherResultDto> results = objects.stream().map(
                 object -> {
-                    Long lessonId = (Long) object[0]; // lessonId
+                    /*Long lessonId = (Long) object[0]; // lessonId
                     String bookTitle = object[1].toString(); // bookTitle
-                    String participantNames = object[2].toString();// participantNames GROUP_CONCAT으로 반환
-                    List<String> participantList = Arrays.asList(participantNames.split(","));
-                    String createdAt = object[3].toString();  // createdAt
+                    List<String> participantList = Arrays.asList(object[2].toString().split(","));
+                    String createdAt = object[3].toString();  // createdAt*/
 
                     return new TeacherResultDto(
-                            lessonId,
-                            bookTitle,
-                            participantList,
-                            createdAt
+                            (Long) object[0],
+                            object[1].toString(),
+                            Arrays.asList(object[2].toString().split(",")),
+                            object[3].toString()
                     );
                 }
         ).collect(Collectors.toList());

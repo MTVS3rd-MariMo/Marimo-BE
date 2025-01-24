@@ -13,27 +13,6 @@ import java.util.List;
 
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
-//    @EntityGraph(attributePaths = {"participantList"})
-//    @Query(
-//            "SELECT " +
-//                    "l.lessonId, " +
-//                    "lm.bookTitle, " +
-//                    "GROUP_CONCAT(p.participantName), " +
-//                    "l.createdAt " +
-//                    "FROM Lesson l " +
-//                    "LEFT JOIN LessonMaterial lm ON l.lessonMaterialId = lm.lessonMaterialId " +
-//                    "LEFT JOIN Participant p ON l = p.lesson " +
-//                    "WHERE EXISTS " +
-//                    "(" +
-//                    "SELECT l " +
-//                    "FROM Lesson l " +
-//                    "WHERE l.createdUserId = :userId " +
-//                    ")" +
-//                    "GROUP BY l.lessonId, lm.bookTitle, l.createdAt"
-//    )
-//    List<Object[]> findAllByCreatedUserId(@Param("userId") Long userId);
-
-
     @EntityGraph(attributePaths = {"participantList"})
     @Query(
             "SELECT " +
