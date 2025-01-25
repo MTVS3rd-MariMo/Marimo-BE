@@ -21,5 +21,4 @@ public class HotSittingResultDto {
     private String character;
 
     private List<String> questionAnswers = new ArrayList<>();
-
 }

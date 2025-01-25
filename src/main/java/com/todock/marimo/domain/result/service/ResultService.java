@@ -7,6 +7,7 @@ import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
 import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
 import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
+import com.todock.marimo.domain.lesson.repository.SelfIntroduceRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
 import com.todock.marimo.domain.result.dto.*;
@@ -28,6 +29,7 @@ public class ResultService {
     private final LessonMaterialRepository lessonMaterialRepository;
     private final UserRepository userRepository;
     private final AvatarRepository avatarRepository;
+    private final SelfIntroduceRepository selfIntroduceRepository;
 
 
     @Autowired
@@ -35,11 +37,12 @@ public class ResultService {
             UserRepository userRepository,
             LessonRepository lessonRepository,
             AvatarRepository avatarRepository,
-            LessonMaterialRepository lessonMaterialRepository) {
+            LessonMaterialRepository lessonMaterialRepository, SelfIntroduceRepository selfIntroduceRepository) {
         this.userRepository = userRepository;
         this.avatarRepository = avatarRepository;
         this.lessonRepository = lessonRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
+        this.selfIntroduceRepository = selfIntroduceRepository;
     }
 
 
@@ -90,13 +93,18 @@ public class ResultService {
      */
     public LessonResultDto lessonDetail(Long lessonId) {
 
-        // lesson 조회
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new IllegalArgumentException("lessonId로 수업을 찾을 수 없습니다."));
+        log.info("수업 찾기");
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(EntityNotFoundException::new);
+        if (lesson == null) {
+            throw new IllegalArgumentException("lessonId로 수업을 찾을 수 없습니다.");
+        }
 
-        // lessonMaterialId 조회
-        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId())
-                .orElseThrow(() -> new IllegalArgumentException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."));
+        log.info("수업 자료 찾기");
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId()).orElseThrow(EntityNotFoundException::new);
+        ;
+        if (lessonMaterial == null) {
+            throw new IllegalArgumentException("lessonMaterialId로 수업 자료를 찾을 수 없습니다.");
+        }
 
         // LessonResultDto 생성 및 초기 설정
         LessonResultDto results = new LessonResultDto(
@@ -109,21 +117,40 @@ public class ResultService {
          * 수업에서 조회
          */
         // 역할(아바타, 유저id)
-        List<LessonRoleResultDto> lessonRoleResults = lesson.getAvatarList()
-                .stream()
-                .map(role -> {
-                    User user = userRepository.getById(role.getUserId());
-
-                    return new LessonRoleResultDto(
-                            user.getName(),
-                            role.getCharacter()
-                    );
-                }).collect(Collectors.toList());
-
-        results.setRoles(lessonRoleResults);
+        log.info("Role 리스트 생성");
+        List<LessonRoleResultDto> avatars = avatarRepository.findAvatarsWithUsers(lesson);
+        results.setRoles(avatars);
 
         // 핫시팅
-        List<HotSittingResultDto> hotSittingResults = lesson.getHotSitting().getSelfIntroduces()
+        log.info("hotSitting 리스트 생성");
+        // 1) 네이티브 쿼리 결과 조회
+        List<Object[]> rawList = selfIntroduceRepository
+                .findSelfIntroduceFetch(lesson.getHotSitting().getHotSittingId());
+
+        List<HotSittingResultDto> hotSittingResults = new ArrayList<>();
+
+        for (Object[] object : rawList) {
+            String contents = (String) object[0];
+            String answers = (String) object[1];
+
+            // 여기서는 임시값이나 별도 로직을 통해 userName, character를 생성 가능
+            String userName = "a";
+            String character = "b";
+
+            // 쉼표로 분리하여 List<String>으로 변환
+            List<String> answerList = Arrays.asList(answers.split(","));
+
+            HotSittingResultDto hotSittingResult = new HotSittingResultDto(
+                    contents,
+                    userName,
+                    character,
+                    answerList
+            );
+            hotSittingResults.add(hotSittingResult);
+        }
+        results.setHotSittings(hotSittingResults);
+
+        /*List<HotSittingResultDto> hotSittingResults = lesson.getHotSitting().getSelfIntroduces()
                 .stream()
                 .map(selfIntroduce -> {
 
@@ -144,11 +171,11 @@ public class ResultService {
                             avatar.getCharacter(),
                             questionAnswers
                     );
-                }).collect(Collectors.toList());
+                }).collect(Collectors.toList());*/
 
-        results.setHotSittings(hotSittingResults);
 
-        // 수업 생성 시간
+// 수업 생성 시간
+        log.info("createdAt 생성");
         results.setCreatedAt(lesson.getCreatedAt());
 
 
@@ -156,9 +183,12 @@ public class ResultService {
          * 수업자료에서 조회
          */
         // 책 제목
+        log.info("bookTitle 생성");
         results.setBookTitle(lessonMaterial.getBookTitle());
 
         // 열린 질문
+        log.info("openQuestion 리스트 생성");
+
         List<OpenQuestionResultDto> openQuestionResults = lessonMaterial.getOpenQuestionList()
                 .stream()
                 .map(question -> new OpenQuestionResultDto(
@@ -178,8 +208,8 @@ public class ResultService {
                                 }).collect(Collectors.toList()))
                 ).collect(Collectors.toList());
 
-
         results.setOpenQuestions(openQuestionResults);
+
         return results;
     }
 
