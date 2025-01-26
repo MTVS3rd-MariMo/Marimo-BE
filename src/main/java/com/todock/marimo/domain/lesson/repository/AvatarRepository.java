@@ -18,6 +18,7 @@ public interface AvatarRepository extends JpaRepository<Avatar, Long> {
 
     @Query
             ("SELECT new com.todock.marimo.domain.result.dto.LessonRoleResultDto( " +
+                    "u.userId, " +
                     "u.name, " +
                     "a.character) " +
                     "FROM Avatar a " +

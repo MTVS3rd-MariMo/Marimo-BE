@@ -94,13 +94,12 @@ public class ResultService {
     public LessonResultDto lessonDetail(Long lessonId) {
 
         log.info("수업 찾기");
-        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(EntityNotFoundException::new);
-        if (lesson == null) {
-            throw new IllegalArgumentException("lessonId로 수업을 찾을 수 없습니다.");
-        }
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new EntityNotFoundException("수업을 찾을 수 없습니다."));
 
         log.info("수업 자료 찾기");
-        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId()).orElseThrow(EntityNotFoundException::new);
+        LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId())
+                .orElseThrow(() -> new EntityNotFoundException("수업자료를 찾을 수 없습니다."));
         ;
         if (lessonMaterial == null) {
             throw new IllegalArgumentException("lessonMaterialId로 수업 자료를 찾을 수 없습니다.");
@@ -123,22 +122,26 @@ public class ResultService {
 
         // 핫시팅
         log.info("hotSitting 리스트 생성");
-        // 1) 네이티브 쿼리 결과 조회
-        List<Object[]> rawList = selfIntroduceRepository
+        List<Object[]> selfIntroduceObjects = selfIntroduceRepository
                 .findSelfIntroduceFetch(lesson.getHotSitting().getHotSittingId());
 
         List<HotSittingResultDto> hotSittingResults = new ArrayList<>();
 
-        for (Object[] object : rawList) {
-            String contents = (String) object[0];
-            String answers = (String) object[1];
+        for (Object[] object : selfIntroduceObjects) {
+            String contents = object[0].toString();
+            Long userId = (Long) object[1];
+            String answers = object[2].toString();
+            // userId를 기준으로 LessonRoleResultDto 매핑
+            LessonRoleResultDto matchingAvatar = avatars.stream()
+                    .filter(avatar -> avatar.getUserId().equals(userId)) // userId와 매칭
+                    .findFirst()
+                    .orElse(new LessonRoleResultDto(userId, "Unknown", "Unknown")); // 기본값 설정
 
-            // 여기서는 임시값이나 별도 로직을 통해 userName, character를 생성 가능
-            String userName = "a";
-            String character = "b";
+            String userName = matchingAvatar.getUserName();
+            String character = matchingAvatar.getCharacter();
 
             // 쉼표로 분리하여 List<String>으로 변환
-            List<String> answerList = Arrays.asList(answers.split(","));
+            List<String> answerList = Arrays.asList(answers.split("-"));
 
             HotSittingResultDto hotSittingResult = new HotSittingResultDto(
                     contents,
@@ -149,30 +152,6 @@ public class ResultService {
             hotSittingResults.add(hotSittingResult);
         }
         results.setHotSittings(hotSittingResults);
-
-        /*List<HotSittingResultDto> hotSittingResults = lesson.getHotSitting().getSelfIntroduces()
-                .stream()
-                .map(selfIntroduce -> {
-
-                    String contents = selfIntroduce.getContents();
-                    User user = userRepository.getById(selfIntroduce.getUserId());
-                    Avatar avatar = avatarRepository.findByLesson_LessonIdAndUserId(
-                                    lesson.getLessonId(), user.getUserId())
-                            .orElseThrow(() -> new EntityNotFoundException("lessonId와 userId로 아바타를 찾을 수 없습니다."));
-                    List<String> questionAnswers = new ArrayList<>();
-                    selfIntroduce.getQuestionAnswers()
-                            .stream()
-                            .map(answer -> questionAnswers.add(answer.getQnAContents()))
-                            .collect(Collectors.toList());
-
-                    return new HotSittingResultDto(
-                            contents,
-                            user.getName(),
-                            avatar.getCharacter(),
-                            questionAnswers
-                    );
-                }).collect(Collectors.toList());*/
-
 
 // 수업 생성 시간
         log.info("createdAt 생성");

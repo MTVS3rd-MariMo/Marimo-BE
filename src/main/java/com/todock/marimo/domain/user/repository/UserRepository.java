@@ -13,9 +13,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 이름과 비밀번호로 유저 찾기
     User findByNameAndPassword(String name, String password);
 
-    @EntityGraph("")
-    @Query("SELECT u " +
-            "FROM User u " +
-            "WHERE u.userId = :userId")
-    User findUser(@Param("userId") Long userId);
 }

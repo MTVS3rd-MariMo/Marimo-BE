@@ -16,7 +16,8 @@ public interface SelfIntroduceRepository extends JpaRepository<SelfIntroduce, Lo
     @Query(
             value = "SELECT " +
                     "si.contents AS selfIntroduce, " +
-                    "GROUP_CONCAT(qa.qnA_contents SEPARATOR ',') AS questionAnswers " +
+                    "si.user_id AS userId, " +
+                    "GROUP_CONCAT(qa.qnA_contents SEPARATOR '-') AS questionAnswers " +
                     "FROM tbl_self_introduce si " +
                     "JOIN tbl_question_answer qa ON si.self_introduce_id = qa.self_introduce_id " +
                     "WHERE si.hot_sitting_id = :hotSittingId " +
