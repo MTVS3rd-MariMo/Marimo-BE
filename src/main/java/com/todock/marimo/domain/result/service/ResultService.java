@@ -192,49 +192,6 @@ public class ResultService {
                                 .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());
-
-
-/*        List<OpenQuestionResultDto> openQuestionResults = openQuestionRepository
-                .findOpenQuestionsWithAnswers(lessonMaterialId)
-                .stream()
-                .map(openquestion -> new OpenQuestionResultDto(
-                        openquestion.getQuestion(),
-                        openquestion.getOpenQuestionAnswerList().stream()
-                                .filter(qna -> qna.getLessonId().equals(lessonId))
-                                .map(qna -> {
-                                    log.info("유저 조회");
-                                    User user = userRepository.findById(qna.getUserId())
-                                            .orElseThrow(() -> new EntityNotFoundException("유저가 없습니다."));
-
-                                    return new ResultAnswerDto(
-                                            user.getName(),
-                                            qna.getAnswer()
-                                    );
-
-                                })
-                                .collect(Collectors.toList())
-                ))
-                .collect(Collectors.toList());*/
-/*        List<OpenQuestionResultDto> openQuestionResults = lessonMaterial.getOpenQuestionList()
-                .stream()
-                .map(question -> new OpenQuestionResultDto(
-                        question.getQuestion(),
-                        question.getOpenQuestionAnswerList().stream()
-                                .filter(answer -> answer.getLessonId().equals(lessonId)) // lessonId가 맞는거만 서칭
-                                .map(answer -> {
-                                    User user = userRepository.findById(answer.getUserId())
-                                            .orElseThrow(()
-                                                    -> new EntityNotFoundException("userId에 맞는 유저가 없습니다."));
-
-                                    return new ResultAnswerDto(
-                                            user.getName(),
-                                            answer.getAnswer()
-                                    );
-
-                                }).collect(Collectors.toList()))
-                ).collect(Collectors.toList());
-
-         results.setOpenQuestions(openQuestionResults);*/
         results.setOpenQuestions(openQuestionResults);
 
         return results;

@@ -13,16 +13,13 @@ import java.util.List;
 
 public interface OpenQuestionRepository extends JpaRepository<OpenQuestion, Long> {
 
+
     @Query(
-            "SELECT oq," +
-                    "u.name " +
+            "SELECT oq " +
                     "FROM OpenQuestion oq " +
-                    "LEFT JOIN FETCH oq.openQuestionAnswerList oqa " +
-                    "JOIN User u ON u.userId = oqa.userId " +
+                    "LEFT JOIN FETCH oq.openQuestionAnswerList " +
                     "WHERE oq.lessonMaterial.lessonMaterialId = :lessonMaterialId"
     )
     List<OpenQuestion> findOpenQuestionsWithAnswers(
-            @Param("lessonMaterialId") Long lessonMaterialId
-    );
-
+            @Param("lessonMaterialId") Long lessonMaterialId);
 }
