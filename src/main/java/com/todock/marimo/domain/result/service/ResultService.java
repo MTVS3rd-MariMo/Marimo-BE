@@ -9,7 +9,9 @@ import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
 import com.todock.marimo.domain.lesson.repository.SelfIntroduceRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
+import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
+import com.todock.marimo.domain.lessonmaterial.repository.OpenQuestionRepository;
 import com.todock.marimo.domain.result.dto.*;
 import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
@@ -25,11 +27,12 @@ import java.util.stream.Collectors;
 @Service
 public class ResultService {
 
-    private final LessonRepository lessonRepository;
-    private final LessonMaterialRepository lessonMaterialRepository;
     private final UserRepository userRepository;
+    private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
+    private final OpenQuestionRepository openQuestionRepository;
     private final SelfIntroduceRepository selfIntroduceRepository;
+    private final LessonMaterialRepository lessonMaterialRepository;
 
 
     @Autowired
@@ -37,12 +40,15 @@ public class ResultService {
             UserRepository userRepository,
             LessonRepository lessonRepository,
             AvatarRepository avatarRepository,
-            LessonMaterialRepository lessonMaterialRepository, SelfIntroduceRepository selfIntroduceRepository) {
+            OpenQuestionRepository openQuestionRepository,
+            SelfIntroduceRepository selfIntroduceRepository,
+            LessonMaterialRepository lessonMaterialRepository) {
         this.userRepository = userRepository;
         this.avatarRepository = avatarRepository;
         this.lessonRepository = lessonRepository;
-        this.lessonMaterialRepository = lessonMaterialRepository;
+        this.openQuestionRepository = openQuestionRepository;
         this.selfIntroduceRepository = selfIntroduceRepository;
+        this.lessonMaterialRepository = lessonMaterialRepository;
     }
 
 
@@ -100,7 +106,9 @@ public class ResultService {
         log.info("수업 자료 찾기");
         LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId())
                 .orElseThrow(() -> new EntityNotFoundException("수업자료를 찾을 수 없습니다."));
-        ;
+
+        Long lessonMaterialId = lessonMaterial.getLessonMaterialId();
+
         if (lessonMaterial == null) {
             throw new IllegalArgumentException("lessonMaterialId로 수업 자료를 찾을 수 없습니다.");
         }
@@ -126,7 +134,6 @@ public class ResultService {
                 .findSelfIntroduceFetch(lesson.getHotSitting().getHotSittingId());
 
         List<HotSittingResultDto> hotSittingResults = new ArrayList<>();
-
         for (Object[] object : selfIntroduceObjects) {
             String contents = object[0].toString();
             Long userId = (Long) object[1];
@@ -153,7 +160,7 @@ public class ResultService {
         }
         results.setHotSittings(hotSittingResults);
 
-// 수업 생성 시간
+        // 수업 생성 시간
         log.info("createdAt 생성");
         results.setCreatedAt(lesson.getCreatedAt());
 
@@ -168,7 +175,47 @@ public class ResultService {
         // 열린 질문
         log.info("openQuestion 리스트 생성");
 
-        List<OpenQuestionResultDto> openQuestionResults = lessonMaterial.getOpenQuestionList()
+        List<OpenQuestionResultDto> openQuestionResults = openQuestionRepository
+                .findOpenQuestionsWithAnswers(lessonMaterialId)
+                .stream()
+                .map(openQuestion -> new OpenQuestionResultDto(
+                        openQuestion.getQuestion(),
+
+                        openQuestion.getOpenQuestionAnswerList().stream()
+                                .filter(qna -> qna.getLessonId().equals(lessonId))
+                                .map(qna -> new ResultAnswerDto(
+                                        userRepository.findById(qna.getUserId())
+                                                .orElseThrow(() -> new EntityNotFoundException("유저가 없습니다."))
+                                                .getName(), // 이미 Fetch Join으로 로드된 User 엔티티 사용
+                                        qna.getAnswer()
+                                ))
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
+
+
+/*        List<OpenQuestionResultDto> openQuestionResults = openQuestionRepository
+                .findOpenQuestionsWithAnswers(lessonMaterialId)
+                .stream()
+                .map(openquestion -> new OpenQuestionResultDto(
+                        openquestion.getQuestion(),
+                        openquestion.getOpenQuestionAnswerList().stream()
+                                .filter(qna -> qna.getLessonId().equals(lessonId))
+                                .map(qna -> {
+                                    log.info("유저 조회");
+                                    User user = userRepository.findById(qna.getUserId())
+                                            .orElseThrow(() -> new EntityNotFoundException("유저가 없습니다."));
+
+                                    return new ResultAnswerDto(
+                                            user.getName(),
+                                            qna.getAnswer()
+                                    );
+
+                                })
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());*/
+/*        List<OpenQuestionResultDto> openQuestionResults = lessonMaterial.getOpenQuestionList()
                 .stream()
                 .map(question -> new OpenQuestionResultDto(
                         question.getQuestion(),
@@ -187,6 +234,7 @@ public class ResultService {
                                 }).collect(Collectors.toList()))
                 ).collect(Collectors.toList());
 
+         results.setOpenQuestions(openQuestionResults);*/
         results.setOpenQuestions(openQuestionResults);
 
         return results;
