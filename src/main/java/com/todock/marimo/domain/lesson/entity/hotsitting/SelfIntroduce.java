@@ -1,11 +1,11 @@
 package com.todock.marimo.domain.lesson.entity.hotsitting;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import java.util.List;
 public class SelfIntroduce {
 
     @Id
+    @Column(name="self_introduce_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long selfIntroduceId;
 
