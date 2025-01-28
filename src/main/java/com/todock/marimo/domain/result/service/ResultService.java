@@ -113,20 +113,9 @@ public class ResultService {
             throw new IllegalArgumentException("lessonMaterialId로 수업 자료를 찾을 수 없습니다.");
         }
 
-        // LessonResultDto 생성 및 초기 설정
-        LessonResultDto results = new LessonResultDto(
-                lessonMaterial.getBookTitle(),
-                lesson.getCreatedAt()
-        );
-
-
-        /**
-         * 수업에서 조회
-         */
         // 역할(아바타, 유저id)
         log.info("Role 리스트 생성");
         List<LessonRoleResultDto> avatars = avatarRepository.findAvatarsWithUsers(lesson);
-        results.setRoles(avatars);
 
         // 핫시팅
         log.info("hotSitting 리스트 생성");
@@ -158,19 +147,6 @@ public class ResultService {
             );
             hotSittingResults.add(hotSittingResult);
         }
-        results.setHotSittings(hotSittingResults);
-
-        // 수업 생성 시간
-        log.info("createdAt 생성");
-        results.setCreatedAt(lesson.getCreatedAt());
-
-
-        /**
-         * 수업자료에서 조회
-         */
-        // 책 제목
-        log.info("bookTitle 생성");
-        results.setBookTitle(lessonMaterial.getBookTitle());
 
         // 열린 질문
         log.info("openQuestion 리스트 생성");
@@ -192,9 +168,16 @@ public class ResultService {
                                 .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());
-        results.setOpenQuestions(openQuestionResults);
 
-        return results;
+        LessonResultDto lessonResults = new LessonResultDto(
+                lessonMaterial.getBookTitle(),
+                lesson.getCreatedAt(),
+                avatars,
+                openQuestionResults,
+                hotSittingResults
+        );
+
+        return lessonResults;
     }
 
 }
