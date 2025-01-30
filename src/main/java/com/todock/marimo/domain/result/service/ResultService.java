@@ -71,7 +71,7 @@ public class ResultService {
     public TeacherResultResponseDto findAllLessons(Long userId) {
 
         List<Object[]> objects = lessonRepository.findAllByCreatedUserId(userId);
-        // Response DTO 변환
+
         List<TeacherResultDto> results = objects.stream().map(
                 object -> {
                     Long lessonId = (Long) object[0];
@@ -124,10 +124,11 @@ public class ResultService {
 
         List<HotSittingResultDto> hotSittingResults = new ArrayList<>();
         for (Object[] object : selfIntroduceObjects) {
+
             String contents = object[0].toString();
             Long userId = (Long) object[1];
             String answers = object[2].toString();
-            // userId를 기준으로 LessonRoleResultDto 매핑
+
             LessonRoleResultDto matchingAvatar = avatars.stream()
                     .filter(avatar -> avatar.getUserId().equals(userId)) // userId와 매칭
                     .findFirst()
