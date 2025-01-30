@@ -13,7 +13,6 @@ import java.util.List;
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
     // 학생 수업결과 리스트 조회
-    @EntityGraph(attributePaths = {"participantList"})
     @Query(
             "SELECT new com.todock.marimo.domain.result.dto.StudentResultDto(" +
                     "lm.bookTitle, " +
@@ -32,7 +31,6 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
     List<StudentResultDto> findAllLessonsWithParticipants(@Param("userId") Long userId);
 
     // 선생님 수업결과 조회
-    @EntityGraph(attributePaths = {"participantList"})
     @Query(
             "SELECT " +
                     "l.lessonId, " +
