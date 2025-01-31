@@ -20,7 +20,7 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
                     "l.createdAt" +
                     ") " +
                     "FROM Lesson l " +
-                    "LEFT JOIN LessonMaterial lm ON l.lessonMaterialId = lm.lessonMaterialId " +
+                    "JOIN FETCH LessonMaterial lm ON l.lessonMaterialId = lm.lessonMaterialId " +
                     "WHERE EXISTS " +
                     "(" +
                     "SELECT p " +
@@ -38,8 +38,8 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
                     "GROUP_CONCAT(p.participantName), " +
                     "l.createdAt " +
                     "FROM Lesson l " +
-                    "LEFT JOIN LessonMaterial lm ON l.lessonMaterialId = lm.lessonMaterialId " +
-                    "LEFT JOIN Participant p ON l = p.lesson " +
+                    "JOIN FETCH LessonMaterial lm ON l.lessonMaterialId = lm.lessonMaterialId " +
+                    "JOIN FETCH Participant p ON l = p.lesson " +
                     "WHERE EXISTS " +
                     "(" +
                     "SELECT l " +

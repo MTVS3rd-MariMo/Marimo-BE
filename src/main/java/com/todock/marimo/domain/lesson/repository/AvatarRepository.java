@@ -21,7 +21,7 @@ public interface AvatarRepository extends JpaRepository<Avatar, Long> {
                     "u.name, " +
                     "a.character) " +
                     "FROM Avatar a " +
-                    "JOIN User u ON u.userId = a.userId " +
+                    "JOIN FETCH User u ON u.userId = a.userId " +
                     "WHERE a.lesson = :lesson")
     List<LessonRoleResultDto> findAvatarsWithUsers(@Param("lesson") Lesson lesson);
 }

@@ -13,7 +13,7 @@ public interface OpenQuestionRepository extends JpaRepository<OpenQuestion, Long
     @Query(
             "SELECT oq " +
                     "FROM OpenQuestion oq " +
-                    "LEFT JOIN FETCH oq.openQuestionAnswerList " +
+                    "JOIN FETCH oq.openQuestionAnswerList " +
                     "WHERE oq.lessonMaterial.lessonMaterialId = :lessonMaterialId"
     )
     List<OpenQuestion> findOpenQuestionsWithAnswers(
