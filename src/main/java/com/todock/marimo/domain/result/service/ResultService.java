@@ -3,31 +3,36 @@ package com.todock.marimo.domain.result.service;
 import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lesson.entity.Participant;
 import com.todock.marimo.domain.lesson.entity.avatar.Avatar;
+import com.todock.marimo.domain.lesson.entity.hotsitting.HotSitting;
 import com.todock.marimo.domain.lesson.entity.hotsitting.QuestionAnswer;
 import com.todock.marimo.domain.lesson.repository.AvatarRepository;
 import com.todock.marimo.domain.lesson.repository.LessonRepository;
-import com.todock.marimo.domain.lesson.repository.ParticipantRepository;
+import com.todock.marimo.domain.lesson.repository.SelfIntroduceRepository;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
+import com.todock.marimo.domain.lessonmaterial.entity.openquestion.OpenQuestion;
 import com.todock.marimo.domain.lessonmaterial.repository.LessonMaterialRepository;
+import com.todock.marimo.domain.lessonmaterial.repository.OpenQuestionRepository;
 import com.todock.marimo.domain.result.dto.*;
 import com.todock.marimo.domain.user.entity.User;
 import com.todock.marimo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ResultService {
 
-    private final LessonRepository lessonRepository;
-    private final ParticipantRepository participantRepository;
-    private final LessonMaterialRepository lessonMaterialRepository;
     private final UserRepository userRepository;
+    private final LessonRepository lessonRepository;
     private final AvatarRepository avatarRepository;
+    private final OpenQuestionRepository openQuestionRepository;
+    private final SelfIntroduceRepository selfIntroduceRepository;
+    private final LessonMaterialRepository lessonMaterialRepository;
 
 
     @Autowired
@@ -35,12 +40,14 @@ public class ResultService {
             UserRepository userRepository,
             LessonRepository lessonRepository,
             AvatarRepository avatarRepository,
-            ParticipantRepository participantRepository,
+            OpenQuestionRepository openQuestionRepository,
+            SelfIntroduceRepository selfIntroduceRepository,
             LessonMaterialRepository lessonMaterialRepository) {
         this.userRepository = userRepository;
         this.avatarRepository = avatarRepository;
         this.lessonRepository = lessonRepository;
-        this.participantRepository = participantRepository;
+        this.openQuestionRepository = openQuestionRepository;
+        this.selfIntroduceRepository = selfIntroduceRepository;
         this.lessonMaterialRepository = lessonMaterialRepository;
     }
 
@@ -50,21 +57,11 @@ public class ResultService {
      */
     public StudentResultResponseDto findAllPhotos(Long userId) {
 
-        List<StudentResultDto> photos = participantRepository.findAllByUserId(userId)
-                .stream()
-                .map(participant -> new StudentResultDto(
-                        lessonMaterialRepository.findById(participant.getLesson().getLessonMaterialId())
-                                .orElseThrow(() ->
-                                        new EntityNotFoundException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
-                                .getBookTitle(),
-                        participant.getLesson().getPhotoUrl(),
-                        participant.getLesson().getCreatedAt()
-                ))
-                .collect(Collectors.toList());
+        List<StudentResultDto> results = lessonRepository.findAllLessonsWithParticipants(userId);
 
-        Collections.reverse(photos);
+        Collections.reverse(results);
 
-        return new StudentResultResponseDto(photos);
+        return new StudentResultResponseDto(results);
     }
 
 
@@ -73,25 +70,23 @@ public class ResultService {
      */
     public TeacherResultResponseDto findAllLessons(Long userId) {
 
-        List<TeacherResultDto> results = lessonRepository.findAllByCreatedUserId(userId)
-                .stream()
-                .map(lesson -> new TeacherResultDto(
-                        lesson.getLessonId(),
-                        lessonMaterialRepository
-                                .findById(lesson.getLessonMaterialId())
-                                .orElseThrow(() -> new EntityNotFoundException(
-                                        "lesson.getLessonId : " + lesson.getLessonId()
-                                                + "의 lessonMaterialId로 수업 자료를 찾을 수 없습니다."))
-                                .getBookTitle(),
-                        lesson.getParticipantList()
-                                .stream()
-                                .map(Participant::getParticipantName)
-                                .collect(Collectors.toList()),
-                        lesson.getCreatedAt() != null
-                                ? lesson.getCreatedAt() // 포맷팅 없이 문자열 반환
-                                : "생성일시 없음" // 기본값 또는 null인 경우 처리
-                ))
-                .collect(Collectors.toList());
+        List<Object[]> objects = lessonRepository.findAllByCreatedUserId(userId);
+
+        List<TeacherResultDto> results = objects.stream().map(
+                object -> {
+                    Long lessonId = (Long) object[0];
+                    String bookTitle = object[1].toString();
+                    List<String> participantList = Arrays.asList(object[2].toString().split(","));
+                    String createdAt = object[3].toString();
+
+                    return new TeacherResultDto(
+                            lessonId,
+                            bookTitle,
+                            participantList,
+                            createdAt
+                    );
+                }
+        ).collect(Collectors.toList());
 
         Collections.reverse(results);
 
@@ -104,78 +99,86 @@ public class ResultService {
      */
     public LessonResultDto lessonDetail(Long lessonId) {
 
-        // lessonId로 Lesson을 조회
+        log.info("수업 찾기");
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new IllegalArgumentException("lessonId로 수업을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("수업을 찾을 수 없습니다."));
 
-        // lessonMaterialId로 LessonMaterial을 조회
+        log.info("수업 자료 찾기");
         LessonMaterial lessonMaterial = lessonMaterialRepository.findById(lesson.getLessonMaterialId())
-                .orElseThrow(() -> new IllegalArgumentException("lessonMaterialId로 수업 자료를 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("수업자료를 찾을 수 없습니다."));
 
-        // 반환할 LessonResultDto 생성 및 초기 설정
-        LessonResultDto lessonResultDto = new LessonResultDto(
+        Long lessonMaterialId = lessonMaterial.getLessonMaterialId();
+
+        if (lessonMaterial == null) {
+            throw new IllegalArgumentException("lessonMaterialId로 수업 자료를 찾을 수 없습니다.");
+        }
+
+        // 역할(아바타, 유저id)
+        log.info("Role 리스트 생성");
+        List<LessonRoleResultDto> avatars = avatarRepository.findAvatarsWithUsers(lesson);
+
+        // 핫시팅
+        log.info("hotSitting 리스트 생성");
+        List<Object[]> selfIntroduceObjects = selfIntroduceRepository
+                .findSelfIntroduceFetch(lesson.getHotSitting().getHotSittingId());
+
+        List<HotSittingResultDto> hotSittingResults = new ArrayList<>();
+        for (Object[] object : selfIntroduceObjects) {
+
+            String contents = object[0].toString();
+            Long userId = (Long) object[1];
+            String answers = object[2].toString();
+
+            LessonRoleResultDto matchingAvatar = avatars.stream()
+                    .filter(avatar -> avatar.getUserId().equals(userId)) // userId와 매칭
+                    .findFirst()
+                    .orElse(new LessonRoleResultDto(userId, "Unknown", "Unknown")); // 기본값 설정
+
+            String userName = matchingAvatar.getUserName();
+            String character = matchingAvatar.getCharacter();
+
+            // 쉼표로 분리하여 List<String>으로 변환
+            List<String> answerList = Arrays.asList(answers.split("-"));
+
+            HotSittingResultDto hotSittingResult = new HotSittingResultDto(
+                    contents,
+                    userName,
+                    character,
+                    answerList
+            );
+            hotSittingResults.add(hotSittingResult);
+        }
+
+        // 열린 질문
+        log.info("openQuestion 리스트 생성");
+
+        List<OpenQuestionResultDto> openQuestionResults = openQuestionRepository
+                .findOpenQuestionsWithAnswers(lessonMaterialId)
+                .stream()
+                .map(openQuestion -> new OpenQuestionResultDto(
+                        openQuestion.getQuestion(),
+
+                        openQuestion.getOpenQuestionAnswerList().stream()
+                                .filter(qna -> qna.getLessonId().equals(lessonId))
+                                .map(qna -> new ResultAnswerDto(
+                                        userRepository.findById(qna.getUserId())
+                                                .orElseThrow(() -> new EntityNotFoundException("유저가 없습니다."))
+                                                .getName(), // 이미 Fetch Join으로 로드된 User 엔티티 사용
+                                        qna.getAnswer()
+                                ))
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
+
+        LessonResultDto lessonResults = new LessonResultDto(
                 lessonMaterial.getBookTitle(),
-                lesson.getCreatedAt()
+                lesson.getCreatedAt(),
+                avatars,
+                openQuestionResults,
+                hotSittingResults
         );
 
-        // 열린 질문 설정
-        List<OpenQuestionResultDto> openQuestions = lessonMaterial.getOpenQuestionList().stream()
-                .map(question -> new OpenQuestionResultDto(
-                        question.getQuestion(),
-                        question.getOpenQuestionAnswerList().stream()
-                                // lessonId로 필터링
-                                .filter(answer -> answer.getLessonId().equals(lessonId))
-                                .map(answer -> {
-                                    // 유저 정보를 가져와 DTO 생성
-                                    User user = userRepository.findById(answer.getUserId())
-                                            .orElseThrow(() -> new IllegalArgumentException("userId로 유저를 찾을 수 없습니다."));
-                                    return new ResultAnswerDto(
-                                            user.getName(),
-                                            answer.getAnswer());
-                                })
-                                .collect(Collectors.toList())))
-                .collect(Collectors.toList());
-
-        lessonResultDto.setOpenQuestions(openQuestions); // 열린 질문 리스트 설정
-
-        // 핫시팅 설정
-        List<HotSittingResultDto> hotSittings = lesson.getHotSitting().getSelfIntroduces().stream()
-                .map(selfIntroduce -> new HotSittingResultDto(
-                        selfIntroduce.getContents(),
-                        userRepository.findById(selfIntroduce.getUserId()).orElseThrow(() ->
-                                new EntityNotFoundException("userId로 유저이름을 찾을 수 없습니다.")).getName(),
-                        avatarRepository.findByLesson_LessonIdAndUserId(
-                                lessonId, selfIntroduce.getUserId()).orElseThrow(() ->
-                                new EntityNotFoundException("lessonId와 userId로 역할을 찾을 수 없습니다.")).getCharacter(),
-                        selfIntroduce.getQuestionAnswers().stream()
-                                .map(QuestionAnswer::getQnAContents)
-                                .collect(Collectors.toList())))
-                .collect(Collectors.toList());
-        lessonResultDto.setHotSittings(hotSittings); // 핫시팅 리스트 설정
-
-        // 역할 설정과 아바타 이미지 설정을 통합
-        List<LessonRoleResultDto> roles = lesson.getAvatarList().stream()
-                .map(role -> {
-                    // 해당 역할에 매칭되는 아바타 찾기
-                    Avatar avatar = lesson.getAvatarList().stream()
-                            .filter(a -> a.getCharacter() != null && a.getCharacter().equals(role.getCharacter()))
-                            .findFirst()
-                            .orElse(null);
-
-                    String avatarUrl = (avatar != null) ? avatar.getAvatarImg() : "defaultAvatarUrl";
-                    String userName = (avatar != null) ? userRepository.findById(avatar.getUserId())
-                            .map(User::getName)
-                            .orElse("존재하지 않는 유저입니다.") : "Unknown User";
-
-                    return new LessonRoleResultDto(
-                            userName, // 유저 이름
-                            role.getCharacter() // 역할 이름
-                    );
-                })
-                .collect(Collectors.toList());
-        lessonResultDto.setRoles(roles); // 역할 리스트 설정
-
-        return lessonResultDto;
+        return lessonResults;
     }
 
 }

@@ -17,7 +17,7 @@ public class LessonRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long RoleId;
+    private Long roleId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_material_id")

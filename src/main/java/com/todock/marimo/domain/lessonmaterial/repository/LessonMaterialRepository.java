@@ -1,9 +1,14 @@
 package com.todock.marimo.domain.lessonmaterial.repository;
 
+import com.todock.marimo.domain.lesson.entity.Lesson;
 import com.todock.marimo.domain.lessonmaterial.entity.LessonMaterial;
+import com.todock.marimo.domain.result.dto.LessonResultDto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface LessonMaterialRepository extends JpaRepository<LessonMaterial, Long> {
 

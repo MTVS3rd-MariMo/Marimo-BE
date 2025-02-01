@@ -42,8 +42,7 @@ public class LessonMaterialController {
      */
     @Operation(
             summary = "PDF 파일 업로드",
-            description = "PDF 파일을 업로드하면 AI 서버로 전송하여 분석 결과를 JSON 형태로 받습니다."
-    )
+            description = "PDF 파일을 업로드하면 AI 서버로 전송하여 분석 결과를 JSON 형태로 받습니다.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -51,31 +50,21 @@ public class LessonMaterialController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(
-                                    example = "PDF 파일 example.pdf이 성공적으로 업로드되었습니다."
-                            )
-                    )
-            ),
+                                    example = "PDF 파일 example.pdf이 성공적으로 업로드되었습니다."))),
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청 (파일이 비어있음)",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(
-                                    example = "파일이 없습니다."
-                            )
-                    )
-            ),
+                                    example = "파일이 없습니다."))),
             @ApiResponse(
                     responseCode = "500",
                     description = "서버 오류",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(
-                                    example = "파일 처리 중 오류가 발생했습니다."
-                            )
-                    )
-            )
-    })
+                                    example = "파일 처리 중 오류가 발생했습니다.")))})
     @PostMapping("/upload-pdf")
     public ResponseEntity<LessonMaterialResponseDto> teacherSendPdfToAiServer(
             @RequestHeader("userId") Long userId,
@@ -151,7 +140,7 @@ public class LessonMaterialController {
                     content = @Content(schema = @Schema(implementation = String.class))
             )
     })
-    @GetMapping("detail/{lessonMaterialId}")
+    @GetMapping("/detail/{lessonMaterialId}")
     public ResponseEntity<DetailLessonMaterialDto> teacherGetLessonMaterialByLessonMaterialId(
             @RequestHeader("userId") Long userId,
             @PathVariable("lessonMaterialId") Long lessonMaterialId) {

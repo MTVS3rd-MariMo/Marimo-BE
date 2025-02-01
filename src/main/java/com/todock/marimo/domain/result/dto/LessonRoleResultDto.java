@@ -11,9 +11,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class LessonRoleResultDto {
 
+    private Long userId;
+
     private String userName;
 
     private String character;
 
-    // private String avatarUrl; 아바타 이미지
 }
